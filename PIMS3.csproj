@@ -10,6 +10,9 @@
 
     <!-- Set this to true if you enable server-side prerendering -->
     <BuildServerSideRenderer>false</BuildServerSideRenderer>
+    <Authors>Richard P. Asch</Authors>
+    <Description>A income portfolio management system.</Description>
+    <Company>self</Company>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,10 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\src\app\data-import\data-import.component.ts" />
     <None Remove="ClientApp\src\app\income-summary\income-summary.component.ts" />
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\app\data-import\data-import.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\income-summary\income-summary.component.ts" />
   </ItemGroup>
 
