@@ -1,0 +1,44 @@
+[
+  {
+    "monthRecvd": 1,
+    "amountRecvd": 2944.51,
+    "ytdAverage": 2944.51,
+    "rolling3MonthAverage": 0
+  },
+  {
+    "monthRecvd": 2,
+    "amountRecvd": 3009.55,
+    "ytdAverage": 2977.03,
+    "rolling3MonthAverage": 0
+  },
+  {
+    "monthRecvd": 3,
+    "amountRecvd": 3227.34,
+    "ytdAverage": 3060.47,
+    "rolling3MonthAverage": 3060.47
+  },
+  {
+    "monthRecvd": 4,
+    "amountRecvd": 3480.09,
+    "ytdAverage": 3165.37,
+    "rolling3MonthAverage": 3238.99
+  },
+  {
+    "monthRecvd": 5,
+    "amountRecvd": 3309.52,
+    "ytdAverage": 3194.2,
+    "rolling3MonthAverage": 3338.98
+  },
+  {
+    "monthRecvd": 6,
+    "amountRecvd": 3416.4,
+    "ytdAverage": 3231.24,
+    "rolling3MonthAverage": 3402
+  },
+  {
+    "monthRecvd": 7,
+    "amountRecvd": 3233.03,
+    "ytdAverage": 3231.49,
+    "rolling3MonthAverage": 3319.65
+  }
+]

@@ -1,0 +1,36 @@
+<style>
+  h4{
+    background-color: lightgray;
+    color: aliceblue;
+  }
+</style>
+
+<div>
+    <h4 class="text-center">YTD income activity for:&nbsp;<strong>{{currentYear}}</strong></h4>
+</div>
+
+<p *ngIf="!ytdIncomeSummary"><em>Loading YTD data...</em></p>
+
+<div class="container" style="background-color:aliceblue">
+    <p></p>
+    <div class="table-responsive-sm">
+        <table *ngIf="ytdIncomeSummary" id="incomeSummary" class="table table-bordered table-striped">
+            <thead class="thead-light">
+                <tr>
+                    <th>Month recv'd</th>
+                    <th>Amount recv'd</th>
+                    <th>YTD average</th>
+                    <th>Rolling 3 month average</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let data of ytdIncomeSummary">
+                    <td>{{data.monthRecvd}}</td>
+                    <td>{{data.amountRecvd | currency}}</td>
+                    <td>{{data.ytdAverage}}</td>
+                    <td>{{data.rolling3MonthAverage}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
