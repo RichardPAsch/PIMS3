@@ -1,12 +1,15 @@
 <style>
   h4{
     background-color: lightgray;
-    color: aliceblue;
+    color: darkblue;
+  }
+  em {
+    color: black;
   }
 </style>
 
 <div>
-    <h4 class="text-center">YTD income activity for:&nbsp;<strong>{{currentYear}}</strong></h4>
+    <h4 class="text-center">Ytd income summary for:&nbsp;<em>{{currentYear}}</em></h4>
 </div>
 
 <p *ngIf="!ytdIncomeSummary"><em>Loading YTD data...</em></p>
