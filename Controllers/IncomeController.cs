@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using PIMS3.Data.Entities;
 using PIMS3.Data.Repositories;
 using PIMS3.ViewModels;
-//using AutoMapper;
+//using AutoMapper; // deferred use.
 using System.Globalization;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -34,10 +34,10 @@ namespace PIMS3.Controllers
 
 
         // GET: /<controller>/
-        public IActionResult Index()
-        {
-            return View();
-        }
+        //public IActionResult Index()
+        //{
+        //    return View();
+        //}
         
 
         [HttpGet("[action]")]
@@ -60,10 +60,8 @@ namespace PIMS3.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Unable to fetch/calculate income via GetRevenueSummary() due to: {ex}");
-                //return BadRequest("Unable to fetch/calculate income.");
                 return null;
             }
-
         }
 
 
