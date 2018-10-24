@@ -8,4 +8,5 @@
         public decimal YtdAverage { get; set; }
         public decimal Rolling3MonthAverage { get; set; }
     }
+
 }
