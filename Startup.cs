@@ -39,6 +39,7 @@ namespace PIMS3
 
             services.AddMvc()
                     .AddJsonOptions(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore)
+                    // Required compatability for [ApiController] annotation.
                     .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // In production, the Angular files will be served from this directory
