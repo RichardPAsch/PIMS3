@@ -29,7 +29,9 @@ export class DataImportComponent {
     if (this.importFilePath.match(this.filePathRegExpr)) {
       this.importFileVm.ImportFilePath = this.importFilePath;
       this.importFileVm.IsRevenueData = this.importDataType === "revenue" ? true : false;
-      // Send to backend for processing here?
+      // Send to backend for processing here: WIP
+      //     -> ImportFileController.cs / ImportFileControllerReference.txt
+
       //var result = dataImportSvc.processImportFileModel(this.importFileModel, this);
     } else {
         alert("Invalid file path submitted for import file.");
