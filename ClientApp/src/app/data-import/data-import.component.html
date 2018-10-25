@@ -1,66 +1,3 @@
-<style>
-  #inputFilePath {
-    background-color: lightgoldenrodyellow;
-    width: 600px;
-  }
-
-  .panel .panel-default { /* adjust height as new fileds are added.*/
-    height: 375px;
-  }
-
-  #notation {
-    padding-left: 50px;
-  }
-
-  #panelSection { /* adjust panel height*/
-    margin-top: 70px;
-    height: 313px;
-  }
-
-  #lblFilePath, #lblDataType {
-    text-align: left;
-    margin-left: 37px;
-    width: 150px;
-  }
-
-  #divBtns {
-    /*width: 300px;*/
-    margin-left: 24px;
-    margin-top: 3px;
-  }
-
-  input[type="file"] {
-    display: block;
-    height: 34px;
-  }
-
-  #msgs {
-    padding-left: 25px;
-  }
-
-  #btnImport {
-    margin-left: 13px;
-    width: 143px;
-  }
-
-  #btnCancel {
-    width: 80px;
-    margin-left: 10px;
-  }
-
-  #divDataTypes {
-    width: 225px;
-    margin-left: 2px;
-    margin-top: 8px;
-  }
-
-  ul {
-    list-style-type: none;
-    padding-left: 1px;
-  }
-</style>
-
-
 
 <div class="col-md-12">
   <section id="panelSection" class="panel panel-default">
@@ -76,9 +13,9 @@
         <div class="form-group">
           <div id="notation" class="col-md-12 col-md-offset-0">
             <ul>
-              <li>Enter the file location of an XLSX spreadsheet containing either revenue, or portfolio asset data.</li>
-              <li> * Importing of revenue requires the existence of a Position (Asset) with an affiliated Account for each income record to be recorded.</li>
-              <li> * If necessary, any missing information must <em>first</em> be added via the 'Asset [new]' option.</li>
+              <li>Enter the file location of an XLSX spreadsheet containing either revenue, or asset data.</li>
+              <li> * Revenue imports require the existence of a Asset/Position affiliated with an existing Account, for each income record to be processed.</li>
+              <li> * If necessary, any missing Asset information unavailable via Profile lookup must <em>first</em> be added via the 'Asset [new]' option.</li>
             </ul>
           </div>
         </div>
@@ -114,7 +51,7 @@
                 Cancel
               </button>
             </span>
-            <span id="msgs">Messages go here...</span>
+            <span id="msgs">{{testMsg}}</span>
           </div>
         </div>
 

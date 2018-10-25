@@ -1,0 +1,51 @@
+#msgs {
+  background-color: lightgoldenrodyellow;
+  margin-left: 10px;
+}
+#inputFilePath {
+  background-color: lightgoldenrodyellow;
+  width: 600px;
+}
+.panel .panel-default { /* adjust height as new fileds are added.*/
+  height: 375px;
+}
+#notation {
+  padding-left: 50px;
+}
+#panelSection { /* adjust panel height*/
+  margin-top: 70px;
+  height: 313px;
+}
+#lblFilePath, #lblDataType {
+  text-align: left;
+  margin-left: 37px;
+  width: 150px;
+}
+#divBtns {
+  margin-left: 24px;
+  margin-top: 3px;
+}
+input[type="file"] {
+  display: block;
+  height: 34px;
+}
+#msgs {
+  padding-left: 25px;
+}
+#btnImport {
+  margin-left: 13px;
+  width: 143px;
+}
+#btnCancel {
+  width: 80px;
+  margin-left: 10px;
+}
+#divDataTypes {
+  width: 225px;
+  margin-left: 2px;
+  margin-top: 8px;
+}
+ul {
+  list-style-type: none;
+  padding-left: 1px;
+}

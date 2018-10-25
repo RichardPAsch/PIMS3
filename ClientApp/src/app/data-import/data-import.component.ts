@@ -1,15 +1,48 @@
 import { Component } from "@angular/core";
 
 
-
 @Component({
   selector: 'data-import',
-  templateUrl: './data-import.component.html'
+  templateUrl: './data-import.component.html',
+  styleUrls: ['./data-import.component.css']
 })
 
-export class DataImportComponent {
 
+export class DataImportComponent {
+  private testMsg: string = "Sample test message.";
+  private filePathRegExpr: string = "^(([a-zA-Z]\\:)|(\\\\))(\\\\{1}|((\\\\{1})[^\\\\]([^/:*?<>\"|]*))+)$";
+  private importFilePath: string = "";
+  private importDataType: string = "revenue";
+  private importFileVm: any = {
+    ImportFilePath: "",
+    IsRevenueData: true
+  }
+
+
+  public processImportFile() {
+
+    if (this.importDataType === "") {
+      alert("Data import terminated; please select an import file type.");
+      return;
+    }
+
+    if (this.importFilePath.match(this.filePathRegExpr)) {
+      this.importFileVm.ImportFilePath = this.importFilePath;
+      this.importFileVm.IsRevenueData = this.importDataType === "revenue" ? true : false;
+      // Send to backend for processing here?
+      //var result = dataImportSvc.processImportFileModel(this.importFileModel, this);
+    } else {
+        alert("Invalid file path submitted for import file.");
+    }
+
+  }
+
+  // 10.25.18 - Notes:
+  // WebClient should only be responsible for validating file type to be imported.
+  // Build UI
+  // If ok, pass import file to backend (MVC) for processing.
 }
+
 
 /*  Reference code (JS) from PIMS:
  *  ==============================
@@ -61,10 +94,10 @@ export class DataImportComponent {
     function dataImportCtrl(dataImportSvc) {
         var vm = this;
         // [Ex: valid local path: C:\Downloads\FidelityXLS\Portfolio_RevenueTEST_1_Fidelity.xlsx]
-        var filePathRegExpr = "^(([a-zA-Z]\\:)|(\\\\))(\\\\{1}|((\\\\{1})[^\\\\]([^/:*?<>\"|]*))+)$";
-        vm.importFilePath = ""; 
-        vm.importDataType = "revenue";
-        vm.importFileModel = {
+        var filePathRegExpr = "^(([a-zA-Z]\\:)|(\\\\))(\\\\{1}|((\\\\{1})[^\\\\]([^/:*?<>\"|]*))+)$"; //done
+        vm.importFilePath = ""; //done
+        vm.importDataType = "revenue"; //done
+        vm.importFileModel = {  //done
                 ImportFilePath: "",
                 IsRevenueData: true
         }

@@ -10,6 +10,7 @@ import { HomeComponent } from './home/home.component';
 import { CounterComponent } from './counter/counter.component';
 import { FetchDataComponent } from './fetch-data/fetch-data.component';
 import { IncomeSummaryComponent } from './income-summary/income-summary.component';
+import { DataImportComponent } from './data-import/data-import.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { IncomeSummaryComponent } from './income-summary/income-summary.componen
     HomeComponent,
     CounterComponent,
     FetchDataComponent,
-    IncomeSummaryComponent
+    IncomeSummaryComponent,
+    DataImportComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -29,6 +31,7 @@ import { IncomeSummaryComponent } from './income-summary/income-summary.componen
       { path: 'counter', component: CounterComponent },
       { path: 'fetch-data', component: FetchDataComponent },
       { path: 'income-summary', component: IncomeSummaryComponent },
+      { path: 'data-import', component: DataImportComponent },
     ])
   ],
   providers: [],

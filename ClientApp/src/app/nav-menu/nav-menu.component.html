@@ -25,6 +25,11 @@
               </a>
             </li>
             <li [routerLinkActive]='["link-active"]'>
+              <a [routerLink]='["/data-import"]' (click)='collapse()'>
+                <span class='glyphicon glyphicon-file'></span> Data import
+              </a>
+            </li>
+            <li [routerLinkActive]='["link-active"]'>
               <a [routerLink]='["/counter"]' (click)='collapse()'>
                 <span class='glyphicon glyphicon-education'></span> Counter
               </a>
