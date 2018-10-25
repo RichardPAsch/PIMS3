@@ -41,13 +41,13 @@ export class DataImportComponent {
 
   // 10.25.18 - Notes:
   // WebClient should only be responsible for validating file type to be imported.
-  // Build UI
-  // If ok, pass import file to backend (MVC) for processing.
+  // Build UI - WIP(70% complete)
+  // If ok, pass import file to backend (MVC) for processing.WIP (5% complete)
 }
 
 
-/*  Reference code (JS) from PIMS:
- *  ==============================
+/*  Client-side Reference code (JS) from PIMS:
+ *  ===========================================
  *    dataImportSvc:
  *    
  *  (function () {
@@ -96,16 +96,16 @@ export class DataImportComponent {
     function dataImportCtrl(dataImportSvc) {
         var vm = this;
         // [Ex: valid local path: C:\Downloads\FidelityXLS\Portfolio_RevenueTEST_1_Fidelity.xlsx]
-        var filePathRegExpr = "^(([a-zA-Z]\\:)|(\\\\))(\\\\{1}|((\\\\{1})[^\\\\]([^/:*?<>\"|]*))+)$"; //done
-        vm.importFilePath = ""; //done
-        vm.importDataType = "revenue"; //done
+        var filePathRegExpr = "^(([a-zA-Z]\\:)|(\\\\))(\\\\{1}|((\\\\{1})[^\\\\]([^/:*?<>\"|]*))+)$";   //done
+        vm.importFilePath = "";                                                                         //done
+        vm.importDataType = "revenue";                                                                  //done
         vm.importFileModel = {  //done
                 ImportFilePath: "",
                 IsRevenueData: true
         }
         
 
-        vm.processImportFile = function () {
+        vm.processImportFile = function () {                                                            // done
             if (vm.importDataType === "") {
                 alert("Data import terminated; please select an import file type.");
                 return;
@@ -121,10 +121,10 @@ export class DataImportComponent {
         }
         
 
-        vm.cancelImport = function () {
+        vm.cancelImport = function () {                                                                 // to be implemented
         }
 
-        // ** 10.24.18 - this fx originally commented. **
+        // ** 10.24.18 - this fx originally commented. **                                               // to be implemented ?
         // Async WebApi service calls
         //vm.postCheckRevenueDuplicate = function (duplicateFound) {
 
