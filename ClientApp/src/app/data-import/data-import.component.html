@@ -1,4 +1,5 @@
 
+
 <div class="col-md-12">
   <section id="panelSection" class="panel panel-default">
     <div class="panel-heading">
@@ -8,7 +9,7 @@
     </div>
 
     <div class="panel-body">
-      <form class="form-horizontal ng-valid" role="form">
+      <form [formGroup]="dataImportForm" class="form-horizontal ng-valid" role="form">
 
         <div class="form-group">
           <div id="notation" class="col-md-12 col-md-offset-0">
@@ -20,11 +21,11 @@
           </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" (ngSubmit)="processImportFile()" formGroupName="importDataType">
           <label id="lblDataType" class="col-sm-2 control-label">Import data type:</label>
           <div id="divDataTypes" class="col-md-5">
-            <input type="radio" data-ng-model="vm.importDataType" value="revenue" />&nbsp;Revenue&nbsp;&nbsp;
-            <input type="radio" data-ng-model="vm.importDataType" value="asset" />&nbsp;Asset [ new ]&nbsp;&nbsp;
+            <input type="radio" formControlName="revenueType" value="revenue" />&nbsp;Revenue&nbsp;&nbsp;
+            <input type="radio" formControlName="assetType" value="asset" />&nbsp;Asset [ new ]&nbsp;&nbsp;
           </div>
         </div>
 
@@ -32,22 +33,23 @@
           <label id="lblFilePath" class="col-sm-2 control-label">File location:</label>
           <div class="col-md-7">
             <input type="text"
+                   formControlName="importFilePath"
                    id="inputFilePath"
-                   class="form-control"
+                   class="form-control"s
                    data-ng-model="vm.importFilePath" />
           </div>
         </div>
 
-        <div class="form-group">
+        <!--TODO: 1. needed formControlName ?, 2. [disabled] handling-->
+        <div class="form-group" formGroupName="importActions">
           <div id="divBtns" class="col-md-10 col-md-offset-2">
             <span>
-              <!--! data-ng-disabled=vm.isValidFilePath()"-->
-              <button id="btnImport" data-ng-disabled="false" class="btn btn-w-md btn-gap-v btn-info col-md-2" type="button" data-ng-click="vm.processImportFile()">
+              <button id="btnImport" type="submit" [disabled]="dataImportForm.valid" class="btn btn-w-md btn-gap-v btn-info col-md-2" (click)="processImportFile()">
                 Import
               </button>
             </span>
             <span>
-              <button id="btnCancel" class="btn btn-w-md btn-gap-v btn-info col-md-4" type="button" data-ng-click="vm.clearRevenue()">
+              <button id="btnCancel" type="submit" [disabled]="dataImportForm.valid" class="btn btn-w-md btn-gap-v btn-info col-md-4" (click)="cancelImportFile()">
                 Cancel
               </button>
             </span>
@@ -61,6 +63,10 @@
 
   </section>
 </div>
+
+
+
+  
 
 
 

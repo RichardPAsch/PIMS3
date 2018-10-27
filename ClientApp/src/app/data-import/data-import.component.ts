@@ -1,4 +1,5 @@
 import { Component } from "@angular/core";
+import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 
 @Component({
@@ -11,42 +12,66 @@ import { Component } from "@angular/core";
 export class DataImportComponent {
   private testMsg: string = "Sample test message.";
   private filePathRegExpr: string = "^(([a-zA-Z]\\:)|(\\\\))(\\\\{1}|((\\\\{1})[^\\\\]([^/:*?<>\"|]*))+)$";
-  private importFilePath: string = "";
-  private importDataType: string = "revenue";
-  private importFileVm: any = {
-    ImportFilePath: "",
-    IsRevenueData: true
-  }
+  //private importFilePath: string = "";
+  //private importDataType: string = "revenue";
+  private importFileVm: any = { ImportFilePath: "", IsRevenueData: true };
+
+  // Constructor of FormControl sets its initial value; creation provides immediate access to listen for,
+  // update, and validate the state of the form input.
+
+  dataImportForm = this.frmBldr.group({
+    importFilePath: ['', Validators.required],
+    importDataType: this.frmBldr.group({
+      revenueType: ['revenue'],
+      assetType: ['']
+    }),
+    importActions: this.frmBldr.group({
+      btnImport: [''],
+      btnCancel: ['']
+    })
+  });
+  
+  
+  constructor(private frmBldr: FormBuilder) { };
 
 
   public processImportFile() {
 
-    if (this.importDataType === "") {
-      alert("Data import terminated; please select an import file type.");
-      return;
-    }
+    alert("in processImportFile() with value(s): " +  this.dataImportForm.value);
+    //if (this.importDataType === "") {
+    //  alert("Data import terminated; please select an import file type.");
+    //  return;
+    //}
 
-    if (this.importFilePath.match(this.filePathRegExpr)) {
-      this.importFileVm.ImportFilePath = this.importFilePath;
-      this.importFileVm.IsRevenueData = this.importDataType === "revenue" ? true : false;
+    //if (this.importFilePath.match(this.filePathRegExpr)) {
+    //  this.importFileVm.ImportFilePath = this.importFilePath;
+    //  this.importFileVm.IsRevenueData = this.importDataType === "revenue" ? true : false;
+
       // Send to backend for processing here: WIP
       //     -> ImportFileController.cs / ImportFileControllerReference.txt
 
       //var result = dataImportSvc.processImportFileModel(this.importFileModel, this);
-    } else {
-        alert("Invalid file path submitted for import file.");
-    }
+    //} else {
+    //    alert("Invalid file path submitted for import file.");
+    //}
 
   }
 
-  // 10.25.18 - Notes:
-  // WebClient should only be responsible for validating file type to be imported.
-  // Build UI - WIP(70% complete)
-  // If ok, pass import file to backend (MVC) for processing.WIP (5% complete)
+  public cancelImportFile() {
+    alert("in cancelImportFile() with value(s).");
+  }
+
+
+    // 10.25.18 - Notes:
+    // WebClient should only be responsible for validating file type to be imported.
+    // Build UI - WIP(70% complete)
+    // If ok, pass import file to backend (MVC) for processing.WIP (5% complete)
+
 }
 
 
-/*  Client-side Reference code (JS) from PIMS:
+
+/*  Client-side reference code (JS) from PIMS:
  *  ===========================================
  *    dataImportSvc:
  *    
