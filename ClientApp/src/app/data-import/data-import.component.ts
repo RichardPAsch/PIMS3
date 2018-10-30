@@ -22,8 +22,7 @@ export class DataImportComponent {
   dataImportForm = this.frmBldr.group({
     importFilePath: ['', Validators.required],
     importDataType: this.frmBldr.group({
-      revenueType: ['revenue'],
-      assetType: ['']
+      importType: ['revenue', Validators.required]
     }),
     importActions: this.frmBldr.group({
       btnImport: [''],
@@ -37,23 +36,29 @@ export class DataImportComponent {
 
   public processImportFile() {
 
-    alert("in processImportFile() with value(s): " +  this.dataImportForm.value);
-    //if (this.importDataType === "") {
-    //  alert("Data import terminated; please select an import file type.");
-    //  return;
-    //}
+    if (this.dataImportForm.value.importFilePath === "") {
+      alert("Data import terminated; please enter the file path for an import file.");
+      return;
+    }
+    else {
+      if (this.dataImportForm.value.importFilePath.match(this.filePathRegExpr)) {
+        if (this.getFileExtension(this.dataImportForm.value.importFilePath).toUpperCase() != "XLSX") {
+          alert("Data import terminated; invalid file type submitted, please submit data as a spreadsheet (xlsx).");
+          return;
+        }
+        else {
+          this.importFileVm.ImportFilePath = this.dataImportForm.value.importFilePath;
+          this.importFileVm.IsRevenueData = this.dataImportForm.value.importDataType === "revenue" ? true : false;
 
-    //if (this.importFilePath.match(this.filePathRegExpr)) {
-    //  this.importFileVm.ImportFilePath = this.importFilePath;
-    //  this.importFileVm.IsRevenueData = this.importDataType === "revenue" ? true : false;
-
-      // Send to backend for processing here: WIP
-      //     -> ImportFileController.cs / ImportFileControllerReference.txt
-
-      //var result = dataImportSvc.processImportFileModel(this.importFileModel, this);
-    //} else {
-    //    alert("Invalid file path submitted for import file.");
-    //}
+          //Send to backend for processing here: WIP -> ImportFileController.cs / ImportFileControllerReference.txt
+          //var result = dataImportSvc.processImportFileModel(this.importFileModel, this);
+          // Logging ??
+        }
+      }
+      else {
+        alert("Data import terminated; file not found, please check for valid file path.");
+      }
+    }
 
   }
 
@@ -62,9 +67,15 @@ export class DataImportComponent {
   }
 
 
+  private getFileExtension(filePath: string) {
+    let submittedFilePath = filePath;
+    return submittedFilePath.substring(submittedFilePath.indexOf("."));
+  }
+
+
     // 10.25.18 - Notes:
-    // WebClient should only be responsible for validating file type to be imported.
-    // Build UI - WIP(70% complete)
+    // WebClient should only be responsible for validating file type to be imported. - done
+    // Build UI - WIP(85% complete)
     // If ok, pass import file to backend (MVC) for processing.WIP (5% complete)
 
 }
