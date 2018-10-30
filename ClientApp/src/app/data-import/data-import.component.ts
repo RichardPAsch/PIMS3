@@ -5,7 +5,8 @@ import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms'
 @Component({
   selector: 'data-import',
   templateUrl: './data-import.component.html',
-  styleUrls: ['./data-import.component.css']
+  styleUrls: ['./data-import.component.css'],
+  providers: []  // An array of providers for services that this component requires; provided via ctor DI.
 })
 
 
@@ -42,13 +43,19 @@ export class DataImportComponent {
     }
     else {
       if (this.dataImportForm.value.importFilePath.match(this.filePathRegExpr)) {
-        if (this.getFileExtension(this.dataImportForm.value.importFilePath).toUpperCase() != "XLSX") {
+        if (this.getFileExtension(this.dataImportForm.value.importFilePath) != "XLSX") {
           alert("Data import terminated; invalid file type submitted, please submit data as a spreadsheet (xlsx).");
           return;
         }
         else {
           this.importFileVm.ImportFilePath = this.dataImportForm.value.importFilePath;
-          this.importFileVm.IsRevenueData = this.dataImportForm.value.importDataType === "revenue" ? true : false;
+          this.importFileVm.IsRevenueData = this.dataImportForm.value.importDataType.importType === "revenue" ? true : false;
+
+          if (this.importFileVm.IsRevenueData) {
+
+          } else {
+            // Asset processing
+          }
 
           //Send to backend for processing here: WIP -> ImportFileController.cs / ImportFileControllerReference.txt
           //var result = dataImportSvc.processImportFileModel(this.importFileModel, this);
@@ -69,7 +76,7 @@ export class DataImportComponent {
 
   private getFileExtension(filePath: string) {
     let submittedFilePath = filePath;
-    return submittedFilePath.substring(submittedFilePath.indexOf("."));
+    return submittedFilePath.substring(submittedFilePath.indexOf(".") + 1).toUpperCase();
   }
 
 

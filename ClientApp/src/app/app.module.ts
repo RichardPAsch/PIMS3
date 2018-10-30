@@ -13,6 +13,10 @@ import { IncomeSummaryComponent } from './income-summary/income-summary.componen
 import { DataImportComponent } from './data-import/data-import.component';
 import { ReactiveFormsModule } from '@angular/forms';
 
+/* Notes:
+ *  Medium to large apps should have one or more FEATURE modules. ngModule may have one
+ *  or more child modules.
+ * */
 
 @NgModule({
   declarations: [
@@ -37,7 +41,9 @@ import { ReactiveFormsModule } from '@angular/forms';
       { path: 'data-import', component: DataImportComponent },
     ])
   ],
-  providers: [],
-  bootstrap: [AppComponent]
+  providers: [], // Creators of services that NgModule contributes to the global collection of services;
+                 // they become accessible in all parts of the app. (You can also specify providers at the component level, which is often preferred.)
+  bootstrap: [AppComponent] // The main application view, called the root component, which HOSTS all other app views.
+                            // Only NgModule should set the bootstrap property.
 })
 export class AppModule { }
