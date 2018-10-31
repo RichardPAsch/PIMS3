@@ -1,8 +1,18 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable()
+
 export class DataImportService {
 
-  constructor() { }
+    constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
+
+    }
+
+
+    postRevenueData() {
+
+
+    }
 
 }
