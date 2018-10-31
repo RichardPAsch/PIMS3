@@ -15,7 +15,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 /* Notes:
  *  Medium to large apps should have one or more FEATURE modules. ngModule may have one
- *  or more child modules.
+ *  or more child modules. Do create an NgModule for each feature area.
  * */
 
 @NgModule({
