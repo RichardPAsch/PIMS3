@@ -1,21 +1,24 @@
 import { Component } from "@angular/core";
-import { FormControl, FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, Validators } from '@angular/forms';
+import { DataImportVm } from './data-importVm';
+import { DataImportService } from './data-import.service';
+import { Observable } from "rxjs";
 
 
 @Component({
-  selector: 'data-import',
-  templateUrl: './data-import.component.html',
-  styleUrls: ['./data-import.component.css'],
-  providers: []  // An array of providers for services that this component requires; provided via ctor DI.
+    selector: 'data-import',
+    templateUrl: './data-import.component.html',
+    styleUrls: ['./data-import.component.css'],
+    providers: []  // An array of providers for services that this component requires; provided via ctor DI.
 })
 
 
 export class DataImportComponent {
-  private testMsg: string = "Sample test message.";
-  private filePathRegExpr: string = "^(([a-zA-Z]\\:)|(\\\\))(\\\\{1}|((\\\\{1})[^\\\\]([^/:*?<>\"|]*))+)$";
-  //private importFilePath: string = "";
-  //private importDataType: string = "revenue";
-  private importFileVm: any = { ImportFilePath: "", IsRevenueData: true };
+    private testMsg: string = "Sample test message.";
+    private filePathRegExpr: string = "^(([a-zA-Z]\\:)|(\\\\))(\\\\{1}|((\\\\{1})[^\\\\]([^/:*?<>\"|]*))+)$";
+    private importFileVm: DataImportVm = { filePath: "", isRevenueData: true };
+    private submittedImportFile: Observable<DataImportVm>;
+
 
   // Constructor of FormControl sets its initial value; creation provides immediate access to listen for,
   // update, and validate the state of the form input.
@@ -32,7 +35,7 @@ export class DataImportComponent {
   });
   
   
-  constructor(private frmBldr: FormBuilder) { };
+  constructor(private frmBldr: FormBuilder, private service: DataImportService) { };
 
 
   public processImportFile() {
@@ -48,17 +51,12 @@ export class DataImportComponent {
           return;
         }
         else {
-          this.importFileVm.ImportFilePath = this.dataImportForm.value.importFilePath;
-          this.importFileVm.IsRevenueData = this.dataImportForm.value.importDataType.importType === "revenue" ? true : false;
+          this.importFileVm.filePath = this.dataImportForm.value.importFilePath;
+          this.importFileVm.isRevenueData = this.dataImportForm.value.importDataType.importType === "revenue" ? true : false;
 
-          if (this.importFileVm.IsRevenueData) {
-
-          } else {
-            // Asset processing
-          }
-
-          //Send to backend for processing here: WIP -> ImportFileController.cs / ImportFileControllerReference.txt
-          //var result = dataImportSvc.processImportFileModel(this.importFileModel, this);
+          // Backend API logic to handle processinbg import file type.
+          this.submittedImportFile = this.service.postImportFileData(this.importFileVm);
+         
           // Logging ??
         }
       }
