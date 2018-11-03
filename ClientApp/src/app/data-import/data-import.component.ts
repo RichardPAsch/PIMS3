@@ -3,6 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { DataImportVm } from './data-importVm';
 import { DataImportService } from './data-import.service';
 import { Observable } from "rxjs";
+import { HttpErrorResponse } from "@angular/common/http";
 
 
 @Component({
@@ -16,7 +17,7 @@ import { Observable } from "rxjs";
 export class DataImportComponent {
     private testMsg: string = "Sample test message.";
     private filePathRegExpr: string = "^(([a-zA-Z]\\:)|(\\\\))(\\\\{1}|((\\\\{1})[^\\\\]([^/:*?<>\"|]*))+)$";
-    private importFileVm: DataImportVm = { filePath: "", isRevenueData: true };
+    private importFileVm: DataImportVm = { filePath: "", isRevenueData: true, recordsSaved: 0, amountSaved: 0};
     private submittedImportFile: Observable<DataImportVm>;
 
 
@@ -55,7 +56,27 @@ export class DataImportComponent {
           this.importFileVm.isRevenueData = this.dataImportForm.value.importDataType.importType === "revenue" ? true : false;
 
           // Backend API logic to handle processinbg import file type.
-          this.submittedImportFile = this.service.postImportFileData(this.importFileVm);
+            this.service.postImportFileData(this.importFileVm)
+                .subscribe(resp => {
+                    let recordsProcessed = resp.recordsSaved;
+                    let totalProcessed = resp.amountSaved;
+                    alert("Successfully saved " + recordsProcessed + " for a total of $" + totalProcessed);
+                },
+                (err: HttpErrorResponse) => {
+                    if (err.error instanceof Error) {
+                        //A client-side or network error occurred.				 
+                        alert('Error saving import data (network?) due to: ' +  err.error.message);
+                    } else {
+                        //Backend returns unsuccessful response codes such as 404, 500 etc.
+                        alert('Error saving import data (server?) with status of : ' + err.status);
+                        //console.log('Backend returned status code: ', err.status);
+                        //console.log('Response body:', err.error);
+                    }
+                });
+
+
+            //this.service.postImportFileData(this.importFileVm)
+            //    .subscribe(() => alert('Income data successfully saved.'));
          
           // Logging ??
         }
