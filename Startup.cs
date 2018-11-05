@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using PIMS3.Data;
 using PIMS3.Data.Repositories;
+using PIMS3.Data.Repositories.IncomeSummary;
 using PIMS3.Services;
 
 namespace PIMS3
