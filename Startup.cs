@@ -43,6 +43,17 @@ namespace PIMS3
                     // Required compatability for [ApiController] annotation.
                     .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                // When an action parameter is annotated with the [FromForm] attribute, the multipart/form-data request content type is inferred.
+                options.SuppressConsumesConstraintForFormFileParameters = true;
+                // Inference rules are applied for the default data sources of action parameters, i.e., [FromBody],[FromForm],[FromRoute],[FromQuery]
+                options.SuppressInferBindingSourcesForParameters = true;
+                // ModelState validation errors automatically trigger an HTTP 400 response.
+                options.SuppressModelStateInvalidFilter = true;
+            });
+
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
