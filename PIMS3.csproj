@@ -16,6 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EPPlus" Version="4.5.2.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="2.1.1" />
@@ -30,12 +31,16 @@
 
   <ItemGroup>
     <None Remove="ClientApp\src\app\data-import\data-import.component.ts" />
+    <None Remove="ClientApp\src\app\data-import\data-importVm.ts" />
     <None Remove="ClientApp\src\app\income-summary\income-summary.component.ts" />
+    <None Remove="ClientApp\src\app\message.service.ts" />
   </ItemGroup>
 
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\app\data-import\data-import.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\data-import\data-importVm.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\income-summary\income-summary.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\message.service.ts" />
   </ItemGroup>
 
   <ItemGroup>

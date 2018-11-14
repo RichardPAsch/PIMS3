@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 
-namespace PIMS3.Data.Repositories
+namespace PIMS3.Data.Repositories.IncomeSummary
 {
     // ** TODO: Make interface available to appropriate controller!
     //          Refer to existing PIMS source for transfer.

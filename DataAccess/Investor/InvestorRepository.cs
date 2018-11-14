@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using PIMS3.Data.Entities;
+using PIMS3.Data.Repositories.IncomeSummary;
 using System;
 using System.Linq;
 using System.Linq.Expressions;

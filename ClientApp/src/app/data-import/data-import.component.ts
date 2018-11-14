@@ -58,12 +58,17 @@ export class DataImportComponent {
           // Backend API logic to handle processinbg import file type.
             this.service.postImportFileData(this.importFileVm)
                 .subscribe(resp => {
-                    let recordsProcessed = resp.recordsSaved;
-                    let totalProcessed = resp.amountSaved;
-                    alert("Successfully saved " + recordsProcessed + " for a total of $" + totalProcessed);
+                    if (resp.isRevenueData && resp.recordsSaved > 0) {
+                        let recordsProcessed = resp.recordsSaved;
+                        let totalProcessed = resp.amountSaved;
+                        alert("Successfully saved " + recordsProcessed + " for a total of $" + totalProcessed);
+                    } else {
+                        // asset processing to be implemented.
+                    }
                 },
                 (err: HttpErrorResponse) => {
                     if (err.error instanceof Error) {
+                        // TODO: 11.5.18 - just have 1 alert, but use logging to log different issues.
                         //A client-side or network error occurred.				 
                         alert('Error saving import data (network?) due to: ' +  err.error.message);
                     } else {
@@ -73,12 +78,6 @@ export class DataImportComponent {
                         //console.log('Response body:', err.error);
                     }
                 });
-
-
-            //this.service.postImportFileData(this.importFileVm)
-            //    .subscribe(() => alert('Income data successfully saved.'));
-         
-          // Logging ??
         }
       }
       else {

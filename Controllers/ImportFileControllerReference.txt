@@ -90,7 +90,7 @@ namespace PIMS.Web.Api.Controllers
                 if (!revenueToBeInserted.Any() )
                     return BadRequest("No income data saved; please check ticker symbol(s), amount(s), and/or account(s) for validity.");
 
-                dataPersistenceResults = PersistIncomeData(revenueToBeInserted);
+                dataPersistenceResults = PersistIncomeData(revenueToBeInserted); // line 430
             }
             else
             {

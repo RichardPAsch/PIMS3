@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PIMS3.Data.Entities;
-using PIMS3.Data.Repositories;
+using PIMS3.Data.Repositories.IncomeSummary;
 using PIMS3.ViewModels;
 //using AutoMapper; // deferred use.
 using System.Globalization;
