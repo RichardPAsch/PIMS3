@@ -11,6 +11,8 @@ namespace PIMS3.ViewModels
         public bool IsRevenueData { get; set; }
         public int? RecordsSaved { get; set; }
         public decimal? AmountSaved { get; set; }
+        // Captured ticker(s) where income not recorded.
+        public string ExceptionTickers { get; set; }
     }
 
 }
