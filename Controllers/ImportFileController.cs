@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PIMS3.ViewModels;
 using PIMS3.DataAccess.ImportData;
 
@@ -50,19 +45,28 @@ namespace PIMS3.Controllers
                 return BadRequest(ModelState);
             }
 
-            importFile.AmountSaved = 0M;
-            importFile.RecordsSaved = 0;
-
             var dataAccessComponent = new RevenueFileImport();
-            // UI to interpret AmountSaved & RecordsSaved results.
-            processedVm = dataAccessComponent.SaveRevenue(importFile);
             
+            processedVm = dataAccessComponent.SaveRevenue(importFile);
+
+            // UI to interpret updated Vm attributes.
+            if (processedVm.RecordsSaved == 0)
+            {
+                if(importFile.ExceptionTickers != string.Empty)
+                    return BadRequest(new { exceptionTickers = processedVm.ExceptionTickers });
+
+                return BadRequest(new { exceptionMessage = "Error processing income import data; please try later." });
+            }
+
+            return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, amount = processedVm.AmountSaved });
+            
+                
 
             
             //string dataPersistenceResults;
             //var importFileUrl = importFile.ImportFilePath;
 
-            /*
+            /*  -------- OLD PIMS code ------------
            var requestUri = Request.RequestUri.AbsoluteUri;
 
                       _serverBaseUri = Utilities.GetWebServerBaseUri(requestUri);
@@ -109,7 +113,7 @@ namespace PIMS3.Controllers
                       return Ok(responseVm);
                   }
              */
-            return Ok();
+            //return Ok();
 
         }
 
