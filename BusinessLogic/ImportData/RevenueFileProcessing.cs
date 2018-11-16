@@ -13,7 +13,7 @@ namespace PIMS3.BusinessLogic.ImportData
     public class RevenueFileProcessing
     {
         private DataImportVm _viewModel;
-        private static string _xlsIncomeRecordsOmitted = string.Empty;
+        private static string _xlsTickerSymbolsOmitted = string.Empty;
         private bool validationResults = false;
         private IEnumerable<Income> parsingResults;
         private IEnumerable<Income> duplicateResults;
@@ -67,7 +67,7 @@ namespace PIMS3.BusinessLogic.ImportData
             var incomeDataAccessComponent = new DataAccess.Income.IncomeData();
             var assetDataAccessComponent = new DataAccess.Asset.AssetData();
             IQueryable<string> fetchedPositionId;
-            const string INVESTORID = "CF256A53-6DCD-431D-BC0B-A810010F5B88"; // temp until security implemented!
+            const string INVESTORID = "CF256A53-6DCD-431D-BC0B-A810010F5B88"; // id for me; temp until security implemented!
 
             try
             {
@@ -78,7 +78,7 @@ namespace PIMS3.BusinessLogic.ImportData
                     var workSheet = package.Workbook.Worksheets[1];
                     var totalRows = workSheet.Dimension.End.Row;
                     var totalColumns = workSheet.Dimension.End.Column;
-                    _xlsIncomeRecordsOmitted = string.Empty;
+                    _xlsTickerSymbolsOmitted = string.Empty;
 
                     for (var rowNum = 2; rowNum <= totalRows; rowNum++)
                     {
@@ -100,10 +100,10 @@ namespace PIMS3.BusinessLogic.ImportData
                         // Validate either a bad ticker symbol, or no account was found to be affiliated with this position/asset.
                         if (!fetchedPositionId.Any())
                         {
-                            if (_xlsIncomeRecordsOmitted == string.Empty)
-                                _xlsIncomeRecordsOmitted += xlsTicker;
+                            if (_xlsTickerSymbolsOmitted == string.Empty)
+                                _xlsTickerSymbolsOmitted += xlsTicker;
                             else
-                                _xlsIncomeRecordsOmitted += ", " + xlsTicker;
+                                _xlsTickerSymbolsOmitted += ", " + xlsTicker;
 
                             continue;
                         }
@@ -116,13 +116,16 @@ namespace PIMS3.BusinessLogic.ImportData
                         duplicateResults = incomeDataAccessComponent.FindIncomeDuplicates(fetchedPositionId.First().ToString(), enumerableCells.ElementAt(0), enumerableCells.ElementAt(4));
                         if (duplicateResults.Any())
                         {
-                            if (_xlsIncomeRecordsOmitted == string.Empty)
-                                _xlsIncomeRecordsOmitted += xlsTicker;
+                            if (_xlsTickerSymbolsOmitted == string.Empty)
+                                _xlsTickerSymbolsOmitted += xlsTicker;
                             else
-                                _xlsIncomeRecordsOmitted += ", " + xlsTicker;
+                                _xlsTickerSymbolsOmitted += ", " + xlsTicker;
 
                             continue;
                         }
+
+                        if (_xlsTickerSymbolsOmitted != string.Empty)
+                            _viewModel.ExceptionTickers = _xlsTickerSymbolsOmitted;
 
                         var newIncomeRecord = new Income
                         {
