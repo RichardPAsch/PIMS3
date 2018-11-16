@@ -11,10 +11,7 @@ namespace PIMS3.DataAccess.ImportData
 
     public class RevenueFileImport
     {
-        // commented after tfr from PIMS
-        //public string UrlAddress { get; set; }
         private readonly PIMS3Context _ctx;
-
 
         public RevenueFileImport(PIMS3Context ctx)
         {
@@ -26,31 +23,36 @@ namespace PIMS3.DataAccess.ImportData
         }
 
 
-        public DataImportVm SaveRevenue(DataImportVm newRevenue)
+        public DataImportVm SaveRevenue(DataImportVm importVmToUpdate)
         {
-            var processingSvc = new RevenueFileProcessing(newRevenue);
-            IEnumerable<Data.Entities.Income> revenueListingToSave; 
+            var processingSvc = new RevenueFileProcessing(importVmToUpdate);
+            IEnumerable<Data.Entities.Income> revenueListingToSave;
+            var recordsSaved = 0;
+            var totalAmtSaved = 0M;
 
             if (processingSvc.ValidateVm())
             {
-                // proceed with saving data.
-                revenueListingToSave = processingSvc.ParseRevenueSpreadsheetForIncomeRecords(newRevenue.ImportFilePath.Trim());
+                revenueListingToSave = processingSvc.ParseRevenueSpreadsheetForIncomeRecords(importVmToUpdate.ImportFilePath.Trim());
 
-                // TODO: correct way to save? 11.14.18
-                _ctx.AddRange(revenueListingToSave);
-                _ctx.SaveChanges();
+                using (_ctx) {
+                    _ctx.AddRange(revenueListingToSave);
+                    recordsSaved = _ctx.SaveChanges();
+                }
 
-                //foreach(var record in revenueListingToSave)
-                //{
-                //    _ctx.Add(record);
-                //    _ctx.SaveChanges();
-                //}
-            
+                if(recordsSaved > 0)
+                {
+                    foreach (var record in revenueListingToSave)
+                    {
+                        totalAmtSaved += totalAmtSaved + record.AmountRecvd;
+                    }
+
+                    importVmToUpdate.AmountSaved = totalAmtSaved;
+                    importVmToUpdate.RecordsSaved = recordsSaved;
+                }
             }
 
-
-            return null;
-
+            // Missing amount & record count reflects error condition.
+            return importVmToUpdate;
         }
 
         //public IQueryable<Investor> RetreiveAll() {
