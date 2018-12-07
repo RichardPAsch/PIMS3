@@ -20,6 +20,7 @@ namespace PIMS3.BusinessLogic.ImportData
         //private static OkNegotiatedContentResult<List<AssetIncomeVm>> _existingInvestorAssets;
         private static int _totalXlsIncomeRecordsToSave = 0;
 
+
         public RevenueFileProcessing(DataImportVm viewModel)
         {
             _viewModel = viewModel;
@@ -28,7 +29,7 @@ namespace PIMS3.BusinessLogic.ImportData
 
         public bool ValidateVm()
         {
-            if (!_viewModel.IsRevenueData || _viewModel.ImportFilePath == string.Empty)
+            if (!_viewModel.IsRevenueData || _viewModel.ImportFilePath == string.Empty || _viewModel.ImportFilePath == null)
             {
                 return false;
             }
@@ -50,6 +51,7 @@ namespace PIMS3.BusinessLogic.ImportData
 
         private bool ValidateFileName(string filePath)
         {
+            // error: filePath = null !
             return filePath.ToUpper().IndexOf("REVENUE") > 0 ? true : false;
         }
 
