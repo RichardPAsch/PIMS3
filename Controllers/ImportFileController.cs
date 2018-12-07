@@ -47,6 +47,7 @@ namespace PIMS3.Controllers
 
             var dataAccessComponent = new RevenueFileImport();
             
+            // 12.6.18 - debug stopped here; 
             processedVm = dataAccessComponent.SaveRevenue(importFile);
 
             // UI to interpret updated Vm attributes.
