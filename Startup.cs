@@ -99,6 +99,7 @@ namespace PIMS3
                     //spa.UseAngularCliServer(npmScript: "start");
                     // Run 'npm start' to launch external/independent Angular CLI server before running app.
                     spa.UseProxyToSpaDevelopmentServer("http://localhost:4200");
+                    //spa.UseProxyToSpaDevelopmentServer("http://localhost:44328");
                 }
             });
         }
