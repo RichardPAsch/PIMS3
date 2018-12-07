@@ -3,7 +3,15 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { DataImportVm } from './data-importVm';
 import { DataImportService } from './data-import.service';
 import { Observable } from "rxjs";
-import { HttpErrorResponse } from "@angular/common/http";
+import { HttpErrorResponse, HttpClient, HttpHandler } from "@angular/common/http";
+//import { MessageService } from "../message.service";
+
+/* *********** Debug note: 11.24.18 ******************
+ * Experiment with 1.ng build (** src edits not reflected via running npm start ***) &
+ *                 2.npm start, when making code changes, until service erorr is identified.
+ * Error occurs with DI of DataImportService here.
+ * Re-examine use of parameters in ctor inside of DataImportService()!!
+*/
 
 
 @Component({
@@ -16,9 +24,11 @@ import { HttpErrorResponse } from "@angular/common/http";
 
 export class DataImportComponent {
     private testMsg: string = "Sample test message.";
-    private filePathRegExpr: string = "^(([a-zA-Z]\\:)|(\\\\))(\\\\{1}|((\\\\{1})[^\\\\]([^/:*?<>\"|]*))+)$";
-    private importFileVm: DataImportVm = { filePath: "", isRevenueData: true, recordsSaved: 0, amountSaved: 0};
-    private submittedImportFile: Observable<DataImportVm>;
+    //private filePathRegExpr: string = "^(?:[\w]\:|\\)(\\[a-z_\-\s0-9\.]+)+\.(xls|xlsx)$";
+    private importFileVm: DataImportVm = { filePath: "", isRevenueData: true, recordsSaved: 0, amountSaved: 0 };
+    private submittedFile: string = "";
+    //private submittedImportFile: Observable<DataImportVm>;
+    //private results: any;
 
 
   // Constructor of FormControl sets its initial value; creation provides immediate access to listen for,
@@ -36,56 +46,57 @@ export class DataImportComponent {
   });
   
   
-  constructor(private frmBldr: FormBuilder, private service: DataImportService) { };
+    constructor(private frmBldr: FormBuilder, private svc: DataImportService) { }; 
 
 
-  public processImportFile() {
+    public processImportFile() {
+        
+        // Test data file_1:  C:\Development\VS2017\PIMS3_TestData\2018AUG_Revenue2Recs.xlsx
+        if (this.dataImportForm.value.importFilePath == "") {
+            alert("Data import terminated: missing import file path.");
+            return;
+        } else {
+            this.submittedFile = this.dataImportForm.value.importFilePath.trim();
+            if (this.submittedFile.indexOf(':') == -1 && ((this.getFileExtension(this.submittedFile) != "XLSX") || this.getFileExtension(this.submittedFile) != "XLS")) {
+                alert("Data import terminated: invalid file type submitted, please submit data as a spreadsheet (xlsx/xls).");
+                return;
+            } else {
+                alert("processing...");
+                this.importFileVm.filePath = this.dataImportForm.value.importFilePath;
+                this.importFileVm.isRevenueData = this.dataImportForm.value.importDataType.importType === "revenue" ? true : false;
 
-    if (this.dataImportForm.value.importFilePath === "") {
-      alert("Data import terminated; please enter the file path for an import file.");
-      return;
-    }
-    else {
-      if (this.dataImportForm.value.importFilePath.match(this.filePathRegExpr)) {
-        if (this.getFileExtension(this.dataImportForm.value.importFilePath) != "XLSX") {
-          alert("Data import terminated; invalid file type submitted, please submit data as a spreadsheet (xlsx).");
-          return;
+                // 11.30.18 - bone up on Angular services!
+                // Backend API logic to handle processing import file type.
+                // ** BASE_URL defined in main.ts **
+                //let svc = new DataImportService(new HttpClient(null), "http://localhost/", new MessageService());
+                this.svc.postImportFileData(this.importFileVm)
+                        .subscribe(resp => {
+                            if (resp.isRevenueData && resp.recordsSaved > 0) {
+                                let recordsProcessed = resp.recordsSaved;
+                                let totalProcessed = resp.amountSaved;
+                                alert("Successfully saved " + recordsProcessed + " for a total of $" + totalProcessed);
+                            } else {
+                                alert("asset processing debug here - TBI");
+                                // asset processing to be implemented.
+                            }
+                        },
+                        (err: HttpErrorResponse) => {
+                            if (err.error instanceof Error) {
+                                // TODO: 11.5.18 - just have 1 alert, but use logging to log different issues.
+                                //A client-side or network error occurred.				 
+                                alert('Error saving import data (network?) due to: ' +  err.error.message);
+                            } else {
+                                //Backend returns unsuccessful response codes such as 404, 500 etc.
+                                alert('Error saving import data (server?) with status of : ' + err.status);
+                                //console.log('Backend returned status code: ', err.status);
+                                //console.log('Response body:', err.error);
+                            }
+                        });
+                alert("processing completed.");
+            }
         }
-        else {
-          this.importFileVm.filePath = this.dataImportForm.value.importFilePath;
-          this.importFileVm.isRevenueData = this.dataImportForm.value.importDataType.importType === "revenue" ? true : false;
-
-          // Backend API logic to handle processinbg import file type.
-            this.service.postImportFileData(this.importFileVm)
-                .subscribe(resp => {
-                    if (resp.isRevenueData && resp.recordsSaved > 0) {
-                        let recordsProcessed = resp.recordsSaved;
-                        let totalProcessed = resp.amountSaved;
-                        alert("Successfully saved " + recordsProcessed + " for a total of $" + totalProcessed);
-                    } else {
-                        // asset processing to be implemented.
-                    }
-                },
-                (err: HttpErrorResponse) => {
-                    if (err.error instanceof Error) {
-                        // TODO: 11.5.18 - just have 1 alert, but use logging to log different issues.
-                        //A client-side or network error occurred.				 
-                        alert('Error saving import data (network?) due to: ' +  err.error.message);
-                    } else {
-                        //Backend returns unsuccessful response codes such as 404, 500 etc.
-                        alert('Error saving import data (server?) with status of : ' + err.status);
-                        //console.log('Backend returned status code: ', err.status);
-                        //console.log('Response body:', err.error);
-                    }
-                });
-        }
-      }
-      else {
-        alert("Data import terminated; file not found, please check for valid file path.");
-      }
     }
 
-  }
 
   public cancelImportFile() {
     alert("in cancelImportFile() with value(s).");

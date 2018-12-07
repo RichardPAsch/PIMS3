@@ -16,13 +16,18 @@ const httpOptions = {
 };
 
 
-
+// Creates a provider for the service; providedIn: 'root' specifies that the service should be provided in the root injector.
+// When you add a service provider to the root application injector, it’s available throughout the app.
+// Should always provide your service in the root injector unless there is a case where you want the service to be available
+// only if the consumer imports a particular @NgModule.
 @Injectable()
 
 export class DataImportService {
 
     constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string, private messageService: MessageService) {
+        baseUrl = "https://localhost:44328";  // temp - conflicts with fetch-data's definition of baseUrl ?
     }
+    
 
     /* All HttpClient methods return an RxJS Observable of something.
      * Observables' subscribe() is responsible for handling errors.
@@ -42,7 +47,7 @@ export class DataImportService {
         // To catch errors, you "pipe" the observable result from http.post() through an RxJS catchError() operator.
         // The catchError() operator intercepts an Observable that failed, & passes the error to an error handler.
         // RxJS 'tap' operator (callback) taps/intercepts into the flow of observable values, LOOKING at their value(s) only & passing them along the chain.
-        return this.http.post<DataImportVm>(this.baseUrl + 'api/<to be supplied>', DataImportVm, httpOptions)
+        return this.http.post<DataImportVm>(this.baseUrl + 'api/ImportFile/ProcessImportFile', importFileToProcess, httpOptions)
                         .pipe(
                             tap(() => this.log("postImportFileData() called.")),
                             catchError(this.handleError<DataImportVm>('postImportFileData'))
@@ -58,7 +63,14 @@ export class DataImportService {
          * so it can return the safe value as the type that the app expects.
      */
     private handleError<T>(operation = 'operation', result?: T) {
+
+        if (operation == "'postImportFileData") {
+            var debugVar = result;
+            
+        }
+
         return (error: any): Observable<T> => {
+            alert(error.message);
 
             // TODO: send the error to remote logging infrastructure
             console.error(error); // log to console instead
