@@ -11,21 +11,14 @@ namespace PIMS3.DataAccess.ImportData
 
     public class RevenueFileImport
     {
-        private readonly PIMS3Context _ctx;
-
-        public RevenueFileImport(PIMS3Context ctx)
-        {
-            _ctx = ctx;
-        }
-
         public RevenueFileImport()
         {
         }
 
 
-        public DataImportVm SaveRevenue(DataImportVm importVmToUpdate)
+        public DataImportVm SaveRevenue(DataImportVm importVmToUpdate, PIMS3Context _ctx)
         {
-            var processingSvc = new RevenueFileProcessing(importVmToUpdate);
+            var processingSvc = new RevenueFileProcessing(importVmToUpdate, _ctx);
             IEnumerable<Data.Entities.Income> revenueListingToSave;
             var recordsSaved = 0;
             var totalAmtSaved = 0M;
@@ -34,13 +27,22 @@ namespace PIMS3.DataAccess.ImportData
             {
                 revenueListingToSave = processingSvc.ParseRevenueSpreadsheetForIncomeRecords(importVmToUpdate.ImportFilePath.Trim());
 
-                using (_ctx) {
-                    _ctx.AddRange(revenueListingToSave);
-                    recordsSaved = _ctx.SaveChanges();
+                // 12.10. 18 - error saving 28 recs.
+                if (revenueListingToSave == null)
+                    return null;
+                else
+                {
+                    using (_ctx)
+                    {
+                        _ctx.AddRange(revenueListingToSave);
+                        recordsSaved = _ctx.SaveChanges();
+                    }
                 }
+               
 
                 if(recordsSaved > 0)
                 {
+                    importVmToUpdate.AmountSaved = 0M;
                     foreach (var record in revenueListingToSave)
                     {
                         totalAmtSaved += totalAmtSaved + record.AmountRecvd;
