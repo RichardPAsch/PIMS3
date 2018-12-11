@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using PIMS3.Services;
-
+using PIMS3.Data;
 
 namespace PIMS3.BusinessLogic.ImportData
 {
@@ -14,16 +14,16 @@ namespace PIMS3.BusinessLogic.ImportData
     {
         private DataImportVm _viewModel;
         private static string _xlsTickerSymbolsOmitted = string.Empty;
-        private bool validationResults = false;
-        private IEnumerable<Income> parsingResults;
         private IEnumerable<Income> duplicateResults;
         //private static OkNegotiatedContentResult<List<AssetIncomeVm>> _existingInvestorAssets;
         private static int _totalXlsIncomeRecordsToSave = 0;
+        private readonly PIMS3Context _ctx;
 
 
-        public RevenueFileProcessing(DataImportVm viewModel)
+        public RevenueFileProcessing(DataImportVm viewModel, PIMS3Context ctx)
         {
             _viewModel = viewModel;
+            _ctx = ctx;
         }
 
 
@@ -35,17 +35,8 @@ namespace PIMS3.BusinessLogic.ImportData
             }
             else
             {
-                validationResults = ValidateFileName(_viewModel.ImportFilePath) && ValidateFileType(_viewModel.ImportFilePath);
-                if (!validationResults)
-                    return false;
-                else
-                {
-                    parsingResults = ParseRevenueSpreadsheetForIncomeRecords(_viewModel.ImportFilePath);
-                }
-                
+                return ValidateFileName(_viewModel.ImportFilePath) && ValidateFileType(_viewModel.ImportFilePath);
             }
-            return false;
-
         }
 
 
@@ -66,10 +57,10 @@ namespace PIMS3.BusinessLogic.ImportData
         public IEnumerable<Income> ParseRevenueSpreadsheetForIncomeRecords(string filePath)
         {
             var newIncomeListing = new List<Income>();
-            var incomeDataAccessComponent = new DataAccess.Income.IncomeData();
-            var assetDataAccessComponent = new DataAccess.Asset.AssetData();
+            var incomeDataAccessComponent = new DataAccess.Income.IncomeData(_ctx);
+            var assetDataAccessComponent = new DataAccess.Asset.AssetData(_ctx);
             IQueryable<string> fetchedPositionId;
-            const string INVESTORID = "CF256A53-6DCD-431D-BC0B-A810010F5B88"; // id for me; temp until security implemented!
+            const string INVESTORID = "CF256A53-6DCD-431D-BC0B-A810010F5B88"; // id for me; temporary until security implemented!
 
             try
             {
@@ -77,7 +68,7 @@ namespace PIMS3.BusinessLogic.ImportData
 
                 using (var package = new ExcelPackage(importFile))
                 {
-                    var workSheet = package.Workbook.Worksheets[1];
+                    var workSheet = package.Workbook.Worksheets[0];
                     var totalRows = workSheet.Dimension.End.Row;
                     var totalColumns = workSheet.Dimension.End.Column;
                     _xlsTickerSymbolsOmitted = string.Empty;
@@ -91,15 +82,18 @@ namespace PIMS3.BusinessLogic.ImportData
 
                         var row = workSheet.Cells[rowNum, 1, rowNum, totalColumns].Select(c => c.Value == null ? string.Empty : c.Value.ToString());
                         var enumerableCells = row as string[] ?? row.ToArray();
+
+                        // 'totalRows' may yield inaccurate results; we'll test for last record, e.g., 'enumerableCells[0] ('Recvd Date').
+                        if (!enumerableCells.Any() || enumerableCells[0] == "" )
+                            return newIncomeListing;
+
                         var xlsTicker = enumerableCells.ElementAt(3).Trim();
                         var xlsAccount = CommonSvc.ParseAccountTypeFromDescription(enumerableCells.ElementAt(1).Trim());
-                        // 11.14.18 - Needs reworking!
-                        //var currentXlsAsset = _existingInvestorAssets.Content
-                        //                                             .Find(a => a.RevenueTickerSymbol == xlsTicker 
-                        //                                       && string.Equals(a.RevenueAccount, xlsAccount, StringComparison.CurrentCultureIgnoreCase));
-                        fetchedPositionId = assetDataAccessComponent.FetchPositionId(INVESTORID, xlsTicker, xlsAccount);
+                       
+                        fetchedPositionId = assetDataAccessComponent.FetchPositionId(INVESTORID, xlsTicker, xlsAccount).AsQueryable();
 
-                        // Validate either a bad ticker symbol, or no account was found to be affiliated with this position/asset.
+                        // Checking PositionId rather than asset is sufficient.
+                        // Validate either a bad ticker symbol, or no account was found to be affiliated with this position/asset in question.
                         if (!fetchedPositionId.Any())
                         {
                             if (_xlsTickerSymbolsOmitted == string.Empty)
@@ -109,11 +103,6 @@ namespace PIMS3.BusinessLogic.ImportData
 
                             continue;
                         }
-
-                        // 11.13.18 - use Income dataAccess routine.
-                        //var incomeCtrl = new IncomeController(_identityService, _repositoryAsset, _repositoryInvestor, _repositoryIncome);
-                        //_isDuplicateIncomeData = incomeCtrl.FindIncomeDuplicates(currentXlsAsset.RevenuePositionId.ToString(), enumerableCells.ElementAt(0), enumerableCells.ElementAt(4))
-                        //                                   .Result;
 
                         duplicateResults = incomeDataAccessComponent.FindIncomeDuplicates(fetchedPositionId.First().ToString(), enumerableCells.ElementAt(0), enumerableCells.ElementAt(4));
                         if (duplicateResults.Any())
@@ -141,15 +130,15 @@ namespace PIMS3.BusinessLogic.ImportData
                         newIncomeListing.Add(newIncomeRecord);
                         _totalXlsIncomeRecordsToSave += 1;
                         newIncomeRecord = null;
-                    }
-                }
+                    } // for
+                    return newIncomeListing;
+                } // using
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                var debugError = ex.Message;
                 return null;
             }
-
-            return newIncomeListing;
         }
 
 
