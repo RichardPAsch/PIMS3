@@ -49,7 +49,7 @@ export class DataImportService {
         // RxJS 'tap' operator (callback) taps/intercepts into the flow of observable values, LOOKING at their value(s) only & passing them along the chain.
         return this.http.post<DataImportVm>(this.baseUrl + 'api/ImportFile/ProcessImportFile', importFileToProcess, httpOptions)
                         .pipe(
-                            tap(() => this.log("postImportFileData() called.")),
+                            tap((processedResults: DataImportVm) => this.log("processed count of " + processedResults.recordsSaved + " XLSX recs totaling $" + processedResults.amountSaved)),
                             catchError(this.handleError<DataImportVm>('postImportFileData'))
                         );
     }
