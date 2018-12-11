@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PIMS3.ViewModels;
 using PIMS3.DataAccess.ImportData;
-
+using PIMS3.Data;
 
 namespace PIMS3.Controllers
 {
@@ -28,11 +28,14 @@ namespace PIMS3.Controllers
     public class ImportFileController : ControllerBase
     {
         private static DataImportVm processedVm;
+        private readonly PIMS3Context _dbCtx;
 
 
-        public ImportFileController()
+        public ImportFileController(PIMS3Context dbCtx)
         {
+            _dbCtx = dbCtx;
         }
+
 
         // There are multiple return/response types and paths in this action.
         [HttpPost("{isRevenue}")]
@@ -47,8 +50,7 @@ namespace PIMS3.Controllers
 
             var dataAccessComponent = new RevenueFileImport();
             
-            // 12.6.18 - debug stopped here; 
-            processedVm = dataAccessComponent.SaveRevenue(importFile);
+            processedVm = dataAccessComponent.SaveRevenue(importFile, _dbCtx);
 
             // UI to interpret updated Vm attributes.
             if (processedVm.RecordsSaved == 0)
@@ -59,7 +61,7 @@ namespace PIMS3.Controllers
                 return BadRequest(new { exceptionMessage = "Error processing income import data; please try later." });
             }
 
-            return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, amount = processedVm.AmountSaved });
+            return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, amount = processedVm.AmountSaved }, processedVm);
             
                 
 
