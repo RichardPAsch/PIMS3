@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using PIMS3.Services;
 using PIMS3.Data;
+using PIMS3.DataAccess.ImportData;
 
 namespace PIMS3.BusinessLogic.ImportData
 {
@@ -54,7 +55,7 @@ namespace PIMS3.BusinessLogic.ImportData
         }
 
 
-        public IEnumerable<Income> ParseRevenueSpreadsheetForIncomeRecords(string filePath)
+        public IEnumerable<Income> ParseRevenueSpreadsheetForIncomeRecords(string filePath, RevenueFileImport dataAccessComponent)
         {
             var newIncomeListing = new List<Income>();
             var incomeDataAccessComponent = new DataAccess.Income.IncomeData(_ctx);
@@ -84,9 +85,16 @@ namespace PIMS3.BusinessLogic.ImportData
                         var enumerableCells = row as string[] ?? row.ToArray();
 
                         // 'totalRows' may yield inaccurate results; we'll test for last record, e.g., 'enumerableCells[0] ('Recvd Date').
-                        if (!enumerableCells.Any() || enumerableCells[0] == "" )
+                        if (!enumerableCells.Any() || enumerableCells[0] == "")
+                        {
+                            if (_xlsTickerSymbolsOmitted.Any())
+                            {
+                                dataAccessComponent._exceptionTickers = _xlsTickerSymbolsOmitted;
+                                return null;
+                            }
                             return newIncomeListing;
-
+                        }
+                        
                         var xlsTicker = enumerableCells.ElementAt(3).Trim();
                         var xlsAccount = CommonSvc.ParseAccountTypeFromDescription(enumerableCells.ElementAt(1).Trim());
                        
