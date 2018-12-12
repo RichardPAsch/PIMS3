@@ -11,12 +11,14 @@ namespace PIMS3.DataAccess.ImportData
 
     public class RevenueFileImport
     {
-        public RevenueFileImport()
+        public string _exceptionTickers = string.Empty;
+
+        public RevenueFileImport( )
         {
         }
 
-
-        public DataImportVm SaveRevenue(DataImportVm importVmToUpdate, PIMS3Context _ctx)
+        
+        public DataImportVm SaveRevenue(DataImportVm importVmToUpdate, PIMS3Context _ctx) 
         {
             var processingSvc = new RevenueFileProcessing(importVmToUpdate, _ctx);
             IEnumerable<Data.Entities.Income> revenueListingToSave;
@@ -25,11 +27,13 @@ namespace PIMS3.DataAccess.ImportData
 
             if (processingSvc.ValidateVm())
             {
-                revenueListingToSave = processingSvc.ParseRevenueSpreadsheetForIncomeRecords(importVmToUpdate.ImportFilePath.Trim());
+                revenueListingToSave = processingSvc.ParseRevenueSpreadsheetForIncomeRecords(importVmToUpdate.ImportFilePath.Trim(), this);
 
-                // 12.10. 18 - error saving 28 recs.
                 if (revenueListingToSave == null)
-                    return null;
+                {
+                    importVmToUpdate.ExceptionTickers = _exceptionTickers;
+                    return importVmToUpdate;
+                }
                 else
                 {
                     using (_ctx)
@@ -56,6 +60,11 @@ namespace PIMS3.DataAccess.ImportData
             // Missing amount & record count reflects error condition.
             return importVmToUpdate;
         }
+
+
+        
+
+
 
         //public IQueryable<Investor> RetreiveAll() {
         //    var investorQuery = (from investor in _nhSession.Query<Investor>() select investor);
