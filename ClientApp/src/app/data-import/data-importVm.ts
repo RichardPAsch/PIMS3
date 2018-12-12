@@ -1,6 +1,7 @@
 export class DataImportVm {
-    filePath: string;
+    importFilePath: string;
     isRevenueData: boolean;
     recordsSaved: number;
     amountSaved: number;
+    exceptionTickers: string;
 }
