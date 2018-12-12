@@ -70,13 +70,17 @@ export class DataImportService {
         }
 
         return (error: any): Observable<T> => {
-            alert(error.message);
+            if (error.error.exceptionTickers.length > 0) {
+                alert("Unable to save income; due to the following invalid submitted Position(s) : \n" + error.error.exceptionTickers);
+                this.log("Missing:" + error.error.exceptionTickers + " at: " + error.url);
+            }
+            
 
             // TODO: send the error to remote logging infrastructure
-            console.error(error); // log to console instead
+            //console.error(error); // log to console instead
 
             // TODO: better job of transforming error for user consumption
-            this.log(`${operation} failed: ${error.message}`);
+            //this.log(`${operation} failed: ${error.message}`);
 
             // Let the app keep running by returning an empty result.
             return of(result as T);
