@@ -54,8 +54,7 @@ namespace PIMS3.Controllers
                 _incomeCount = new decimal[ytdRevenueSummary.Count()];
                 ytdRevenueSummary.ToList().ForEach(CalculateAverages);
                 _logger.LogInformation("Successfull YTD income summary via GetRevenueSumary()");
-                // YtdRevenueSummaryVm collection returned.
-                return ytdRevenueSummary.ToList();
+                return ytdRevenueSummary.OrderByDescending(r => r.MonthRecvd).ToList();
             }
             catch (Exception ex)
             {
