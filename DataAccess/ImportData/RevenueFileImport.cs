@@ -46,10 +46,10 @@ namespace PIMS3.DataAccess.ImportData
 
                 if(recordsSaved > 0)
                 {
-                    importVmToUpdate.AmountSaved = 0M;
+                    totalAmtSaved = 0M;
                     foreach (var record in revenueListingToSave)
                     {
-                        totalAmtSaved += totalAmtSaved + record.AmountRecvd;
+                        totalAmtSaved += record.AmountRecvd;
                     }
 
                     importVmToUpdate.AmountSaved = totalAmtSaved;
