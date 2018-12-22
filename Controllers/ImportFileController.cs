@@ -38,30 +38,39 @@ namespace PIMS3.Controllers
 
 
         // There are multiple return/response types and paths in this action.
-        [HttpPost("{isRevenue}")]
+        //[HttpPost("{isRevenue}")]
+        [HttpPost("[action]")]
         [ProducesResponseType(400)]
         [ProducesResponseType(200, Type = typeof(DataImportVm))]
         public ActionResult<DataImportVm> ProcessImportFile([FromBody] DataImportVm importFile, bool isRevenue = true)
         {
-            if (isRevenue && !importFile.IsRevenueData)
-            {
-                return BadRequest(ModelState);
-            }
+            if(!ModelState.IsValid)
+                return BadRequest("Invalid model state: " + ModelState);
 
-            var dataAccessComponent = new RevenueFileImport();
+            var dataAccessComponent = new ImportFileDataProcessing();
+
+            if (importFile.IsRevenueData)
+            {
+                processedVm = dataAccessComponent.SaveRevenue(importFile, _dbCtx);
+
+                // UI to interpret updated Vm attributes.
+                if (processedVm.RecordsSaved == 0)
+                {
+                    if (importFile.ExceptionTickers != string.Empty)
+                        return BadRequest(new { exceptionTickers = processedVm.ExceptionTickers });
+
+                    return BadRequest(new { exceptionMessage = "Error processing income import data; please try later." });
+                }
+
+                return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, amount = processedVm.AmountSaved }, processedVm);
+            }
+            else
+            {
+                processedVm = dataAccessComponent.SaveAssets(importFile, _dbCtx);
+                return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved }, processedVm);
+            }
             
-            processedVm = dataAccessComponent.SaveRevenue(importFile, _dbCtx);
-
-            // UI to interpret updated Vm attributes.
-            if (processedVm.RecordsSaved == 0)
-            {
-                if(importFile.ExceptionTickers != string.Empty)
-                    return BadRequest(new { exceptionTickers = processedVm.ExceptionTickers });
-
-                return BadRequest(new { exceptionMessage = "Error processing income import data; please try later." });
-            }
-
-            return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, amount = processedVm.AmountSaved }, processedVm);
+            
             
                 
 
