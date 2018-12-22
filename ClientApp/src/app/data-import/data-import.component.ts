@@ -53,7 +53,6 @@ export class DataImportComponent {
         let recordsProcessed: number;
         let totalProcessed: number;
         
-        // Test data file_1:  C:\Development\VS2017\PIMS3_TestData\2018AUG_Revenue2Recs.xlsx - Ok.
         if (this.dataImportForm.value.importFilePath == "") {
             alert("Data import terminated: missing import file path.");
             return;
@@ -68,26 +67,46 @@ export class DataImportComponent {
 
                 // Backend API logic to handle processing import file type.
                 // ** BASE_URL defined in main.ts **
-                this.svc.postImportFileData(this.importFileVm)
+                if (this.importFileVm.isRevenueData) {
+
+                    this.svc.postImportFileData(this.importFileVm)
                         .subscribe(resp => {
                             if (resp.isRevenueData && resp.recordsSaved > 0) {
                                 recordsProcessed = resp.recordsSaved;
                                 totalProcessed = resp.amountSaved;
                                 alert("Successfully saved  " + recordsProcessed + " XLSX/XLS income records, \nfor a total of $" + totalProcessed);
+                            } 
+                        },
+                        (err: HttpErrorResponse) => {
+                            if (err.error instanceof Error) {
+                                // TODO: 11.5.18 - just have 1 alert, but use logging to log different issues.
+                                alert('Error saving import data (network?) due to: ' + err.error.message);
                             } else {
-                                alert("new Asset processing to be implemented.");
-                                // asset processing to be implemented.
+                                //Backend returns unsuccessful response codes such as 404, 500 etc.
+                                alert('Error saving Income import data (server?) with status of : ' + err.status);
+                            }
+                        });
+                } else {
+                    // New Position import data.
+                    // sample: C:\Development\VS2017\PIMS3_TestData\Asset_Files\Portfolio_Positions_Dec_21_Test1_MissingTicker.xlsx
+                    alert("Processing new Position data...");
+                    this.svc.postImportFileData(this.importFileVm)
+                        .subscribe(resp => {
+                            if (!resp.isRevenueData && resp.recordsSaved > 0) {
+                                recordsProcessed = resp.recordsSaved;
+                                alert("Successfully added  " + recordsProcessed + " new Position(s).");
                             }
                         },
                         (err: HttpErrorResponse) => {
                             if (err.error instanceof Error) {
                                 // TODO: 11.5.18 - just have 1 alert, but use logging to log different issues.
-                                alert('Error saving import data (network?) due to: ' +  err.error.message);
+                                alert('Error saving import data (network?) due to: ' + err.error.message);
                             } else {
                                 //Backend returns unsuccessful response codes such as 404, 500 etc.
-                                alert('Error saving import data (server?) with status of : ' + err.status);
+                                alert('Error saving Position import data (server?) with status of : ' + err.status);
                             }
                         });
+                }
             }
         }
     }
