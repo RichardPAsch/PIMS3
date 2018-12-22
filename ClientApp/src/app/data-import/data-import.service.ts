@@ -71,7 +71,7 @@ export class DataImportService {
 
         return (error: any): Observable<T> => {
             if (error.error.exceptionTickers.length > 0) {
-                alert("Unable to save income; due to the following invalid submitted Position(s) : \n" + error.error.exceptionTickers);
+                alert("Unable to save income, due to the following invalid and/or duplicate submitted Position(s) : \n" + error.error.exceptionTickers);
                 this.log("Missing:" + error.error.exceptionTickers + " at: " + error.url);
             }
             
