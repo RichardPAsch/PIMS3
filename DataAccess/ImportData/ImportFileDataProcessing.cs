@@ -69,7 +69,7 @@ namespace PIMS3.DataAccess.ImportData
         {
             var busLogicComponent = new ImportFileProcessing(importVmToSave, _ctx);
 
-            IEnumerable<Data.Entities.Asset> assetListingToSave = null;
+            IEnumerable<AssetCreationVm> assetListingToSave = null;
 
             if (busLogicComponent.ValidateVm())
             {
@@ -105,7 +105,7 @@ namespace PIMS3.DataAccess.ImportData
 
 
         private DataImportVm HandleDbProcessingResults(DataImportVm vmToProcess, IEnumerable<Data.Entities.Income> incomeListing, 
-                                                                                 IEnumerable<Data.Entities.Asset> assetListing)  {
+                                                                                 IEnumerable<AssetCreationVm> assetListing)  {
 
             totalAmtSaved = 0M;
             recordsSaved = 0;
