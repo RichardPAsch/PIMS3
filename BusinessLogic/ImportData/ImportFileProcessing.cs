@@ -8,6 +8,9 @@ using System.Linq;
 using PIMS3.Services;
 using PIMS3.Data;
 using PIMS3.DataAccess.ImportData;
+using PIMS3.DataAccess.Position;
+using PIMS3.DataAccess.Profile;
+using PIMS3.DataAccess.Account;
 
 namespace PIMS3.BusinessLogic.ImportData
 {
@@ -19,6 +22,8 @@ namespace PIMS3.BusinessLogic.ImportData
         //private static OkNegotiatedContentResult<List<AssetIncomeVm>> _existingInvestorAssets;
         private static int _totalXlsIncomeRecordsToSave = 0;
         private readonly PIMS3Context _ctx;
+        private static string _assetsNotAddedListing = string.Empty;
+        private string newAssetId = string.Empty;
 
 
         public ImportFileProcessing(DataImportVm viewModel, PIMS3Context ctx)
@@ -139,10 +144,127 @@ namespace PIMS3.BusinessLogic.ImportData
         }
 
 
-        public IEnumerable<Asset> ParsePortfolioSpreadsheetForAssetRecords(string filePath, ImportFileDataProcessing dataAccessComponent)
+        public IEnumerable<AssetCreationVm> ParsePortfolioSpreadsheetForAssetRecords(string filePath, ImportFileDataProcessing dataAccessComponent)
         {
-            // 12.21.18 - WIP; paste existing PIMS code here & test/modify...
-            return null;
+            List<AssetCreationVm> assetsToCreateList = new List<AssetCreationVm>();
+            var existingProfileId = string.Empty;
+            var existingAssetClassId = string.Empty;
+            // Id to be fetched once security is implemented. ** 12.27.18
+            var currentInvestorId = "CF256A53-6DCD-431D-BC0B-A810010F5B88"; // me
+            List<Position> positionsToBeSaved = null;
+
+            try
+            {
+                var lastTickerProcessed = string.Empty;
+                var importFile = new FileInfo(filePath);
+                
+
+                using (var package = new ExcelPackage(importFile))
+                {
+                    var workSheet = package.Workbook.Worksheets[0];
+                    var totalRows = workSheet.Dimension.End.Row;
+                    var totalColumns = workSheet.Dimension.End.Column;
+                    var newAsset = new AssetCreationVm();
+
+                    // Iterate XLS/CSV, ignoring column headings (row 1).
+                    for (var rowNum = 2; rowNum <= totalRows; rowNum++)
+                    {
+                        // Validate XLS
+                        var headerRow = workSheet.Cells[1, 1, rowNum, totalColumns].Select(c => c.Value == null ? string.Empty : c.Value.ToString());
+                        if (!ValidateFileType(filePath))
+                            return null;
+
+                        // Args: Cells[fromRow, fromCol, toRow, toCol]
+                        var row = workSheet.Cells[rowNum, 1, rowNum, totalColumns].Select(c => c.Value == null ? string.Empty : c.Value.ToString());
+                        var enumerableCells = row as string[] ?? row.ToArray();
+                        var positionDataAccessComponent = new PositionDataProcessing(_ctx);
+                        // Position check includes checking via Profile.
+                        var positionAccountExists = positionDataAccessComponent.GetPositionByTickerAndAccount(enumerableCells.ElementAt(1).Trim(), enumerableCells.ElementAt(0).Trim());
+
+                        if (!positionAccountExists)
+                        {
+                            Profile assetProfilePersisted = null;
+
+                            // Are we processing a different ticker symbol?
+                            if (lastTickerProcessed.Trim().ToUpper() != enumerableCells.ElementAt(1).Trim().ToUpper())
+                            {
+                                // Do we have an existing Profile ?
+                                var profileDataAccessComponent = new ProfileDataProcessing(_ctx);
+                                assetProfilePersisted = profileDataAccessComponent.FetchDbProfile(enumerableCells.ElementAt(1).Trim());
+
+                                // 12.26.18:
+                                // ** Re-examine how we want/need to initialize AssetCreationVm ? Have a seperate Vm for Asset & Position &
+                                //    ctx.SaveChanges() on each?
+                                //    Need to get Guids for AssetClassId, ProfileId, PositionId, & AssetTypeId. See in original PIMS code:
+                                //    AssetController.CreateNewAsset() 
+                                if (assetProfilePersisted != null)
+                                {
+                                    // Bypassing Profile creation.
+                                    existingProfileId = assetProfilePersisted.ProfileId;
+                                    newAssetId = CommonSvc.GenerateGuid();
+                                    // AssetClassId hard-coded to default: 'common stock'. Make available via XLSX? ** 12.27.18
+                                    existingAssetClassId = "6215631D-5788-4718-A1D0-A2FC00A5B1A7";
+
+                                    // Are we processing our first XLSX record?
+                                    if(positionsToBeSaved == null)
+                                        positionsToBeSaved = InitializePositions(new List<Position>(), enumerableCells);
+                                    else
+                                        positionsToBeSaved = InitializePositions(positionsToBeSaved, enumerableCells);
+
+                                    // Error seeding collection.
+                                    if (positionsToBeSaved == null)
+                                        return null;
+                                    
+                                    assetsToCreateList.Add(new AssetCreationVm
+                                    {
+                                        AssetId = newAssetId,
+                                        AssetClassId = existingAssetClassId,
+                                        InvestorId = currentInvestorId,
+                                        ProfileId = existingProfileId,
+                                        LastUpdate = DateTime.Now,
+                                        Positions = positionsToBeSaved // collection updated via re-assignment; able to add 2 Positions?
+                                    });
+                                }
+                                else
+                                {
+                                    // Obtain Profile via Tiingo API.
+                                }
+                            }
+                            else
+                            {
+                                // No need to re-check for Profile existence.
+                                // use current: existingProfileId, newAssetId, existingAssetClassId
+
+                                // Asset header initialization bypassed; processing same ticker - different account.
+                                // Positions updated via re-assignment; able to add 2 Positions?
+                                assetsToCreateList.Add(new AssetCreationVm
+                                {
+                                    AssetId = assetsToCreateList.Last().Positions.Last().AssetId,
+                                    AssetClassId = assetsToCreateList.Last().AssetClassId,
+                                    InvestorId = assetsToCreateList.Last().InvestorId,
+                                    ProfileId = assetsToCreateList.Last().ProfileId,
+                                    LastUpdate = DateTime.Now,
+                                    Positions = InitializePositions(positionsToBeSaved, enumerableCells) 
+                                });
+                                //assetsToCreateList.Last().Positions = InitializePositions(positionsToBeSaved, enumerableCells);
+                            }
+                        }
+                        else
+                        {
+                            // Attempted duplicate Position-Account insertion.
+                            _assetsNotAddedListing += enumerableCells.ElementAt(1).Trim() + " ,";
+                            lastTickerProcessed = enumerableCells.ElementAt(1).Trim();
+                        }
+                    }// end for
+
+                } // end using
+            }
+            catch
+            {
+                return null;
+            }
+
+            return assetsToCreateList;
         }
 
 
@@ -165,6 +287,69 @@ namespace PIMS3.BusinessLogic.ImportData
                    enumerable.ElementAt(2).Trim() == "Description" &&
                    enumerable.ElementAt(3).Trim() == "Quantity" &&
                    enumerable.ElementAt(4).Trim() == "Last Price";
+        }
+
+
+        private List<Position> InitializePositions(List<Position> initializedPositions, string[] currentRow)
+        {
+            // Build Position listing.
+            if (initializedPositions == null) return null; 
+            if (currentRow == null) throw new ArgumentNullException("currentRow");
+
+            var mktPrice = decimal.Parse(currentRow.ElementAt(4));
+            var acctDataAccessComponent = new AccountDataProcessing(_ctx);
+            //var valuation = Utilities.CalculateValuation(decimal.Parse(currentRow.ElementAt(4)), decimal.Parse(currentRow.ElementAt(3)));
+            //decimal fees = 0;
+            //var costBasis = Utilities.CalculateCostBasis(fees, valuation);
+            //var unitCost = Utilities.CalculateUnitCost(costBasis, decimal.Parse(currentRow.ElementAt(3)));
+
+            //var newPositions = initializedPositions;
+
+            var newPosition = new Position
+            {
+                PositionId = CommonSvc.GenerateGuid(),
+                AccountTypeId = acctDataAccessComponent.GetAccountTypeId(currentRow.ElementAt(4)).ToString(),
+                AssetId = newAssetId,
+                Fees = 0M,
+                LastUpdate = DateTime.Now,
+                PositionDate = DateTime.Now,
+                Quantity = decimal.Parse(currentRow.ElementAt(3)),
+                //PreEditPositionAccount = currentRow.ElementAt(0),
+                //PostEditPositionAccount = currentRow.ElementAt(0),
+                Status = "A",
+                //Qty = decimal.Parse(currentRow.ElementAt(3)),
+                //UnitCost = costBasis,
+                // TODO: Allow user to assign date position added.
+                // Position add date will not have been assigned, therefore assign an unlikely date & allow for investor update via UI.
+                //DateOfPurchase = new DateTime(1950, 1, 1),
+                //DatePositionAdded = null,
+                //Url = "",
+                //LoggedInInvestor = _identityService.CurrentUser,
+                //ReferencedAssetId = Guid.NewGuid(),            // initialized during Asset creation
+                //ReferencedAccount = new AccountTypeVm
+                //{
+                //    AccountTypeDesc = currentRow.ElementAt(0),
+                //    KeyId = Guid.NewGuid(), // Guid for AccountType, initialized during Asset creation
+                //    Url = ""
+                //},
+                //ReferencedTransaction = new TransactionVm
+                //{
+                //    PositionId = Guid.NewGuid(),
+                //    TransactionId = Guid.NewGuid(),
+                //    Units = decimal.Parse(currentRow.ElementAt(3)),
+                //    TransactionEvent = "C",
+                //    MktPrice = mktPrice,
+                //    Fees = fees,
+                //    UnitCost = unitCost,
+                //    CostBasis = costBasis,
+                //    Valuation = valuation,
+                //    DateCreated = DateTime.Now,
+                //    DatePositionCreated = null
+                //}
+            };
+
+            initializedPositions.Add(newPosition);
+            return initializedPositions;
         }
 
 
