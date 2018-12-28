@@ -38,23 +38,17 @@ namespace PIMS3.Data.Entities
         [Range(0.01, 50.00)]
         public decimal? DividendYield { get; set; }
 
-
+        [Required]
         public string DividendFreq { get; set; }
 
-
+        [Required]
         public string DividendMonths { get; set; }
 
-
-        public string DividendDays { get; set; }
-
-
-        public DateTime? DividendPayDate { get; set; }
+        [Required]
+        public int DividendPayDay { get; set; }
 
 
         public DateTime? ExDividendDate { get; set; }
-
-
-        public int DividendDay { get; set; }
 
 
         public decimal? PERatio { get; set; }
