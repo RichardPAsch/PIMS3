@@ -6,7 +6,7 @@ namespace PIMS3.ViewModels
 {
     public class PositionVm
     {
-        public string CreatedPositionId { get; set; }
+        public string PositionId { get; set; }
 
         // 12.24.18 - deferred for possible future use.
         //[Required]
