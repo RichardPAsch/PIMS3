@@ -39,6 +39,11 @@ namespace PIMS3.Services
 
             return accountDesc.ToUpper().IndexOf("CMA", StringComparison.Ordinal) >= 0 ? "CMA" : null;
         }
+
+        public static string GenerateGuid()
+        {
+            return Guid.NewGuid().ToString();
+        }
     }
 
 }
