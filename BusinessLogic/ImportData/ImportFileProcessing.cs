@@ -11,6 +11,8 @@ using PIMS3.DataAccess.ImportData;
 using PIMS3.DataAccess.Position;
 using PIMS3.DataAccess.Profile;
 using PIMS3.DataAccess.Account;
+using System.Globalization;
+
 
 namespace PIMS3.BusinessLogic.ImportData
 {
@@ -25,6 +27,7 @@ namespace PIMS3.BusinessLogic.ImportData
         private static string _assetsNotAddedListing = string.Empty;
         private string newAssetId = string.Empty;
 
+        // ** Needs refactoring & testing with new Position data. *** 12.31.18
 
         public ImportFileProcessing(DataImportVm viewModel, PIMS3Context ctx)
         {
@@ -67,12 +70,12 @@ namespace PIMS3.BusinessLogic.ImportData
                     var totalRows = workSheet.Dimension.End.Row;
                     var totalColumns = workSheet.Dimension.End.Column;
                     _xlsTickerSymbolsOmitted = string.Empty;
-
+                    
                     for (var rowNum = 2; rowNum <= totalRows; rowNum++)
                     {
                         // Validate XLS
                         var headerRow = workSheet.Cells[1, 1, rowNum, totalColumns].Select(c => c.Value == null ? string.Empty : c.Value.ToString());
-                        if (!ValidateFileAttributes(true, headerRow))
+                        if (!ValidateFileAttributes(true, headerRow) || !ValidateFileType(filePath))
                             return null;
 
                         var row = workSheet.Cells[rowNum, 1, rowNum, totalColumns].Select(c => c.Value == null ? string.Empty : c.Value.ToString());
@@ -147,6 +150,7 @@ namespace PIMS3.BusinessLogic.ImportData
         public IEnumerable<AssetCreationVm> ParsePortfolioSpreadsheetForAssetRecords(string filePath, ImportFileDataProcessing dataAccessComponent)
         {
             List<AssetCreationVm> assetsToCreateList = new List<AssetCreationVm>();
+            var profileDataAccessComponent = new ProfileDataProcessing(_ctx);
             var existingProfileId = string.Empty;
             var existingAssetClassId = string.Empty;
             // Id to be fetched once security is implemented. ** 12.27.18
@@ -178,7 +182,7 @@ namespace PIMS3.BusinessLogic.ImportData
                         var row = workSheet.Cells[rowNum, 1, rowNum, totalColumns].Select(c => c.Value == null ? string.Empty : c.Value.ToString());
                         var enumerableCells = row as string[] ?? row.ToArray();
                         var positionDataAccessComponent = new PositionDataProcessing(_ctx);
-                        // Position check includes checking via Profile.
+                        // Existing Position-Account implies a Profile existence.
                         var positionAccountExists = positionDataAccessComponent.GetPositionByTickerAndAccount(enumerableCells.ElementAt(1).Trim(), enumerableCells.ElementAt(0).Trim());
 
                         if (!positionAccountExists)
@@ -188,9 +192,9 @@ namespace PIMS3.BusinessLogic.ImportData
                             // Are we processing a different ticker symbol?
                             if (lastTickerProcessed.Trim().ToUpper() != enumerableCells.ElementAt(1).Trim().ToUpper())
                             {
-                                // Do we have an existing Profile ?
-                                var profileDataAccessComponent = new ProfileDataProcessing(_ctx);
-                                assetProfilePersisted = profileDataAccessComponent.FetchDbProfile(enumerableCells.ElementAt(1).Trim());
+                                // Do we have an existing Profile ? Although no Position-Account exist for (XLSX) record in question, we'll 
+                                // first check for Profile existence affiliated with another investor.
+                                assetProfilePersisted = profileDataAccessComponent.FetchDbProfile(enumerableCells.ElementAt(1).Trim()).FirstOrDefault();
 
                                 // 12.26.18:
                                 // ** Re-examine how we want/need to initialize AssetCreationVm ? Have a seperate Vm for Asset & Position &
@@ -202,7 +206,7 @@ namespace PIMS3.BusinessLogic.ImportData
                                     // Bypassing Profile creation.
                                     existingProfileId = assetProfilePersisted.ProfileId;
                                     newAssetId = CommonSvc.GenerateGuid();
-                                    // AssetClassId hard-coded to default: 'common stock'. Make available via XLSX? ** 12.27.18
+                                    // TODO: AssetClassId hard-coded to default: 'common stock'. Make available via XLSX? ** 12.27.18
                                     existingAssetClassId = "6215631D-5788-4718-A1D0-A2FC00A5B1A7";
 
                                     // Are we processing our first XLSX record?
@@ -227,14 +231,48 @@ namespace PIMS3.BusinessLogic.ImportData
                                 }
                                 else
                                 {
-                                    // Obtain Profile via Tiingo API.
+                                    // Obtain a new Profile via Tiingo API.
+                                    var webProfileData = profileDataAccessComponent.FetchWebProfile(enumerableCells.ElementAt(1).Trim().ToUpper());
+                                    if (webProfileData == null)
+                                        return null;
+                                    else
+                                    {
+                                        Profile newProfile = new Profile
+                                        {
+                                            ProfileId = webProfileData.Result.ProfileId,
+                                            DividendYield = webProfileData.Result.DividendYield,
+                                            CreatedBy = null,
+                                            DividendRate = webProfileData.Result.DividendRate > 0 ? webProfileData.Result.DividendRate : 0,
+                                            ExDividendDate = webProfileData.Result.ExDividendDate ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day),
+                                            DividendFreq = webProfileData.Result.DividendFreq ?? "M", // TODO: allow to change
+                                            DividendMonths = null,
+                                            DividendPayDay = 15,    // TODO: allow to change
+                                            EarningsPerShare = webProfileData.Result.EarningsPerShare,
+                                            LastUpdate = DateTime.Now,
+                                            PERatio = webProfileData.Result.PERatio,
+                                            TickerDescription = webProfileData.Result.TickerDescription.Trim(),
+                                            TickerSymbol = webProfileData.Result.TickerSymbol.ToUpper().Trim(),
+                                            UnitPrice = webProfileData.Result.UnitPrice
+                                        };
+
+                                        assetsToCreateList.Add(new AssetCreationVm
+                                        {
+                                            AssetId = newAssetId,
+                                            AssetClassId = existingAssetClassId,
+                                            InvestorId = currentInvestorId,
+                                            ProfileId = newProfile.ProfileId,
+                                            LastUpdate = DateTime.Now,
+                                            Positions = positionsToBeSaved == null 
+                                                ? InitializePositions(new List<Position>(), enumerableCells)
+                                                : InitializePositions(positionsToBeSaved, enumerableCells),
+                                            Profile = newProfile
+                                        });
+                                    }
                                 }
                             }
                             else
                             {
                                 // No need to re-check for Profile existence.
-                                // use current: existingProfileId, newAssetId, existingAssetClassId
-
                                 // Asset header initialization bypassed; processing same ticker - different account.
                                 // Positions updated via re-assignment; able to add 2 Positions?
                                 assetsToCreateList.Add(new AssetCreationVm
@@ -246,7 +284,6 @@ namespace PIMS3.BusinessLogic.ImportData
                                     LastUpdate = DateTime.Now,
                                     Positions = InitializePositions(positionsToBeSaved, enumerableCells) 
                                 });
-                                //assetsToCreateList.Last().Positions = InitializePositions(positionsToBeSaved, enumerableCells);
                             }
                         }
                         else
@@ -256,7 +293,6 @@ namespace PIMS3.BusinessLogic.ImportData
                             lastTickerProcessed = enumerableCells.ElementAt(1).Trim();
                         }
                     }// end for
-
                 } // end using
             }
             catch
@@ -316,7 +352,7 @@ namespace PIMS3.BusinessLogic.ImportData
                 Quantity = decimal.Parse(currentRow.ElementAt(3)),
                 //PreEditPositionAccount = currentRow.ElementAt(0),
                 //PostEditPositionAccount = currentRow.ElementAt(0),
-                Status = "A",
+                Status = "A"
                 //Qty = decimal.Parse(currentRow.ElementAt(3)),
                 //UnitCost = costBasis,
                 // TODO: Allow user to assign date position added.
@@ -351,6 +387,15 @@ namespace PIMS3.BusinessLogic.ImportData
             initializedPositions.Add(newPosition);
             return initializedPositions;
         }
+
+
+        public decimal CalculateDividendYield(decimal divRate, decimal unitPrice)
+        {
+            var yield = divRate * 12 / unitPrice * 100;
+            return decimal.Round(decimal.Parse(yield.ToString(CultureInfo.InvariantCulture)), 2);
+        }
+
+       
 
 
     }

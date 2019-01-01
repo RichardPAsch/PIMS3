@@ -1,9 +1,12 @@
-﻿using PIMS3.Data;
+﻿using Newtonsoft.Json.Linq;
+using PIMS3.BusinessLogic.ImportData;
+using PIMS3.Data;
 using PIMS3.ViewModels;
 using System;
 using System.Linq;
 using System.Net.Http;
-
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
 namespace PIMS3.DataAccess.Profile
 {
@@ -19,7 +22,7 @@ namespace PIMS3.DataAccess.Profile
 
         // Note: Can we add a new Position w/o adding a Profile, if the Profile is already presisted? A: YES!
 
-        public Data.Entities.Profile FetchDbProfile(string ticker)
+        public IQueryable<Data.Entities.Profile> FetchDbProfile(string ticker)
         {
             var dbProfile = _ctx.Profile
                                 .Where(p => p.TickerSymbol.ToUpper() == ticker.ToUpper())
@@ -32,19 +35,141 @@ namespace PIMS3.DataAccess.Profile
             else
             {
                 // No need for mapping Vm to model, as we'll use model for insert or update.
-                return dbProfile.First();
+                return dbProfile;
             }
 
         }
 
 
-        // ** 12.28.18 - WIP
-        public Data.Entities.Profile FetchWebProfile(string ticker)
+        public async Task<Data.Entities.Profile> FetchWebProfile(string ticker)
         {
+            // Update or initialize Profile data.
+            DateTime cutOffDateTimeForProfileUpdate = DateTime.Now.AddHours(-72);
+            const string BaseTiingoUrl = "https://api.tiingo.com/tiingo/daily/";
+            const string TiingoAccountToken = "95cff258ce493ec51fd10798b3e7f0657ee37740";
+            ImportFileProcessing busLayerComponent = new ImportFileProcessing(null, _ctx);
 
-            return null;
+
+            var updatedOrNewProfile = new Data.Entities.Profile();
+            // By default, we'll use the last 6 months for pricing history.
+            var priceHistoryStartDate = CalculateStartDate(-180);
+
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(BaseTiingoUrl + ticker); // e.g., https://api.tiingo.com/tiingo/daily/IBM
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + TiingoAccountToken);
+
+                HttpResponseMessage historicPriceDataResponse;
+                HttpResponseMessage metaDataResponse;
+                JArray jsonTickerPriceData;
+                Task<string> responsePriceData;
+
+                historicPriceDataResponse = await client.GetAsync(client.BaseAddress + "/prices?startDate=" + priceHistoryStartDate + "&" + "token=" + TiingoAccountToken);
+                if (historicPriceDataResponse == null)
+                    return null; // TODO: write error msg to log: [BadRequest("Unable to update Profile price data for: " + ticker);]
+
+                responsePriceData = historicPriceDataResponse.Content.ReadAsStringAsync();
+                jsonTickerPriceData = JArray.Parse(responsePriceData.Result);
+
+                // Sort Newtonsoft JArray historical results on 'date', e.g., date info gathered.
+                var orderedJsonTickerPriceData = new JArray(jsonTickerPriceData.OrderByDescending(obj => obj["date"]));
+
+                var sequenceIndex = 0;
+                var divCashGtZero = false;
+                var metaDataInitialized = false;
+                var existingProfile = FetchDbProfile(ticker);
+
+                foreach (var objChild in orderedJsonTickerPriceData.Children<JObject>())
+                {
+                    if (existingProfile.Any())
+                    {
+                        // Profile update IF last updated > 72hrs ago.
+                        if (Convert.ToDateTime(existingProfile.First().LastUpdate) < cutOffDateTimeForProfileUpdate)
+                        {
+                            // 11.17.2017 - Due to Tiingo API limitations, update just dividend rate.
+                            foreach (var property in objChild.Properties())
+                            {
+                                if (property.Name != "divCash") continue;
+                                var cashValue = decimal.Parse(property.Value.ToString());
+
+                                if (cashValue <= 0) break;
+                                existingProfile.First().DividendRate = decimal.Parse(property.Value.ToString());
+                                // Arbitrary day; will need to allow for updating !
+                                existingProfile.First().DividendPayDay = 15;
+                                existingProfile.First().UnitPrice = decimal.Parse(objChild.Properties().ElementAt(1).Value.ToString());
+                                existingProfile.First().DividendYield = busLayerComponent.CalculateDividendYield(existingProfile.First().DividendRate, existingProfile.First().UnitPrice);
+                                existingProfile.First().LastUpdate = DateTime.Now;
+                                updatedOrNewProfile = existingProfile.First();
+                                return updatedOrNewProfile;
+                            }
+                            continue;
+                        }
+                    }
+
+                    if (divCashGtZero)
+                        break;
+
+                    // New Profile processing. Capture meta data. 
+                    if (!metaDataInitialized)
+                    {
+                        metaDataResponse = await client.GetAsync(client.BaseAddress + "?token=" + TiingoAccountToken);
+                        if (metaDataResponse == null)
+                            return null; // TODO: Log: BadRequest("Unable to fetch Profile meta data for: " + tickerForProfile);
+
+                        var responseMetaData = metaDataResponse.Content.ReadAsStringAsync();
+                        var jsonTickerMetaData = JObject.Parse(await responseMetaData);
+
+                        updatedOrNewProfile.TickerDescription = jsonTickerMetaData["name"].ToString().Trim();
+                        updatedOrNewProfile.TickerSymbol = jsonTickerMetaData["ticker"].ToString().Trim();
+                        metaDataResponse.Dispose();
+                        metaDataInitialized = true;
+                    }
+
+                    // Capture most recent closing price & dividend rate (aka divCash); 
+                    if (sequenceIndex == 0)
+                    {
+                        foreach (var property in objChild.Properties())
+                        {
+                            if (property.Name != "close") continue;
+                            updatedOrNewProfile.UnitPrice = decimal.Parse(property.Value.ToString());
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        foreach (var property in objChild.Properties())
+                        {
+                            if (property.Name != "divCash") continue;
+                            var cashValue = decimal.Parse(property.Value.ToString());
+
+                            if (cashValue <= 0) continue;
+                            updatedOrNewProfile.DividendRate = decimal.Parse(property.Value.ToString());
+                            updatedOrNewProfile.DividendYield = busLayerComponent.CalculateDividendYield(updatedOrNewProfile.DividendRate, updatedOrNewProfile.UnitPrice);
+                            updatedOrNewProfile.DividendPayDay = 15; // DateTime.Parse(objChild.Properties().ElementAt(0).Value.ToString());
+                            divCashGtZero = true;
+                            break;
+                        }
+                    }
+
+                    sequenceIndex += 1;
+
+                } // end foreach
+
+                historicPriceDataResponse.Dispose();
+                updatedOrNewProfile.ProfileId = Guid.NewGuid().ToString();
+                updatedOrNewProfile.Asset.AssetId = Guid.NewGuid().ToString();
+                updatedOrNewProfile.EarningsPerShare = 0;
+                updatedOrNewProfile.PERatio = 0;
+                updatedOrNewProfile.ExDividendDate = null;
+
+            } // end using
+
+            updatedOrNewProfile.LastUpdate = DateTime.Now;
+            return updatedOrNewProfile;
+
         }
-
 
 
         private static ProfileVm InitializeProfile(string ticker, bool isDbProfileCheck, string _serverBaseUri)
@@ -79,15 +204,27 @@ namespace PIMS3.DataAccess.Profile
             return null;
         }
 
+
+        private static string CalculateStartDate(int priorNumberOfDays)
+        {
+            if (priorNumberOfDays >= 0)
+                return "Invalid hours submitted.";
+
+            var today = DateTime.Now;
+            var priorDate = today.AddDays(priorNumberOfDays);
+            return (priorDate.Year + "-" + priorDate.Month + "-" + priorDate.Day).Trim();
+        }
+
+
         /* From PIMS.ProfileController.cs
-         
+
         // class-level vars:
         private static IGenericRepository<Profile> _repository;
         private const string BaseTiingoUrl = "https://api.tiingo.com/tiingo/daily/";
         private const string TiingoAccountToken = "95cff258ce493ec51fd10798b3e7f0657ee37740";
         private DateTime cutOffDateTimeForProfileUpdate = DateTime.Now.AddHours(-72);
 
-         
+
         [HttpGet]
         [Route("{tickerForProfile?}")]
         // e.g. http://localhost/Pims.Web.Api/api/Profile/IBM
@@ -111,7 +248,7 @@ namespace PIMS3.DataAccess.Profile
                 JArray jsonTickerPriceData;
                 Task<string> responsePriceData;
 
-                
+
                 historicPriceDataResponse = await client.GetAsync(client.BaseAddress + "/prices?startDate=" + priceHistoryStartDate + "&" + "token=" + TiingoAccountToken);
                 if (historicPriceDataResponse == null)
                     return BadRequest("Unable to update Profile price data for: " + tickerForProfile);
@@ -149,7 +286,7 @@ namespace PIMS3.DataAccess.Profile
                         }
                         continue;
                     }
-                   
+
                     if (divCashGtZero)
                         break;
 
@@ -167,10 +304,10 @@ namespace PIMS3.DataAccess.Profile
                             updatedOrNewProfile.TickerDescription = jsonTickerMetaData["name"].ToString().Trim();
                             updatedOrNewProfile.TickerSymbol = jsonTickerMetaData["ticker"].ToString().Trim();
                             metaDataResponse.Dispose();
-                                            metaDataInitialized = true;
+                            metaDataInitialized = true;
                     }
-                   
-                    
+
+
                     // Capture most recent closing price & dividend rate (aka divCash); 
                     if (sequenceIndex == 0) {
                         foreach (var property in objChild.Properties()) {
@@ -228,5 +365,14 @@ namespace PIMS3.DataAccess.Profile
         */
 
 
+
+
+
+
+
+
+
     }
+
+
 }
