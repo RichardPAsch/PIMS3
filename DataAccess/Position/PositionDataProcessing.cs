@@ -14,19 +14,18 @@ namespace PIMS3.DataAccess.Position
 
 
 
-        public bool GetPositionByTickerAndAccount(string tickerSymbol, string assetAccount)
+        public IQueryable<Data.Entities.Asset> GetPositionAssetByTickerAndAccount(string tickerSymbol, string assetAccount)
         {
             // Temporary until security implemented.
-            var currentInvestorId = "CF256A53-6DCD-431D-BC0B-A810010F5B88"; 
+            var currentInvestorId = "CF256A53-6DCD-431D-BC0B-A810010F5B88";
 
-            var positionInfo = _ctx.Position
-                                   .Where(p => p.PositionAsset.InvestorId == currentInvestorId &&
-                                               p.PositionAsset.Profile.TickerSymbol == tickerSymbol &&
-                                               p.AccountType.AccountTypeDesc.ToUpper() == assetAccount.ToUpper())
-                                   .Select(p => p.PositionAsset)
-                                   .AsQueryable();
+            var assetInfo = _ctx.Position
+                                .Where(p => p.PositionAsset.InvestorId == currentInvestorId &&
+                                            p.PositionAsset.Profile.TickerSymbol == tickerSymbol &&
+                                            p.AccountType.AccountTypeDesc.ToUpper() == assetAccount.ToUpper())
+                                .Select(p => p.PositionAsset);
 
-            return positionInfo.Any();
+            return assetInfo.AsQueryable();
         }
     }
 }
