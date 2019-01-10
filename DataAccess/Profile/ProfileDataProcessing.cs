@@ -41,7 +41,7 @@ namespace PIMS3.DataAccess.Profile
         }
 
 
-        public async Task<Data.Entities.Profile> FetchWebProfile(string ticker)
+        public Data.Entities.Profile FetchWebProfile(string ticker)
         {
             // Update or initialize Profile data.
             DateTime cutOffDateTimeForProfileUpdate = DateTime.Now.AddHours(-72);
@@ -61,17 +61,24 @@ namespace PIMS3.DataAccess.Profile
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + TiingoAccountToken);
 
-                HttpResponseMessage historicPriceDataResponse;
-                HttpResponseMessage metaDataResponse;
+                //HttpResponseMessage historicPriceDataResponse;
+                //HttpResponseMessage metaDataResponse;
+                string metaDataResponse;
                 JArray jsonTickerPriceData;
-                Task<string> responsePriceData;
+                //Task<string> responsePriceData;
 
-                historicPriceDataResponse = await client.GetAsync(client.BaseAddress + "/prices?startDate=" + priceHistoryStartDate + "&" + "token=" + TiingoAccountToken);
-                if (historicPriceDataResponse == null)
+                var url = client.BaseAddress + "/prices?startDate=" + priceHistoryStartDate + "&" + "token=" + TiingoAccountToken;
+                var webResponse = FetchProfileViaWebSync(client, url);  // this works!
+                //historicPriceDataResponse = await client.GetAsync(client.BaseAddress + "/prices?startDate=" + priceHistoryStartDate + "&" + "token=" + TiingoAccountToken);
+
+                if (webResponse == null || webResponse == string.Empty)
                     return null; // TODO: write error msg to log: [BadRequest("Unable to update Profile price data for: " + ticker);]
 
-                responsePriceData = historicPriceDataResponse.Content.ReadAsStringAsync();
-                jsonTickerPriceData = JArray.Parse(responsePriceData.Result);
+                //responsePriceData = historicPriceDataResponse.Content.ReadAsStringAsync();
+                //responsePriceData = historicPriceDataResponse;
+                //responsePriceData = webResponse;
+                //jsonTickerPriceData = JArray.Parse(responsePriceData.Result);
+                jsonTickerPriceData = JArray.Parse(webResponse);
 
                 // Sort Newtonsoft JArray historical results on 'date', e.g., date info gathered.
                 var orderedJsonTickerPriceData = new JArray(jsonTickerPriceData.OrderByDescending(obj => obj["date"]));
@@ -79,11 +86,22 @@ namespace PIMS3.DataAccess.Profile
                 var sequenceIndex = 0;
                 var divCashGtZero = false;
                 var metaDataInitialized = false;
-                var existingProfile = FetchDbProfile(ticker);
+                IQueryable<Data.Entities.Profile> existingProfile;
+
+                // Just in case, we'll check again for an existing Profile to update.
+                try
+                {
+                    existingProfile = FetchDbProfile(ticker);
+                }
+                catch (Exception)
+                {
+                    // TODO: log error.
+                    return null;
+                }
 
                 foreach (var objChild in orderedJsonTickerPriceData.Children<JObject>())
                 {
-                    if (existingProfile.Any())
+                    if (existingProfile != null)
                     {
                         // Profile update IF last updated > 72hrs ago.
                         if (Convert.ToDateTime(existingProfile.First().LastUpdate) < cutOffDateTimeForProfileUpdate)
@@ -114,16 +132,18 @@ namespace PIMS3.DataAccess.Profile
                     // New Profile processing. Capture meta data. 
                     if (!metaDataInitialized)
                     {
-                        metaDataResponse = await client.GetAsync(client.BaseAddress + "?token=" + TiingoAccountToken);
-                        if (metaDataResponse == null)
+                        var Uri = client.BaseAddress + "?token=" + TiingoAccountToken;
+                        //metaDataResponse = await client.GetAsync(Uri);
+                        metaDataResponse = FetchProfileViaWebSync(new HttpClient(), Uri);
+                        if (metaDataResponse == null || metaDataResponse == string.Empty)
                             return null; // TODO: Log: BadRequest("Unable to fetch Profile meta data for: " + tickerForProfile);
 
-                        var responseMetaData = metaDataResponse.Content.ReadAsStringAsync();
-                        var jsonTickerMetaData = JObject.Parse(await responseMetaData);
+                        var responseMetaData = metaDataResponse;// Content.ReadAsStringAsync();
+                        var jsonTickerMetaData = JObject.Parse(responseMetaData);
 
                         updatedOrNewProfile.TickerDescription = jsonTickerMetaData["name"].ToString().Trim();
                         updatedOrNewProfile.TickerSymbol = jsonTickerMetaData["ticker"].ToString().Trim();
-                        metaDataResponse.Dispose();
+                        metaDataResponse = null;
                         metaDataInitialized = true;
                     }
 
@@ -157,9 +177,9 @@ namespace PIMS3.DataAccess.Profile
 
                 } // end foreach
 
-                historicPriceDataResponse.Dispose();
+                //historicPriceDataResponse.Dispose();
                 updatedOrNewProfile.ProfileId = Guid.NewGuid().ToString();
-                updatedOrNewProfile.Asset.AssetId = Guid.NewGuid().ToString();
+                updatedOrNewProfile.AssetId = Guid.NewGuid().ToString();
                 updatedOrNewProfile.EarningsPerShare = 0;
                 updatedOrNewProfile.PERatio = 0;
                 updatedOrNewProfile.ExDividendDate = null;
@@ -169,6 +189,43 @@ namespace PIMS3.DataAccess.Profile
             updatedOrNewProfile.LastUpdate = DateTime.Now;
             return updatedOrNewProfile;
 
+        }
+
+
+        public string FetchProfileViaWebSync(HttpClient client, string Url)
+        {
+            var webResponse = string.Empty;
+            try
+            {
+                using (client)
+                {
+                    var response = client.GetAsync(Url).Result;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseContent = response.Content;
+
+                        // Using '.Result' - results in synchronously reading the result.
+                        string responseString = responseContent.ReadAsStringAsync().Result;
+
+                        webResponse = responseString;
+                        //Console.WriteLine(responseString);
+                    }
+                    else
+                    {
+                        // TODO: log error, data ?
+                        return webResponse;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // TODO: log error, connection ?
+                var debug = ex.Message;
+                return webResponse;
+            }
+            
+            return webResponse;
         }
 
 
