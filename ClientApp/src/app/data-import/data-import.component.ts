@@ -23,11 +23,15 @@ import { HttpErrorResponse, HttpClient, HttpHandler } from "@angular/common/http
 
 
 export class DataImportComponent {
-    private testMsg: string = "Sample test message.";
-    private importFileVm: DataImportVm = { importFilePath: "", isRevenueData: true, recordsSaved: 0, amountSaved: 0, exceptionTickers:"" };
+    private importFileVm: DataImportVm = {
+        importFilePath: "",
+        isRevenueData: true,
+        recordsSaved: 0,
+        amountSaved: 0,
+        exceptionTickers: "",
+        miscMessage: ""
+    };
     private submittedFile: string = "";
-    //private submittedImportFile: Observable<DataImportVm>;
-    //private results: any;
 
 
   // Constructor of FormControl sets its initial value; creation provides immediate access to listen for,
@@ -94,7 +98,7 @@ export class DataImportComponent {
                         .subscribe(resp => {
                             if (!resp.isRevenueData && resp.recordsSaved > 0) {
                                 recordsProcessed = resp.recordsSaved;
-                                alert("Successfully added  " + recordsProcessed + " new Position(s).");
+                                alert("Successfully added portfolio data for \n" + recordsProcessed + " new Position(s):  " + resp.miscMessage);
                             }
                         },
                         (err: HttpErrorResponse) => {
