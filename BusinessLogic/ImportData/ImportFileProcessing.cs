@@ -193,73 +193,65 @@ namespace PIMS3.BusinessLogic.ImportData
                             {
                                 profilePersisted = profileDataAccessComponent.FetchDbProfile(enumerableCells.ElementAt(1).Trim());
 
-                                // 12.26.18:
-                                // ** Re-examine how we want/need to initialize AssetCreationVm ? Have a seperate Vm for Asset & Position &
-                                //    ctx.SaveChanges() on each?
-                                //    Need to get Guids for AssetClassId, ProfileId, PositionId, & AssetTypeId. See in original PIMS code:
-                                //    AssetController.CreateNewAsset() 
                                 if (profilePersisted != null)
                                 {
                                     // Bypassing Profile creation for new Position.
-                                    existingProfileId = profilePersisted.First().ProfileId; // ok
-                                    //newAssetId = Guid.NewGuid().ToString();   // ok
-                                    // TODO: AssetClassId hard-coded to default: 'common stock'. Make available via XLSX? ** 12.27.18
-                                    //existingAssetClassId = "6215631D-5788-4718-A1D0-A2FC00A5B1A7"; // ok
+                                    existingProfileId = profilePersisted.First().ProfileId;
+                                    // TODO: AssetClassId hard-coded to default: 'common stock'. Make available via XLSX? 
 
-                                    // Are we processing our first Position XLSX record?
-                                    if(positionsToBeSaved == null)
-                                        positionsToBeSaved = InitializePositions(new List<Position>(), enumerableCells);  // ok
+                                    // Are we processing our first XLSX Position record?
+                                    if (positionsToBeSaved == null)
+                                        positionsToBeSaved = InitializePositions(new List<Position>(), enumerableCells);  
                                     else
-                                        positionsToBeSaved = InitializePositions(positionsToBeSaved, enumerableCells);  // ok
+                                        positionsToBeSaved = InitializePositions(positionsToBeSaved, enumerableCells);  
 
                                     // Error seeding collection.
                                     if (positionsToBeSaved == null)
-                                        return null;  // ok
+                                        return null;  
                                     
                                     assetsToCreateList.Add(new AssetCreationVm
                                     {
-                                        AssetId = newAssetId,  // ok
-                                        AssetClassId = existingAssetClassId,  // ok
-                                        InvestorId = INVESTORID,  // ok
-                                        ProfileId = existingProfileId,  // ok
-                                        LastUpdate = DateTime.Now, // ok
-                                        Positions = positionsToBeSaved // collection updated via re-assignment; able to add 2 Positions?  // ok
+                                        AssetId = newAssetId,  
+                                        AssetClassId = existingAssetClassId,  
+                                        InvestorId = INVESTORID,  
+                                        ProfileId = existingProfileId,  
+                                        LastUpdate = DateTime.Now, 
+                                        Positions = positionsToBeSaved  
                                     });
                                 }
                                 else
                                 {
                                     // Obtain a new Profile via Tiingo API.
                                     var webProfileData = profileDataAccessComponent.FetchWebProfile(enumerableCells.ElementAt(1).Trim().ToUpper());
-                                    //var webProfileData = profileDataAccessComponent.FetchWebProfile(enumerableCells.ElementAt(1).Trim().ToUpper()); // ok
                                     if (webProfileData == null) 
                                         return null;  // any necessary logging done via component.
                                     else
                                     {
                                         Profile newProfile = new Profile
                                         {
-                                            ProfileId = webProfileData.ProfileId, // ok
+                                            ProfileId = webProfileData.ProfileId, 
                                             DividendYield = webProfileData.DividendYield > 0
                                                 ? webProfileData.DividendYield
-                                                : 0,  // always valid ?
-                                            CreatedBy = null, // ok
-                                            DividendRate = webProfileData.DividendRate > 0 ? webProfileData.DividendRate : 0, // ok
-                                            ExDividendDate = webProfileData.ExDividendDate ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day), // ok
-                                            DividendFreq = webProfileData.DividendFreq ?? "M", // TODO: allow user to change ok
-                                            DividendMonths = null, // TODO: allow user to change ok
-                                            DividendPayDay = 15,    // TODO: allow user to change  ok
-                                            EarningsPerShare = webProfileData.EarningsPerShare > 0  // ok
+                                                : 0,  
+                                            CreatedBy = null, 
+                                            DividendRate = webProfileData.DividendRate > 0 ? webProfileData.DividendRate : 0, 
+                                            ExDividendDate = webProfileData.ExDividendDate ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day), 
+                                            DividendFreq = webProfileData.DividendFreq ?? "M", // TODO: allow user to change
+                                            DividendMonths = null,                             // TODO: allow user to change 
+                                            DividendPayDay = 15,                               // TODO: allow user to change  
+                                            EarningsPerShare = webProfileData.EarningsPerShare > 0  
                                                 ? webProfileData.EarningsPerShare 
                                                 : 0,
-                                            LastUpdate = DateTime.Now, // ok
-                                            PERatio = webProfileData.PERatio > 0 // ok
+                                            LastUpdate = DateTime.Now, 
+                                            PERatio = webProfileData.PERatio > 0 
                                                 ? webProfileData.PERatio 
                                                 : 0,
-                                            TickerDescription = webProfileData.TickerDescription.Trim(), // ok
-                                            TickerSymbol = webProfileData.TickerSymbol.ToUpper().Trim(), // ok
-                                            UnitPrice = webProfileData.UnitPrice // ok
+                                            TickerDescription = webProfileData.TickerDescription.Trim(), 
+                                            TickerSymbol = webProfileData.TickerSymbol.ToUpper().Trim(), 
+                                            UnitPrice = webProfileData.UnitPrice 
                                         };
                                         assetIdForPosition = newAssetId;
-                                        assetsToCreateList.Add(new AssetCreationVm  // ok
+                                        assetsToCreateList.Add(new AssetCreationVm  
                                         {
                                             AssetId = newAssetId, 
                                             AssetClassId = existingAssetClassId, 
@@ -286,15 +278,14 @@ namespace PIMS3.BusinessLogic.ImportData
                             {
                                 // No need to re-check for Profile existence.
                                 // Asset header initialization bypassed; processing same ticker - different account.
-                                // Positions updated via re-assignment; able to add 2 Positions?
                                 assetsToCreateList.Add(new AssetCreationVm
                                 {
-                                    AssetId = assetsToCreateList.Last().Positions.Last().AssetId, // ok
-                                    AssetClassId = assetsToCreateList.Last().AssetClassId, // ok
-                                    InvestorId = assetsToCreateList.Last().InvestorId, // ok 
-                                    ProfileId = assetsToCreateList.Last().ProfileId, // ok
-                                    LastUpdate = DateTime.Now, // ok
-                                    Positions = InitializePositions(positionsToBeSaved, enumerableCells) // ok
+                                    AssetId = assetsToCreateList.Last().Positions.Last().AssetId, 
+                                    AssetClassId = assetsToCreateList.Last().AssetClassId, 
+                                    InvestorId = assetsToCreateList.Last().InvestorId,  
+                                    ProfileId = assetsToCreateList.Last().ProfileId, 
+                                    LastUpdate = DateTime.Now, 
+                                    Positions = InitializePositions(positionsToBeSaved, enumerableCells) 
                                 });
                             }
                         }
@@ -305,8 +296,8 @@ namespace PIMS3.BusinessLogic.ImportData
                             _assetsNotAddedListing += enumerableCells.ElementAt(1).Trim() + " ,";
                             lastTickerProcessed = enumerableCells.ElementAt(1).Trim();
                         }
-                    }// end for
-                } // end using
+                    }   // end for
+                }       // end using
             }
             catch(Exception ex)
             {
@@ -355,27 +346,20 @@ namespace PIMS3.BusinessLogic.ImportData
             var mktPrice = decimal.Parse(currentRow.ElementAt(4));
             var acctDataAccessComponent = new AccountDataProcessing(_ctx);
             Position newPosition = null;
-            //var valuation = Utilities.CalculateValuation(decimal.Parse(currentRow.ElementAt(4)), decimal.Parse(currentRow.ElementAt(3)));
-            //decimal fees = 0;
-            //var costBasis = Utilities.CalculateCostBasis(fees, valuation);
-            //var unitCost = Utilities.CalculateUnitCost(costBasis, decimal.Parse(currentRow.ElementAt(3)));
-
-            //var newPositions = initializedPositions;
-            //var test = acctDataAccessComponent.GetAccountTypeId(currentRow.ElementAt(0)).First().ToString().Trim();
-
+            
             try
             {
                 newPosition = new Position
                 {
-                    PositionId = "", 
-                    AccountTypeId = acctDataAccessComponent.GetAccountTypeId(currentRow.ElementAt(0)).First().ToString().Trim(), // ok
+                    PositionId = Guid.NewGuid().ToString(), 
+                    AccountTypeId = acctDataAccessComponent.GetAccountTypeId(currentRow.ElementAt(0)).First().ToString().Trim(), 
                     AssetId = assetIdForPosition,
-                    Fees = 0M, // ok
-                    LastUpdate = DateTime.Now, // ok
-                    PositionDate = DateTime.Now, // ok
+                    Fees = 0M, 
+                    LastUpdate = DateTime.Now, 
+                    PositionDate = DateTime.Now, 
                     Quantity = int.Parse(currentRow.ElementAt(3)),
-                    Status = "A",  // ok
-                    UnitCost = decimal.Parse(currentRow.ElementAt(4))  // ok
+                    Status = "A",  
+                    UnitCost = decimal.Parse(currentRow.ElementAt(4))  
                 };
             }
             catch (Exception)
@@ -386,41 +370,6 @@ namespace PIMS3.BusinessLogic.ImportData
 
             initializedPositions.Add(newPosition);
             return initializedPositions;
-
-
-            /* Old code:
-                PreEditPositionAccount = currentRow.ElementAt(0),
-                PostEditPositionAccount = currentRow.ElementAt(0),
-                Qty = decimal.Parse(currentRow.ElementAt(3)),
-                UnitCost = costBasis,
-                 TODO: Allow user to assign date position added.
-                 Position add date will not have been assigned, therefore assign an unlikely date & allow for investor update via UI.
-                DateOfPurchase = new DateTime(1950, 1, 1),
-                DatePositionAdded = null,
-                Url = "",
-                LoggedInInvestor = _identityService.CurrentUser,
-                ReferencedAssetId = Guid.NewGuid(),            // initialized during Asset creation
-                ReferencedAccount = new AccountTypeVm
-                {
-                    AccountTypeDesc = currentRow.ElementAt(0),
-                    KeyId = Guid.NewGuid(), // Guid for AccountType, initialized during Asset creation
-                    Url = ""
-                },
-                ReferencedTransaction = new TransactionVm
-                {
-                    PositionId = Guid.NewGuid(),
-                    TransactionId = Guid.NewGuid(),
-                    Units = decimal.Parse(currentRow.ElementAt(3)),
-                    TransactionEvent = "C",
-                    MktPrice = mktPrice,
-                    Fees = fees,
-                    UnitCost = unitCost,
-                    CostBasis = costBasis,
-                    Valuation = valuation,
-                    DateCreated = DateTime.Now,
-                    DatePositionCreated = null
-                }
-            */
         }
 
 

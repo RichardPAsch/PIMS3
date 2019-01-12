@@ -38,7 +38,6 @@ namespace PIMS3.Controllers
 
 
         // There are multiple return/response types and paths in this action.
-        //[HttpPost("{isRevenue}")]
         [HttpPost("[action]")]
         [ProducesResponseType(400)]
         [ProducesResponseType(200, Type = typeof(DataImportVm))]
@@ -67,7 +66,7 @@ namespace PIMS3.Controllers
             else
             {
                 processedVm = dataAccessComponent.SaveAssets(importFile, _dbCtx);
-                return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved }, processedVm);
+                return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, savedTickers = processedVm.MiscMessage }, processedVm);
             }
             
             

@@ -16,6 +16,8 @@ namespace PIMS3.DataAccess.ImportData
         public string _exceptionTickers = string.Empty;
         private decimal totalAmtSaved = 0M;
         private int recordsSaved = 0;
+        private string tickersProcessed = string.Empty;
+
 
         public ImportFileDataProcessing()
         {
@@ -80,41 +82,40 @@ namespace PIMS3.DataAccess.ImportData
                 {
                     // TODO: Populate with any error msg if no exception tickers.
                     importVmToSave.ExceptionTickers = _exceptionTickers;
-                     return importVmToSave;
+                    return importVmToSave;
                 }
                 else
                 {
                     // EF Core automatically cascades inserts from 'Asset' parent table.
-                    // 1.9.19 - tested ok to here under scenario #1  ***
-                    IDictionary<string, object> entitiesToSave  = null;
+                    Dictionary<string, dynamic> entitiesToSave = new Dictionary<string, dynamic>();
                     if(assetListingToSave.First().Profile != null)
                         entitiesToSave.Add("Profile", MapVmToEntities(assetListingToSave.First().Profile));
 
-                    entitiesToSave.Add("Asset", MapVmToEntities(assetListingToSave.First().Asset));
+                    entitiesToSave.Add("Asset", MapVmToEntities(assetListingToSave.First()));
 
-                    for(var position = 0; position < assetListingToSave.First().Asset.Positions.Count; position++)
+                    for (var position = 0; position < assetListingToSave.First().Positions.Count; position++)
                     {
                         entitiesToSave.Add("Positions", MapVmToEntities(assetListingToSave.First().Positions.ElementAt(position)));
                     }
+                    // "Asset" must first be initialized before referenced "Asset-Positions" can be added.
+                    entitiesToSave["Asset"].Positions.Add(entitiesToSave["Positions"]);
+                    
              
                     try
                     {
                         using (_ctx)
                         {
-                            //_ctx.AddRange(assetListingToSave);
                             if (entitiesToSave["Profile"] != null)
-                                _ctx.Add(entitiesToSave["Profile"]);
+                                _ctx.AddRange(entitiesToSave["Profile"]);  // saved Ok! 1.11.19
 
-                            _ctx.Add(entitiesToSave["Asset"]);
-                            _ctx.AddRange(entitiesToSave["Position"]);
-
+                            _ctx.AddRange(entitiesToSave["Asset"]);        // saved Ok! 1.11.19
                             recordsSaved = _ctx.SaveChanges();
                         }
                     }
                     catch (Exception ex)
                     {
                         // Add 'Exception data' to model?
-                        var err = ex.Message;
+                        var err = ex.InnerException;
                         return null;
                     }
                 }
@@ -135,6 +136,10 @@ namespace PIMS3.DataAccess.ImportData
                 foreach (var record in assetListing)
                 {
                     recordsSaved += 1;
+                    if (recordsSaved == 1)
+                        tickersProcessed = record.Profile.TickerSymbol.ToUpper();
+                    else
+                        tickersProcessed += ", " + record.Profile.TickerSymbol.ToUpper();
                 }
             }
             else
@@ -144,10 +149,11 @@ namespace PIMS3.DataAccess.ImportData
                     recordsSaved += 1;
                     totalAmtSaved += record.AmountRecvd;
                 }
+                vmToProcess.AmountSaved = totalAmtSaved;
             }
 
-            vmToProcess.AmountSaved = totalAmtSaved;
             vmToProcess.RecordsSaved = recordsSaved;
+            vmToProcess.MiscMessage = tickersProcessed;
 
             return vmToProcess;
 
@@ -157,34 +163,33 @@ namespace PIMS3.DataAccess.ImportData
         private object MapVmToEntities(dynamic entityToMap){
 
             dynamic currentType = null;
-            switch (entityToMap.GetType().ToString())
+            switch (entityToMap.GetType().Name)
             {
                 case "Profile":
                     currentType = new Data.Entities.Profile
                     {
                         ProfileId = entityToMap.ProfileId,  // test this; entityToMap.ProfileId should be dynamically valid ?
-                        CreatedBy = entityToMap.CreatedBy,
+                        CreatedBy = entityToMap.CreatedBy ?? string.Empty,
                         DividendFreq = entityToMap.DividendFreq,
                         DividendMonths = "NA",
-                        DividendPayDay = int.Parse(entityToMap.DividendPayDay),
+                        DividendPayDay = entityToMap.DividendPayDay,
                         DividendRate = entityToMap.DividendRate,
                         DividendYield = entityToMap.DividendYield > 0
-                            ? decimal.Parse(entityToMap.DividendYield)
+                            ? entityToMap.DividendYield
                             : 0M,
                         EarningsPerShare = entityToMap.EarningsPerShare > 0 
-                            ? decimal.Parse(entityToMap.EarningsPerShare)
+                            ? entityToMap.EarningsPerShare
                             : 0M,
                         LastUpdate = entityToMap.LastUpdate ?? DateTime.Now,
                         PERatio = entityToMap.PERatio > 0 
-                            ? decimal.Parse(entityToMap.PERatio)
+                            ? entityToMap.PERatio
                             : 0M,
                         TickerDescription = entityToMap.TickerDescription,
                         TickerSymbol = entityToMap.TickerSymbol,
-                        UnitPrice = decimal.Parse(entityToMap.UnitPrice)
+                        UnitPrice = entityToMap.UnitPrice
                     };
                     break;
-                case "Asset":
-                    // 'Positions' to be added after Position(s) initialized ??
+                case "AssetCreationVm":
                     currentType = new Data.Entities.Asset
                     {
                         AssetId = entityToMap.AssetId,
@@ -192,7 +197,7 @@ namespace PIMS3.DataAccess.ImportData
                         InvestorId = entityToMap.InvestorId,
                         LastUpdate = entityToMap.LastUpdate ?? DateTime.Now,
                         ProfileId = entityToMap.ProfileId,
-                        Positions = entityToMap.Positions ?? null  // added ??
+                        Positions = new List<Data.Entities.Position>()
                     };
                     break;
                 case "Position":
@@ -202,13 +207,13 @@ namespace PIMS3.DataAccess.ImportData
                         AccountTypeId = entityToMap.AccountTypeId,
                         AssetId = entityToMap.AssetId,  // value needed
                         Fees = entityToMap.Fees > 0
-                            ? decimal.Parse(entityToMap.Fees)
+                            ? entityToMap.Fees
                             : 0M,
                         LastUpdate = entityToMap.LastUpdate ?? DateTime.Now,
                         PositionDate = entityToMap.PositionDate ?? DateTime.Now,
                         Quantity = entityToMap.Quantity,
                         Status = "A",
-                        UnitCost = decimal.Parse(entityToMap.UnitCost)
+                        UnitCost = entityToMap.UnitCost
                     };
                     break;
                 default:
