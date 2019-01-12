@@ -75,8 +75,6 @@ namespace PIMS3.Data
             modelBuilder.Entity<Position>()
                 .Property(p => p.Fees).HasColumnType("decimal");
             modelBuilder.Entity<Position>()
-                .Property(p => p.MarketPrice).HasColumnType("decimal");
-            modelBuilder.Entity<Position>()
                 .Property(p => p.Quantity).HasColumnType("decimal");
             modelBuilder.Entity<Position>()
                 .Property(p => p.UnitCost).HasColumnType("decimal");
