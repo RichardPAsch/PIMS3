@@ -4,4 +4,5 @@ export class DataImportVm {
     recordsSaved: number;
     amountSaved: number;
     exceptionTickers: string;
+    miscMessage: string;
 }
