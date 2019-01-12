@@ -37,14 +37,11 @@ namespace PIMS3.Data.Entities
 
         [Required]
         [Range(0,10000)]
-        public decimal Quantity { get; set; }
+        public int Quantity { get; set; }
         
 
         [Required]
         public DateTime LastUpdate { get; set; }
-
-        // Price when Position altered.
-        public decimal MarketPrice { get; set; }
 
 
         // TODO: set [Required] attr? If set, will be part of ModelState validation.
