@@ -14,6 +14,9 @@ namespace PIMS3.Data.Entities
         // Profile can only belong 1 unique 'Asset'
         // 1:1 cardinality via convention
         public Asset Asset { get; set; }
+
+
+        //public string AssetId { get; set; }
        
 
         [Required]
