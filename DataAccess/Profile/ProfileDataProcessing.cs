@@ -6,7 +6,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
+
 
 namespace PIMS3.DataAccess.Profile
 {
@@ -179,7 +179,7 @@ namespace PIMS3.DataAccess.Profile
 
                 //historicPriceDataResponse.Dispose();
                 updatedOrNewProfile.ProfileId = Guid.NewGuid().ToString();
-                updatedOrNewProfile.AssetId = Guid.NewGuid().ToString();
+                updatedOrNewProfile.CreatedBy = string.Empty;
                 updatedOrNewProfile.EarningsPerShare = 0;
                 updatedOrNewProfile.PERatio = 0;
                 updatedOrNewProfile.ExDividendDate = null;
