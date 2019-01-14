@@ -79,7 +79,7 @@ export class DataImportComponent {
                                 recordsProcessed = resp.recordsSaved;
                                 totalProcessed = resp.amountSaved;
                                 alert("Successfully saved  " + recordsProcessed + " XLSX/XLS income records, \nfor a total of $" + totalProcessed);
-                            } 
+                            }
                         },
                         (err: HttpErrorResponse) => {
                             if (err.error instanceof Error) {
