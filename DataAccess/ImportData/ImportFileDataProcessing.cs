@@ -29,8 +29,6 @@ namespace PIMS3.DataAccess.ImportData
             var busLayerComponent = new ImportFileProcessing(importVmToUpdate, _ctx);
 
             IEnumerable<Data.Entities.Income> revenueListingToSave;
-            //var recordsSaved = 0;
-            //var totalAmtSaved = 0M;
 
             if (busLayerComponent.ValidateVm())
             {
