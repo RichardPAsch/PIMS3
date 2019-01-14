@@ -47,6 +47,7 @@ export class DataImportService {
         // To catch errors, you "pipe" the observable result from http.post() through an RxJS catchError() operator.
         // The catchError() operator intercepts an Observable that failed, & passes the error to an error handler.
         // RxJS 'tap' operator (callback) taps/intercepts into the flow of observable values, LOOKING at their value(s) only & passing them along the chain.
+        // Returned 'DataImportVm' - will contain results of processing.
         return this.http.post<DataImportVm>(this.baseUrl + 'api/ImportFile/ProcessImportFile', importFileToProcess, httpOptions)
                         .pipe(
                             tap((processedResults: DataImportVm) => this.log("processed count of " + processedResults.recordsSaved + " XLSX recs totaling $" + processedResults.amountSaved + " for tickers: " + processedResults.miscMessage)),
@@ -70,9 +71,15 @@ export class DataImportService {
         }
 
         return (error: any): Observable<T> => {
-            if (error.error.exceptionTickers.length > 0) {
+            if (error.error.exceptionTickers.length > 0 && error.error.isRevenueData == true) {
                 alert("Unable to save income, due to the following invalid and/or duplicate submitted Position(s) : \n" + error.error.exceptionTickers);
                 this.log("Missing:" + error.error.exceptionTickers + " at: " + error.url);
+            }
+
+            // POSTing error for Position; unable to fetch Profile via web - bad ticker/unavailable data ?
+            if (error.error.isRevenueData == false) {
+                alert("Unable to fetch Profile data for: \n" + error.error.exceptionTickers + " \nCheck ticker validity, or enter Profile manually.");
+                this.log("Error saving Position data for: " + error.error.exceptionTickers + " at: " + error.url);
             }
             
 
@@ -91,5 +98,7 @@ export class DataImportService {
     private log(message: string) {
         this.messageService.add(`DataImportService: ${message}`);
     }
+
+   
 
 }
