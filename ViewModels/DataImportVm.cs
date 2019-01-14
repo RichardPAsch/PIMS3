@@ -13,6 +13,7 @@ namespace PIMS3.ViewModels
         public decimal? AmountSaved { get; set; }
         // Captured ticker(s) where income not recorded.
         public string ExceptionTickers { get; set; }
+        public string MiscMessage { get; set; }
     }
 
 }
