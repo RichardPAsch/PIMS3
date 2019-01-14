@@ -61,23 +61,15 @@ namespace PIMS3.DataAccess.Profile
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " + TiingoAccountToken);
 
-                //HttpResponseMessage historicPriceDataResponse;
-                //HttpResponseMessage metaDataResponse;
                 string metaDataResponse;
                 JArray jsonTickerPriceData;
-                //Task<string> responsePriceData;
 
                 var url = client.BaseAddress + "/prices?startDate=" + priceHistoryStartDate + "&" + "token=" + TiingoAccountToken;
-                var webResponse = FetchProfileViaWebSync(client, url);  // this works!
-                //historicPriceDataResponse = await client.GetAsync(client.BaseAddress + "/prices?startDate=" + priceHistoryStartDate + "&" + "token=" + TiingoAccountToken);
 
+                var webResponse = FetchProfileViaWebSync(client, url);  
                 if (webResponse == null || webResponse == string.Empty)
                     return null; // TODO: write error msg to log: [BadRequest("Unable to update Profile price data for: " + ticker);]
 
-                //responsePriceData = historicPriceDataResponse.Content.ReadAsStringAsync();
-                //responsePriceData = historicPriceDataResponse;
-                //responsePriceData = webResponse;
-                //jsonTickerPriceData = JArray.Parse(responsePriceData.Result);
                 jsonTickerPriceData = JArray.Parse(webResponse);
 
                 // Sort Newtonsoft JArray historical results on 'date', e.g., date info gathered.
