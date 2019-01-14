@@ -12,7 +12,7 @@ using PIMS3.DataAccess.Position;
 using PIMS3.DataAccess.Profile;
 using PIMS3.DataAccess.Account;
 using System.Globalization;
-using System.Threading.Tasks;
+
 
 namespace PIMS3.BusinessLogic.ImportData
 {
@@ -223,8 +223,11 @@ namespace PIMS3.BusinessLogic.ImportData
                                 {
                                     // Obtain a new Profile via Tiingo API.
                                     var webProfileData = profileDataAccessComponent.FetchWebProfile(enumerableCells.ElementAt(1).Trim().ToUpper());
-                                    if (webProfileData == null) 
+                                    if (webProfileData == null)
+                                    {
+                                        dataAccessComponent._exceptionTickers = enumerableCells.ElementAt(1).Trim().ToUpper();
                                         return null;  // any necessary logging done via component.
+                                    }
                                     else
                                     {
                                         Profile newProfile = new Profile
