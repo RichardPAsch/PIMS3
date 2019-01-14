@@ -23,11 +23,15 @@ namespace PIMS3.ViewModels
         
         public DateTime LastUpdate { get; set; }
 
+        [Required]
         public IList<Position> Positions { get; set; }
 
         public Profile Profile { get; set; }
 
         public string ExceptionTickers { get; set; }
+
+        [Required]
+        public Asset Asset { get; set; }
     }
 }
 
