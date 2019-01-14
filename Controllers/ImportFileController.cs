@@ -58,7 +58,7 @@ namespace PIMS3.Controllers
                     if (importFile.ExceptionTickers != string.Empty)
                         return BadRequest(new { exceptionTickers = processedVm.ExceptionTickers });
 
-                    return BadRequest(new { exceptionMessage = "Error processing income import data; please try later." });
+                    return BadRequest(new { exceptionMessage = "Error processing income import data; please try later.", isRevenueData = true });
                 }
 
                 return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, amount = processedVm.AmountSaved }, processedVm);
@@ -66,6 +66,10 @@ namespace PIMS3.Controllers
             else
             {
                 processedVm = dataAccessComponent.SaveAssets(importFile, _dbCtx);
+                // Returned customized anonymous object to be data-import.service catchError().
+                if (processedVm.ExceptionTickers != string.Empty)
+                    return BadRequest(new { exceptionTickers = processedVm.ExceptionTickers, isRevenueData = false });
+
                 return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, savedTickers = processedVm.MiscMessage }, processedVm);
             }
             
