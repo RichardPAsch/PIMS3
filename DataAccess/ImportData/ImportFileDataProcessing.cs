@@ -4,6 +4,7 @@ using PIMS3.BusinessLogic.ImportData;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using PIMS3.DataAccess.Profile;
 
 namespace PIMS3.DataAccess.ImportData
 {
@@ -17,6 +18,8 @@ namespace PIMS3.DataAccess.ImportData
         private decimal totalAmtSaved = 0M;
         private int recordsSaved = 0;
         private string tickersProcessed = string.Empty;
+        IEnumerable<AssetCreationVm> assetListingToSave = null;
+        private ProfileDataProcessing profileDataAccessComponent;
 
 
         public ImportFileDataProcessing()
@@ -70,8 +73,6 @@ namespace PIMS3.DataAccess.ImportData
         {
             var busLogicComponent = new ImportFileProcessing(importVmToSave, _ctx);
 
-            IEnumerable<AssetCreationVm> assetListingToSave = null;
-
             if (busLogicComponent.ValidateVm())
             {
                 assetListingToSave = busLogicComponent.ParsePortfolioSpreadsheetForAssetRecords(importVmToSave.ImportFilePath.Trim(), this);
@@ -86,8 +87,12 @@ namespace PIMS3.DataAccess.ImportData
                 {
                     // EF Core automatically cascades inserts from 'Asset' parent table.
                     Dictionary<string, dynamic> entitiesToSave = new Dictionary<string, dynamic>();
-                    if(assetListingToSave.First().Profile != null)
+
+                    if (assetListingToSave.First().Profile != null)
                         entitiesToSave.Add("Profile", MapVmToEntities(assetListingToSave.First().Profile));
+                    else
+                        profileDataAccessComponent = new ProfileDataProcessing(_ctx);
+
 
                     entitiesToSave.Add("Asset", MapVmToEntities(assetListingToSave.First()));
 
@@ -97,18 +102,21 @@ namespace PIMS3.DataAccess.ImportData
                     }
                     // "Asset" must first be initialized before referenced "Asset-Positions" can be added.
                     entitiesToSave["Asset"].Positions.Add(entitiesToSave["Positions"]);
-                    
-             
+                                 
                     try
                     {
-                        using (_ctx)
+                        // Omitting using{}: DI handles disposing of ctx; *non-disposed ctx* needed for later call to
+                        // profileDataAccessComponent.FetchDbProfileTicker().
+
+                        // No new Profile to insert if it already exists.
+                        if (entitiesToSave.ContainsKey("Profile"))
                         {
                             if (entitiesToSave["Profile"] != null)
-                                _ctx.AddRange(entitiesToSave["Profile"]);  // saved Ok! 1.11.19
-
-                            _ctx.AddRange(entitiesToSave["Asset"]);        // saved Ok! 1.11.19
-                            recordsSaved = _ctx.SaveChanges();
+                                _ctx.AddRange(entitiesToSave["Profile"]);  
                         }
+
+                        _ctx.AddRange(entitiesToSave["Asset"]);            
+                        recordsSaved = _ctx.SaveChanges(); 
                     }
                     catch (Exception ex)
                     {
@@ -131,13 +139,22 @@ namespace PIMS3.DataAccess.ImportData
 
             if (assetListing != null)
             {
-                foreach (var record in assetListing)
+                for(var record = 0; record < assetListing.Count(); record++)
                 {
                     recordsSaved += 1;
                     if (recordsSaved == 1)
-                        tickersProcessed = record.Profile.TickerSymbol.ToUpper();
+                    {
+                        if(assetListing.ElementAt(record).Profile != null)
+                            tickersProcessed = assetListing.ElementAt(record).Profile.TickerSymbol.ToUpper();
+                        else
+                        {
+                            // Db Profile already exists, hence no Profile instance in vm with a ProfileId.
+                            var id = assetListing.ElementAt(record).ProfileId;
+                            tickersProcessed = profileDataAccessComponent.FetchDbProfileTicker(id).First();
+                        }
+                    }
                     else
-                        tickersProcessed += ", " + record.Profile.TickerSymbol.ToUpper();
+                        tickersProcessed += ", " + assetListing.ElementAt(record).Profile.TickerSymbol.ToUpper();
                 }
             }
             else
