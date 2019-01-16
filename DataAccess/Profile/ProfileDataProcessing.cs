@@ -40,6 +40,13 @@ namespace PIMS3.DataAccess.Profile
 
         }
 
+        public IQueryable<string> FetchDbProfileTicker(string profileId)
+        {
+            return _ctx.Profile.Where(p => p.ProfileId == profileId.Trim())
+                               .Select(p => p.TickerSymbol.ToUpper().Trim())
+                               .AsQueryable();
+        }
+
 
         public Data.Entities.Profile FetchWebProfile(string ticker)
         {
@@ -66,6 +73,7 @@ namespace PIMS3.DataAccess.Profile
 
                 var url = client.BaseAddress + "/prices?startDate=" + priceHistoryStartDate + "&" + "token=" + TiingoAccountToken;
 
+                // Currently using 'Tiingo' end-point service for Profile data retreival.
                 var webResponse = FetchProfileViaWebSync(client, url);  
                 if (webResponse == null || webResponse == string.Empty)
                     return null; // TODO: write error msg to log: [BadRequest("Unable to update Profile price data for: " + ticker);]
