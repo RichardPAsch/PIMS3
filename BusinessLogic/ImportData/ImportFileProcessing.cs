@@ -197,7 +197,9 @@ namespace PIMS3.BusinessLogic.ImportData
                                 {
                                     // Bypassing Profile creation for new Position.
                                     existingProfileId = profilePersisted.First().ProfileId;
-                                    // TODO: AssetClassId hard-coded to default: 'common stock'. Make available via XLSX? 
+
+                                    if (assetIdForPosition == string.Empty)
+                                        assetIdForPosition = newAssetId;
 
                                     // Are we processing our first XLSX Position record?
                                     if (positionsToBeSaved == null)
@@ -207,8 +209,9 @@ namespace PIMS3.BusinessLogic.ImportData
 
                                     // Error seeding collection.
                                     if (positionsToBeSaved == null)
-                                        return null;  
-                                    
+                                        return null;
+
+                                    // TODO: AssetClassId hard-coded to default: 'common stock'. Make available via XLSX? 
                                     assetsToCreateList.Add(new AssetCreationVm
                                     {
                                         AssetId = newAssetId,  
