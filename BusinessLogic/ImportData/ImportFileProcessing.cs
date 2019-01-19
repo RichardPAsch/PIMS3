@@ -25,10 +25,10 @@ namespace PIMS3.BusinessLogic.ImportData
         private readonly PIMS3Context _ctx;
         private static string _assetsNotAddedListing = string.Empty;
         private string assetIdForPosition = string.Empty;
+
         // 12.27.18 - Temporary assignment until security implemented.
         const string INVESTORID = "CF256A53-6DCD-431D-BC0B-A810010F5B88"; // RPA
 
-        // ** Needs refactoring & testing with new Position data. *** 12.31.18
 
         public ImportFileProcessing(DataImportVm viewModel, PIMS3Context ctx)
         {
@@ -214,7 +214,7 @@ namespace PIMS3.BusinessLogic.ImportData
                                     // TODO: AssetClassId hard-coded to default: 'common stock'. Make available via XLSX? 
                                     assetsToCreateList.Add(new AssetCreationVm
                                     {
-                                        AssetId = newAssetId,  
+                                        AssetId = Guid.NewGuid().ToString(),  
                                         AssetClassId = existingAssetClassId,  
                                         InvestorId = INVESTORID,  
                                         ProfileId = existingProfileId,  
@@ -259,7 +259,7 @@ namespace PIMS3.BusinessLogic.ImportData
                                         assetIdForPosition = newAssetId;
                                         assetsToCreateList.Add(new AssetCreationVm  
                                         {
-                                            AssetId = newAssetId, 
+                                            AssetId = Guid.NewGuid().ToString(), 
                                             AssetClassId = existingAssetClassId, 
                                             InvestorId = INVESTORID,
                                             ProfileId = newProfile.ProfileId,
