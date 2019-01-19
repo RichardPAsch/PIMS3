@@ -85,37 +85,37 @@ namespace PIMS3.DataAccess.ImportData
                 }
                 else
                 {
-                    // EF Core automatically cascades inserts from 'Asset' parent table.
-                    Dictionary<string, dynamic> entitiesToSave = new Dictionary<string, dynamic>();
+                    var profilesToSave = new List<Data.Entities.Profile>();
+                    var assetsToSave = new List<Data.Entities.Asset>();
+                    var positionsToSave = new List<Data.Entities.Position>();
 
-                    if (assetListingToSave.First().Profile != null)
-                        entitiesToSave.Add("Profile", MapVmToEntities(assetListingToSave.First().Profile));
-                    else
-                        profileDataAccessComponent = new ProfileDataProcessing(_ctx);
-
-
-                    entitiesToSave.Add("Asset", MapVmToEntities(assetListingToSave.First()));
-
-                    for (var position = 0; position < assetListingToSave.First().Positions.Count; position++)
+                    for(var vmRecordIdx = 0; vmRecordIdx < assetListingToSave.Count(); vmRecordIdx++)
                     {
-                        entitiesToSave.Add("Positions", MapVmToEntities(assetListingToSave.First().Positions.ElementAt(position)));
+                        if (assetListingToSave.ElementAt(vmRecordIdx).Profile != null)
+                            profilesToSave.Add(MapVmToEntities(assetListingToSave.ElementAt(vmRecordIdx).Profile) as Data.Entities.Profile);
+                        else
+                            profileDataAccessComponent = new ProfileDataProcessing(_ctx);
+
+                        // "Asset" must first be initialized before referenced "Positions" can be added.
+                        assetsToSave.Add(MapVmToEntities(assetListingToSave.ElementAt(vmRecordIdx)) as Data.Entities.Asset);
+
+                        positionsToSave.Clear();
+                        for (var position = 0; position < assetListingToSave.ElementAt(vmRecordIdx).Positions.Count(); position++)
+                        {
+                            positionsToSave.Add(MapVmToEntities(assetListingToSave.ElementAt(vmRecordIdx).Positions.ElementAt(position)) as Data.Entities.Position);
+                            assetsToSave.ElementAt(vmRecordIdx).Positions.Add(positionsToSave.ElementAt(position));
+                        }
                     }
-                    // "Asset" must first be initialized before referenced "Asset-Positions" can be added.
-                    entitiesToSave["Asset"].Positions.Add(entitiesToSave["Positions"]);
-                                 
+                   
+                    // Persist to PIMS2Db.
                     try
                     {
-                        // Omitting using{}: DI handles disposing of ctx; *non-disposed ctx* needed for later call to
+                        // Omitting "using{}": DI handles disposing of ctx; *non-disposed ctx* needed for later call to
                         // profileDataAccessComponent.FetchDbProfileTicker().
+                        if (profilesToSave.Count > 0)
+                            _ctx.AddRange(profilesToSave);  
 
-                        // No new Profile to insert if it already exists.
-                        if (entitiesToSave.ContainsKey("Profile"))
-                        {
-                            if (entitiesToSave["Profile"] != null)
-                                _ctx.AddRange(entitiesToSave["Profile"]);  
-                        }
-
-                        _ctx.AddRange(entitiesToSave["Asset"]);            
+                        _ctx.AddRange(assetsToSave);            
                         recordsSaved = _ctx.SaveChanges(); 
                     }
                     catch (Exception ex)
@@ -237,100 +237,98 @@ namespace PIMS3.DataAccess.ImportData
             return currentType;
         }
 
+
+
+
+        /*  Old Code
+            public IQueryable<Investor> RetreiveAll() {
+            var investorQuery = (from investor in _nhSession.Query<Investor>() select investor);
+            return investorQuery.AsQueryable();
+             }
+
+
+            public Investor RetreiveById(Guid idGuid) {
+                return _nhSession.Get<Investor>(idGuid);
+            }
+
+
+            public IQueryable<Investor> Retreive(Expression<Func<Investor, bool>> predicate) {
+                return RetreiveAll().Where(predicate);
+            }
+
+             commented after tfr from PIMS
+            public bool SaveOrUpdateProfile(Profile newEntity)
+            {
+                //using (var trx = _nhSession.BeginTransaction()) {
+                //    try {
+                //        _nhSession.Save(newEntity);
+                //        trx.Commit();
+                //    }
+                //    catch (Exception ex) {
+                //        return false;
+                //    }
+
+                return true;
+                //}
+            }
+
+             commented after tfr from PIMS
+            public bool SavePositions(Position[] newPositions)
+            {
+                //using (var trx = _nhSession.BeginTransaction()) {
+                //    try {
+                //        _nhSession.Save(newEntity);
+                //        trx.Commit();
+                //    }
+                //    catch (Exception ex) {
+                //        return false;
+                //    }
+
+                return true;
+                //}
+            }
             
+            public bool Update(Investor entity, object id) {
+                using (var trx = _nhSession.BeginTransaction()) {
+                    try {
+                        _nhSession.Merge(entity);
+                        trx.Commit();
+                    }
+                    catch (Exception) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
 
 
+            public bool Delete(Guid cGuid) {
+
+                var deleteOk = true;
+                var accountTypeToDelete = RetreiveById(cGuid);
+
+                if (accountTypeToDelete == null)
+                    return false;
 
 
+                using (var trx = _nhSession.BeginTransaction()) {
+                    try {
+                        _nhSession.Delete(accountTypeToDelete);
+                        trx.Commit();
+                    }
+                    catch (Exception) {
+                        deleteOk = false;
+                    }
+                }
 
+                return deleteOk;
+            }
+        */
 
-        //public IQueryable<Investor> RetreiveAll() {
-        //    var investorQuery = (from investor in _nhSession.Query<Investor>() select investor);
-        //    return investorQuery.AsQueryable();
-        //}
-
-
-        //public Investor RetreiveById(Guid idGuid) {
-        //    return _nhSession.Get<Investor>(idGuid);
-        //}
-
-
-        //public IQueryable<Investor> Retreive(Expression<Func<Investor, bool>> predicate) {
-        //    return RetreiveAll().Where(predicate);
-        //}
-
-        // commented after tfr from PIMS
-        //public bool SaveOrUpdateProfile(Profile newEntity)
-        //{
-        //    //using (var trx = _nhSession.BeginTransaction()) {
-        //    //    try {
-        //    //        _nhSession.Save(newEntity);
-        //    //        trx.Commit();
-        //    //    }
-        //    //    catch (Exception ex) {
-        //    //        return false;
-        //    //    }
-
-        //    return true;
-        //    //}
-        //}
-
-        // commented after tfr from PIMS
-        //public bool SavePositions(Position[] newPositions)
-        //{
-        //    //using (var trx = _nhSession.BeginTransaction()) {
-        //    //    try {
-        //    //        _nhSession.Save(newEntity);
-        //    //        trx.Commit();
-        //    //    }
-        //    //    catch (Exception ex) {
-        //    //        return false;
-        //    //    }
-
-        //    return true;
-        //    //}
-        //}
-
-
-
-        //public bool Update(Investor entity, object id) {
-        //    using (var trx = _nhSession.BeginTransaction()) {
-        //        try {
-        //            _nhSession.Merge(entity);
-        //            trx.Commit();
-        //        }
-        //        catch (Exception) {
-        //            return false;
-        //        }
-        //    }
-
-        //    return true;
-        //}
-
-
-        //public bool Delete(Guid cGuid) {
-
-        //    var deleteOk = true;
-        //    var accountTypeToDelete = RetreiveById(cGuid);
-
-        //    if (accountTypeToDelete == null)
-        //        return false;
-
-
-        //    using (var trx = _nhSession.BeginTransaction()) {
-        //        try {
-        //            _nhSession.Delete(accountTypeToDelete);
-        //            trx.Commit();
-        //        }
-        //        catch (Exception) {
-        //            deleteOk = false;
-        //        }
-        //    }
-
-        //    return deleteOk;
-        //}
 
     }
+   
 }
 
 
