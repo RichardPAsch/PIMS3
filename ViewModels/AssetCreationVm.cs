@@ -24,7 +24,7 @@ namespace PIMS3.ViewModels
         public DateTime LastUpdate { get; set; }
 
         [Required]
-        public IList<Position> Positions { get; set; }
+        public List<Position> Positions { get; set; }
 
         public Profile Profile { get; set; }
 
