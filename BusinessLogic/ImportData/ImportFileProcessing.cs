@@ -12,7 +12,7 @@ using PIMS3.DataAccess.Position;
 using PIMS3.DataAccess.Profile;
 using PIMS3.DataAccess.Account;
 using System.Globalization;
-
+using System.Collections;
 
 namespace PIMS3.BusinessLogic.ImportData
 {
@@ -191,6 +191,7 @@ namespace PIMS3.BusinessLogic.ImportData
                             // Are we processing a different ticker symbol?
                             if (lastTickerProcessed.Trim().ToUpper() != enumerableCells.ElementAt(1).Trim().ToUpper())
                             {
+                                lastTickerProcessed = enumerableCells.ElementAt(1).Trim().ToUpper();
                                 profilePersisted = profileDataAccessComponent.FetchDbProfile(enumerableCells.ElementAt(1).Trim());
 
                                 if (profilePersisted != null)
@@ -282,17 +283,10 @@ namespace PIMS3.BusinessLogic.ImportData
                             }
                             else
                             {
-                                // No need to re-check for Profile existence.
-                                // Asset header initialization bypassed; processing same ticker - different account.
-                                assetsToCreateList.Add(new AssetCreationVm
-                                {
-                                    AssetId = assetsToCreateList.Last().Positions.Last().AssetId, 
-                                    AssetClassId = assetsToCreateList.Last().AssetClassId, 
-                                    InvestorId = assetsToCreateList.Last().InvestorId,  
-                                    ProfileId = assetsToCreateList.Last().ProfileId, 
-                                    LastUpdate = DateTime.Now, 
-                                    Positions = InitializePositions(positionsToBeSaved, enumerableCells) 
-                                });
+                                // Asset header initialization & Profile check bypassed; processing SAME ticker - DIFFERENT account.
+                                // Adding to existing AssetCreationVm.Positions.
+                                var updatedPositions = InitializePositions(assetsToCreateList.Last().Positions.ToList(), enumerableCells);
+                                assetsToCreateList.Last().Positions.Add(updatedPositions.Last());
                             }
                         }
                         else
