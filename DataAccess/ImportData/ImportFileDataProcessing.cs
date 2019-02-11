@@ -110,8 +110,8 @@ namespace PIMS3.DataAccess.ImportData
                     // Persist to PIMS2Db.
                     try
                     {
-                        // Omitting "using{}": DI handles disposing of ctx; *non-disposed ctx* needed for later call to
-                        // profileDataAccessComponent.FetchDbProfileTicker().
+                        // Omitting "using{}": DI handles disposing of ctx; *non-disposed ctx* needed for later 
+                        // call to profileDataAccessComponent.FetchDbProfileTicker().
                         if (profilesToSave.Count > 0)
                             _ctx.AddRange(profilesToSave);  
 
