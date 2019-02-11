@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +9,7 @@ using PIMS3.Data;
 using PIMS3.Data.Repositories;
 using PIMS3.Data.Repositories.IncomeSummary;
 using PIMS3.Services;
+
 
 namespace PIMS3
 {
@@ -37,6 +36,7 @@ namespace PIMS3
             // Service, interface & implementation(s), available for the lifetime of a request (scoped).
             services.AddScoped<IIncomeRepository, IncomeRepository>();
             services.AddScoped<InvestorRepository>();
+
 
             services.AddMvc()
                     .AddJsonOptions(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore)
