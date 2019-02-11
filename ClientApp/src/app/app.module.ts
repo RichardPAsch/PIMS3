@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
-
 import { AppComponent } from './app.component';
 import { NavMenuComponent } from './nav-menu/nav-menu.component';
 import { HomeComponent } from './home/home.component';
@@ -14,8 +13,9 @@ import { DataImportService } from './data-import/data-import.service';
 import { DataImportComponent } from './data-import/data-import.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MessageService } from './message.service';
-
-
+import { AgGridModule } from 'ag-grid-angular';
+import { IncomeProjectionsComponent } from './income-projections/income-projections.component';
+import { ProfileService } from './shared/profile.service';
 
 /* Notes:
  *  Medium to large apps should have one or more FEATURE modules. ngModule may have one
@@ -30,22 +30,25 @@ import { MessageService } from './message.service';
     CounterComponent,
     FetchDataComponent,
     IncomeSummaryComponent,
-    DataImportComponent
+    DataImportComponent,
+    IncomeProjectionsComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
+    AgGridModule.withComponents([]),
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterModule.forRoot([
+      RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'counter', component: CounterComponent },
       { path: 'fetch-data', component: FetchDataComponent },
+      { path: 'income-projections', component: IncomeProjectionsComponent },
       { path: 'income-summary', component: IncomeSummaryComponent },
       { path: 'data-import', component: DataImportComponent },
     ])
   ],
-  providers: [DataImportService, MessageService], // Creators of services that NgModule contributes to the global collection of services;
+  providers: [DataImportService, MessageService, ProfileService], // Creators of services that NgModule contributes to the global collection of services;
     // they become accessible in all parts of the app. (You can also specify providers at the component level,
     // which is often preferred.)
 
