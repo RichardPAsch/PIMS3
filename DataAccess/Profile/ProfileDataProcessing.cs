@@ -20,8 +20,6 @@ namespace PIMS3.DataAccess.Profile
             _ctx = ctx;
         }
 
-        // Note: Can we add a new Position w/o adding a Profile, if the Profile is already presisted? A: YES!
-
         public IQueryable<Data.Entities.Profile> FetchDbProfile(string ticker)
         {
             var dbProfile = _ctx.Profile
@@ -40,6 +38,7 @@ namespace PIMS3.DataAccess.Profile
 
         }
 
+
         public IQueryable<string> FetchDbProfileTicker(string profileId)
         {
             return _ctx.Profile.Where(p => p.ProfileId == profileId.Trim())
@@ -48,7 +47,7 @@ namespace PIMS3.DataAccess.Profile
         }
 
 
-        public Data.Entities.Profile FetchWebProfile(string ticker)
+        public Data.Entities.Profile BuildProfile(string ticker)
         {
             // Update or initialize Profile data.
             DateTime cutOffDateTimeForProfileUpdate = DateTime.Now.AddHours(-72);
@@ -73,7 +72,7 @@ namespace PIMS3.DataAccess.Profile
 
                 var url = client.BaseAddress + "/prices?startDate=" + priceHistoryStartDate + "&" + "token=" + TiingoAccountToken;
 
-                // Currently using 'Tiingo' end-point service for Profile data retreival.
+                // Using 'Tiingo' end-point service for Profile data retreival.
                 var webResponse = FetchProfileViaWebSync(client, url);  
                 if (webResponse == null || webResponse == string.Empty)
                     return null; // TODO: write error msg to log: [BadRequest("Unable to update Profile price data for: " + ticker);]
@@ -106,7 +105,7 @@ namespace PIMS3.DataAccess.Profile
                         // Profile update IF last updated > 72hrs ago.
                         if (Convert.ToDateTime(existingProfile.First().LastUpdate) < cutOffDateTimeForProfileUpdate)
                         {
-                            // 11.17.2017 - Due to Tiingo API limitations, update just dividend rate.
+                            // Due to Tiingo API limitations, update just dividend rate.
                             foreach (var property in objChild.Properties())
                             {
                                 if (property.Name != "divCash") continue;
@@ -167,7 +166,7 @@ namespace PIMS3.DataAccess.Profile
                             if (cashValue <= 0) continue;
                             updatedOrNewProfile.DividendRate = decimal.Parse(property.Value.ToString());
                             updatedOrNewProfile.DividendYield = busLayerComponent.CalculateDividendYield(updatedOrNewProfile.DividendRate, updatedOrNewProfile.UnitPrice);
-                            updatedOrNewProfile.DividendPayDay = 15; // DateTime.Parse(objChild.Properties().ElementAt(0).Value.ToString());
+                            updatedOrNewProfile.DividendPayDay = 15; 
                             divCashGtZero = true;
                             break;
                         }
@@ -177,7 +176,6 @@ namespace PIMS3.DataAccess.Profile
 
                 } // end foreach
 
-                //historicPriceDataResponse.Dispose();
                 updatedOrNewProfile.ProfileId = Guid.NewGuid().ToString();
                 updatedOrNewProfile.CreatedBy = string.Empty;
                 updatedOrNewProfile.EarningsPerShare = 0;
@@ -192,7 +190,7 @@ namespace PIMS3.DataAccess.Profile
         }
 
 
-        public string FetchProfileViaWebSync(HttpClient client, string Url)
+        private string FetchProfileViaWebSync(HttpClient client, string Url)
         {
             var webResponse = string.Empty;
             try
