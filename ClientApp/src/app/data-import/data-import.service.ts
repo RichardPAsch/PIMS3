@@ -7,6 +7,7 @@ import { of } from 'rxjs/observable/of';
 import { MessageService } from '../message.service';
 
 
+
 let httpHeaders = new HttpHeaders()
     .set('Content-Type', 'application/json')
     .set('Cache-Control', 'no-cache');
@@ -20,7 +21,7 @@ const httpOptions = {
 // When you add a service provider to the root application injector, it’s available throughout the app.
 // Should always provide your service in the root injector unless there is a case where you want the service to be available
 // only if the consumer imports a particular @NgModule.
-@Injectable()
+@Injectable({providedIn: "root"})
 
 export class DataImportService {
 
@@ -28,7 +29,6 @@ export class DataImportService {
         baseUrl = "https://localhost:44328";  // temp - conflicts with fetch-data's definition of baseUrl ?
     }
     
-
     /* All HttpClient methods return an RxJS Observable of something.
      * Observables' subscribe() is responsible for handling errors.
      * You can use pipes to link operators (RxJS) together. Pipes let you combine multiple functions into a single function.
@@ -37,7 +37,7 @@ export class DataImportService {
        Also see: https://angular.io/tutorial/toh-pt6
     */
 
-    postImportFileData(importFileToProcess: DataImportVm): Observable<DataImportVm> {
+    postImportFileData(importFileToProcess: DataImportVm): any {
         //Send to backend for processing here: WIP -> ImportFileController.cs / ImportFileControllerReference.txt
 
         // Also see: https://stackblitz.com/angular/nqyqljajkrp?file=src%2Fapp%2Fhero.service.ts
@@ -48,6 +48,7 @@ export class DataImportService {
         // The catchError() operator intercepts an Observable that failed, & passes the error to an error handler.
         // RxJS 'tap' operator (callback) taps/intercepts into the flow of observable values, LOOKING at their value(s) only & passing them along the chain.
         // Returned 'DataImportVm' - will contain results of processing.
+
         return this.http.post<DataImportVm>(this.baseUrl + 'api/ImportFile/ProcessImportFile', importFileToProcess, httpOptions)
                         .pipe(
                             tap((processedResults: DataImportVm) => this.log("processed count of " + processedResults.recordsSaved + " XLSX recs totaling $" + processedResults.amountSaved + " for tickers: " + processedResults.miscMessage)),
