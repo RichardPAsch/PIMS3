@@ -1,0 +1,20 @@
+<p>
+    <!--   ** Note use of ag-grid-angular selector *  -->
+    <ag-grid-angular #agGrid
+                     id="gridProjections"
+                     class="ag-theme-blue"
+                     [rowData]="rowData"
+                     [columnDefs]="columnDefs"
+                     [defaultColDef]="defaultColDef"
+                     rowSelection="multiple">
+    </ag-grid-angular>
+
+    <!--This is the ag-grid component definition, with two property bindings - rowData and columnDefs.
+        The component also accepts the standard DOM style and class. We have set the class to ag-theme-balham,
+        which defines the grid theme. As you may have already noticed, the CSS class matches the name of CSS
+        file we imported earlier.-->
+
+
+</p>
+<button id="btnProjections" (click)="getProjections()">Get projections</button>
+
