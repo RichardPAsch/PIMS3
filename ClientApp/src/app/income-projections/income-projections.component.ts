@@ -46,10 +46,9 @@ export class IncomeProjectionsComponent implements OnInit {
         let profiles = new Array<Profile>();
         var selectedNodes = this.agGrid.api.getSelectedNodes();
         var selectedData = selectedNodes.map(node => node.data);
-        //var selectedRowRepresentation = selectedData.map(selRow => selRow.ticker + '/' + selRow.capital).join(' , ');
-
+        
         for (let gridRow = 0; gridRow < selectedData.length; gridRow++) {
-            this.profileSvc.getProfileData(selectedData[gridRow].ticker) //, selectedData[gridRow].capital)
+            this.profileSvc.getProfileData(selectedData[gridRow].ticker) 
                 .subscribe(responseProfile => {
                     profiles.push(this.initializeGridModel(responseProfile, selectedData[gridRow].capital));
                     this.agGrid.api.setRowData(profiles);
