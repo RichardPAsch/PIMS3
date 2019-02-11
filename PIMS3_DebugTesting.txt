@@ -1,0 +1,106 @@
+// Client path:
+C:\Development\VS2017\PIMS3\ClientApp
+
+C:\Development\VS2017\PIMS3_TestData\Asset_Files\Portfolio_Positions_Dec_21_Test1_MissingTicker.xlsx  // Ok
+
+// working price hx for HYG:
+https://api.tiingo.com/tiingo/daily/HYG/prices?startDate=2018-7-11&token=95cff258ce493ec51fd10798b3e7f0657ee37740
+// working Profile for HYG:
+https://api.tiingo.com/tiingo/daily/HYG?token=95cff258ce493ec51fd10798b3e7f0657ee37740
+
+// Tiingo with bad ticker:
+C:\Development\VS2017\PIMS3_TestData\Asset_Files\Portfolio_Positions_Jan_14_Test2_BadTicker.xlsx // Ok
+https://api.tiingo.com/tiingo/daily/RPA?token=95cff258ce493ec51fd10798b3e7f0657ee37740
+Tiingo => {"detail":"Not found."}
+?error.error
+Object {exceptionTickers: "RPA"}
+?assetListingToSave.First().ProfileId
+"B89352CC-D2C7-4F70-B224-A73F00CE6B4D" // AAPL 
+
+// Existing Db Profile w/o Position-Account
+C:\Development\VS2017\PIMS3_TestData\Asset_Files\Portfolio_Positions_Jan_16_HasDbProfile_No_Position.xlsx  // Ok
+
+// Multiple non-Db Profiles nor Positions
+C:\Development\VS2017\PIMS3_TestData\Asset_Files\Portfolio_Positions_Jan_18_NoDbProfile_or_Positions.xlsx  // Ok
+	Error dealing collection:
+	- AMZN - Ok
+	- WMT  - Ok
+
+// Multiple non-Db Profiles nor Positions - 2 Positions/2-3 Accounts
+C:\Development\VS2017\PIMS3_TestData\Asset_Files\Portfolio_Positions_Jan_21_NoDbProfile_or_Positions_2_3.xlsx // Ok
+
+
+
+Sample listing to save (HYG):
+-----------------------------
+?assetListingToSave.First()  // assetListingToSave.First().GetType().Name = assetCreationVm
+{PIMS3.ViewModels.AssetCreationVm}
+    Asset: null
+    AssetClassId: "6215631D-5788-4718-A1D0-A2FC00A5B1A7"
+    AssetId: "793bd733-4fd9-41f6-8b45-f56e456a910e"
+    ExceptionTickers: null
+    InvestorId: "CF256A53-6DCD-431D-BC0B-A810010F5B88"
+    LastUpdate: {1/9/2019 3:50:29 PM}
+    Positions: Count = 1
+    Profile: {PIMS3.Data.Entities.Profile}
+    ProfileId: "2ce23013-d005-4c78-99dc-1b7162835ab7"
+
+?assetListingToSave.First().Positions.ElementAt(0)
+{PIMS3.Data.Entities.Position}
+    AccountType: null
+    AccountTypeId: "745AD04D-D7DF-4CD2-A5C1-ADA8032FCFD8"
+    AssetId: "793bd733-4fd9-41f6-8b45-f56e456a910e"
+    Fees: 0
+    Incomes: null
+    LastUpdate: {1/9/2019 3:50:52 PM}
+    MarketPrice: 0
+    PositionAsset: null
+    PositionDate: {1/9/2019 3:50:52 PM}
+    PositionId: "b61b0000-91ab-45ac-b668-9633fd560eab"
+    Quantity: 100
+    Status: "A"
+    UnitCost: 81.44
+
+?assetListingToSave.First().Profile
+{PIMS3.Data.Entities.Profile}
+    Asset: null
+    AssetId: null
+    CreatedBy: null
+    DividendFreq: "M"
+    DividendMonths: null
+    DividendPayDay: 15
+    DividendRate: 0.39105
+    DividendYield: 5.60
+    EarningsPerShare: 0
+    ExDividendDate: {1/9/2019 12:00:00 AM}
+    LastUpdate: {1/9/2019 4:10:20 PM}
+    PERatio: 0
+    ProfileId: "a3da5058-3006-4ff2-93f1-ef980f2f89ee"
+    TickerDescription: "ISHARES IBOXX $ HIGH YIELD CORPORATE BOND ETF"
+    TickerSymbol: "HYG"
+    UnitPrice: 83.83
+
+
+-------------------------
+Test scenarios completed:
+-------------------------
+1. no existing Db Profile with no existing Position-Account - DONE
+2. no existing Tiingo Profile - DONE
+3. existing Db Profile with no existing Position-Account
+   for existing investor: ('AAPL' for me) - DONE
+4. multiple non-existing Db Profiles with no existing Position-Accounts AMZN & WMT - DONE
+
+
+Errors:
+=========
+"An exception occurred while reading a database value for property 'Profile.DividendPayDay'. DONE
+The expected type was 'System.Int32' but the actual value was null." DONE
+The best overloaded method match for 'int.Parse(string)' has some invalid arguments  DONE
+Cannot implicitly convert type 'PIMS3.Data.Entities.Position' to 'System.Collections.Generic.IList<PIMS3.Data.Entities.Position>'.
+An explicit conversion exists (are you missing a cast?) DONE
+'processedVm' = null ?
+
+
+
+
+  

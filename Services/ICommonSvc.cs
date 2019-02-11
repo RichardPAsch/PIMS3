@@ -5,6 +5,8 @@ namespace PIMS3.Services
     public interface ICommonSvc
     {
         string GetInvestorIdFromInvestor(string currentInvestor);
+
+        //string GenerateGuid();
     }
 
 }

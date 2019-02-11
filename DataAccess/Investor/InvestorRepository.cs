@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 
 
+// 12.06.18 - all repositories to phased out!
 
 namespace PIMS3.Data.Repositories
 {
