@@ -2,6 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { AgGridNg2 } from 'ag-grid-angular';
 import { ProfileService } from '../shared/profile.service';
 import { Profile } from '../income-projections/profile';
+import { HttpErrorResponse } from '@angular/common/http';
+import 'rxjs/add/operator/retry'; 
 //import { map } from 'rxjs/operators';
 
 @Component({
@@ -11,13 +13,13 @@ import { Profile } from '../income-projections/profile';
 })
 export class IncomeProjectionsComponent implements OnInit {
 
-    constructor(private profileSvc : ProfileService) { }
+    constructor(private profileSvc: ProfileService) { }
 
     // Decorator references the child component inside the template.
     @ViewChild('agGrid')
     agGrid: AgGridNg2;
 
-
+    
     columnDefs = [
         { headerName: "Ticker", field: "ticker", sortable: true, filter: true, checkboxSelection: true, width: 100 },
         { headerName: "Capital ($)", field: "capital", width: 110, type: "numericColumn" },
@@ -27,7 +29,7 @@ export class IncomeProjectionsComponent implements OnInit {
             groupId: "dividendGroup",
             children: [
                 { headerName: "Rate ($)", field: "dividendRate", width: 90, type: "numericColumn" },
-                { headerName: "Yield (%)", field: "dividendYield", width: 100, type: "numericColumn" }
+                { headerName: "Yield (%)", field: "dividendYield", width: 100, type: "numericColumn", editable: false }
             ]
         },
         { headerName: "Income ($)", field: "projectedMonthlyIncome", width: 135, editable: false, type: "numericColumn" },
@@ -42,19 +44,42 @@ export class IncomeProjectionsComponent implements OnInit {
         editable: true
     };
 
-    getProjections() {
+    getProjections()
+    {
         let profiles = new Array<Profile>();
         var selectedNodes = this.agGrid.api.getSelectedNodes();
         var selectedData = selectedNodes.map(node => node.data);
-        
-        for (let gridRow = 0; gridRow < selectedData.length; gridRow++) {
-            this.profileSvc.getProfileData(selectedData[gridRow].ticker) 
+
+        for (let gridRow = 0; gridRow < selectedData.length; gridRow++)
+        {
+            if (selectedData[gridRow].ticker == "" || selectedData[gridRow].capital == 0) {
+                alert("Error processing projection(s): \nmissing 'ticker' and/or 'capital' entry(ies).");
+                return;
+            }
+
+            this.profileSvc.getProfileData(selectedData[gridRow].ticker)
+                .retry(2)     // Retrying request in case of transient errors, e.g, slow network, no internet access.
                 .subscribe(responseProfile => {
-                    profiles.push(this.initializeGridModel(responseProfile, selectedData[gridRow].capital));
-                    this.agGrid.api.setRowData(profiles);
-                });
+                                    profiles.push(this.initializeGridModel(responseProfile, selectedData[gridRow].capital));
+                                    this.agGrid.api.setRowData(profiles);
+                },
+                (apiErr: HttpErrorResponse) => {
+                    if (apiErr.error instanceof Error) {
+                        // Client-side or network error encountered.
+                        alert("Error processing projection(s): \network or application error. Please try later.");
+                    }
+                    else {
+                        //API returns unsuccessful response status codes, e.g., 404, 500 etc.
+                        let truncatedMsgLength = apiErr.error.errorMsg.indexOf(":") - 7;
+                        alert("Error processing projection(s): due to : \n" + apiErr.error.errorMsg.substring(0, truncatedMsgLength)
+                                                                            + "."
+                                                                            + "\nCheck ticker validity.");
+                    }
+                }
+            ); // end subscribe
         }
     }
+
 
     ngOnInit() {
         this.rowData = [
