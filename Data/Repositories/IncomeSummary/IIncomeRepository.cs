@@ -5,6 +5,6 @@ namespace PIMS3.Data.Repositories.IncomeSummary
 {
     public interface IIncomeRepository
     {
-        IEnumerable<Income> GetRevenue();
+        IEnumerable<Income> GetRevenueSummaryForYear(int yearsBackDated);
     }
 }
