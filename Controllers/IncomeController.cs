@@ -33,23 +33,15 @@ namespace PIMS3.Controllers
         }
 
 
-        // GET: /<controller>/
-        //public IActionResult Index()
-        //{
-        //    return View();
-        //}
-        
-
-        [HttpGet("[action]")]
-        public IEnumerable<YtdRevenueSummaryVm> GetRevenueSummary()
+        [HttpGet("{yearsToBackDate}")]
+        public IEnumerable<YtdRevenueSummaryVm> GetRevenueSummary(int yearsToBackDate)
         {
-            // TODO: use repository instead. 10.6.18
             // AutoMapper not needed; summary data is read-only.
             IEnumerable<Income> incomeData;
             try
             {
                 _logger.LogInformation("Attempting GetRevenueSummary().");
-                incomeData = _repo.GetRevenue();
+                incomeData = _repo.GetRevenueSummaryForYear(yearsToBackDate);
                 var ytdRevenueSummary = CalculateRevenueTotals(incomeData.AsQueryable());
                 _incomeCount = new decimal[ytdRevenueSummary.Count()];
                 ytdRevenueSummary.ToList().ForEach(CalculateAverages);
