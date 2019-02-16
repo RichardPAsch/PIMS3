@@ -1,18 +1,52 @@
 <style>
-  h4{
-    background-color: lightgray;
-    color: darkblue;
-  }
-  em {
-    color: black;
-  }
+    h4 {
+        background-color: lightgray;
+        color: darkblue;
+    }
+    .container {
+        background-color: aliceblue;
+        width: 600px;
+        float: left;
+    }
+    tbody tr td {
+        text-align: right;
+    }
+    td:first-child {
+        text-align: center;
+    }
+    header {
+        background-color: #222;
+        padding: 5px;
+        text-align: center;
+        font-size: 17px;
+        color: white;
+        width: 598px;
+        height: 34px;
+        margin-bottom: 24px;
+    }
 </style>
 
-<div>
-    <h4 class="text-center">Ytd income summary for:&nbsp;<em>{{currentYear}}</em></h4>
-</div>
+
+<header>
+    YTD income summary for:&nbsp;<em>{{currentYearHeading}}</em>
+</header>
 
 <p *ngIf="!ytdIncomeSummary"><em>Loading YTD data...</em></p>
+
+<p>
+    <span><label>Display income summary for:&nbsp;&nbsp;</label></span>
+    <select #yearSelected class="select-option" (change)="onYearSelected(yearSelected.value)">
+        <!--Value = # of years backdated.-->
+        <option value="0">{{currentYear}}</option>
+        <option value="1">{{currentYear-1}}</option>
+        <option value="2">{{currentYear-2}}</option>
+        <option value="3">{{currentYear-3}}</option>
+        <option value="4">{{currentYear-4}}</option>
+        <option value="5">{{currentYear-5}}</option>
+        <option value="6">{{currentYear-6}}</option>
+        <option value="7">{{currentYear-7}}</option>
+    </select>
+</p>
 
 <div class="container" style="background-color:aliceblue">
     <p></p>
@@ -23,15 +57,21 @@
                     <th>Month recv'd</th>
                     <th>Amount recv'd</th>
                     <th>YTD average</th>
-                    <th>Rolling 3 month average</th>
+                    <th>Rolling 3 Mo. Avg.</th>
                 </tr>
             </thead>
             <tbody>
                 <tr *ngFor="let data of ytdIncomeSummary">
-                    <td>{{data.monthRecvd}}</td>
-                    <td>{{data.amountRecvd | currency}}</td>
+                    <td style="text-align: center;">{{data.monthRecvd}}</td>
+                    <td>{{data.amountRecvd}}</td>
                     <td>{{data.ytdAverage}}</td>
                     <td>{{data.rolling3MonthAverage}}</td>
+                </tr>
+                <tr>
+                    <td style="color:#222">Total:</td>
+                    <td><font color="blue">{{incomeSummaryTotal | currency}}</font></td>
+                    <td></td>
+                    <td></td>
                 </tr>
             </tbody>
         </table>
