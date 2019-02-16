@@ -26,11 +26,11 @@ namespace PIMS3.Data.Repositories.IncomeSummary
         }
 
 
-        public IEnumerable<Income> GetRevenue()
+        public IEnumerable<Income> GetRevenueSummaryForYear(int yearsBackDated)
         {
             var tempInvestor = "rpasch@rpclassics.net"; // TODO: use Identity - to be implemented
-            var fromDate = new DateTime(DateTime.UtcNow.Year, 1, 1);
-            var toDate = Convert.ToDateTime(DateTime.UtcNow.ToString("d"));
+            var fromDate = new DateTime(DateTime.UtcNow.AddYears(-yearsBackDated).Year, 1, 1);
+            var toDate = new DateTime(DateTime.UtcNow.AddYears(-yearsBackDated).Year, 12, 31);
 
             try
             {
