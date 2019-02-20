@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PIMS3.BusinessLogic.ProfileData;
 using PIMS3.Data;
+using PIMS3.DataAccess.Position;
 using System;
+using System.Linq;
 
 namespace PIMS3.Controllers
 {
@@ -10,6 +12,8 @@ namespace PIMS3.Controllers
     public class ProfileController : ControllerBase
     {
         private readonly PIMS3Context _dbCtx;
+        // TODO: temporary until security implemented.
+        private readonly string investorId = "CF256A53-6DCD-431D-BC0B-A810010F5B88";
 
         public ProfileController(PIMS3Context dbCtx)
         {
@@ -35,6 +39,25 @@ namespace PIMS3.Controllers
             {
                 return BadRequest(new { errorMsg = "Unable to fetch Profile data for " + tickerProfileToFetch + " due to: " + ex.Message}); 
             }
+        }
+
+
+        [HttpGet()]
+        public IQueryable<Data.Entities.Profile> GetProfilesForIncomeSchedule()
+        {
+            var positionDataAccessComponent = new PositionDataProcessing(_dbCtx);
+            var eligiblePositions = positionDataAccessComponent.GetPositionsByInvestorId(investorId);
+
+            var eligibleProfiles = eligiblePositions.Select(p => p.PositionAsset.Profile)
+                                                    .Distinct()
+                                                    .Where(p => p.DividendFreq == "A" ||
+                                                                p.DividendFreq == "S" ||
+                                                                p.DividendFreq == "Q" ||
+                                                                p.DividendFreq == "M")
+                                                    .OrderBy(p => p.DividendFreq)
+                                                    .ThenBy(p => p.TickerSymbol)
+                                                    .AsQueryable();
+            return eligibleProfiles;
         }
 
     }
