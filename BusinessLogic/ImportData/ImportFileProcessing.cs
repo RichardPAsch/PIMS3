@@ -12,6 +12,7 @@ using PIMS3.DataAccess.Position;
 using PIMS3.DataAccess.Profile;
 using PIMS3.DataAccess.Account;
 using System.Globalization;
+using PIMS3.DataAccess.IncomeData;
 
 namespace PIMS3.BusinessLogic.ImportData
 {
@@ -19,7 +20,7 @@ namespace PIMS3.BusinessLogic.ImportData
     {
         private DataImportVm _viewModel;
         private static string _xlsTickerSymbolsOmitted = string.Empty;
-        private IEnumerable<Income> duplicateResults;
+        private IEnumerable<Data.Entities.Income> duplicateResults;
         private static int _totalXlsIncomeRecordsToSave = 0;
         private readonly PIMS3Context _ctx;
         private static string _assetsNotAddedListing = string.Empty;
@@ -52,10 +53,10 @@ namespace PIMS3.BusinessLogic.ImportData
         }
 
 
-        public IEnumerable<Income> ParseRevenueSpreadsheetForIncomeRecords(string filePath, ImportFileDataProcessing dataAccessComponent)
+        public IEnumerable<Data.Entities.Income> ParseRevenueSpreadsheetForIncomeRecords(string filePath, ImportFileDataProcessing dataAccessComponent)
         {
-            var newIncomeListing = new List<Income>();
-            var incomeDataAccessComponent = new DataAccess.Income.IncomeData(_ctx);
+            var newIncomeListing = new List<Data.Entities.Income>();
+            var incomeDataAccessComponent = new IncomeDataProcessing(_ctx);
             var assetDataAccessComponent = new DataAccess.Asset.AssetData(_ctx);
             IQueryable<string> fetchedPositionId;
 
@@ -122,7 +123,7 @@ namespace PIMS3.BusinessLogic.ImportData
                         if (_xlsTickerSymbolsOmitted != string.Empty)
                             _viewModel.ExceptionTickers = _xlsTickerSymbolsOmitted;
 
-                        var newIncomeRecord = new Income
+                        var newIncomeRecord = new Data.Entities.Income
                         {
                             IncomeId = Guid.NewGuid().ToString(),
                             PositionId = fetchedPositionId.First().ToString(),
