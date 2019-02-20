@@ -30,6 +30,11 @@
                     </a>
                 </li>
                 <li [routerLinkActive]='["link-active"]'>
+                    <a [routerLink]='["/income-receivables"]' (click)='collapse()'>
+                        <span class='glyphicon glyphicon-usd'></span> Income due
+                    </a>
+                </li>
+                <li [routerLinkActive]='["link-active"]'>
                     <a [routerLink]='["/data-import"]' (click)='collapse()'>
                         <span class='glyphicon glyphicon-file'></span> Data import
                     </a>
