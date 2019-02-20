@@ -41,4 +41,5 @@ export class IncomeReceivablesComponent implements OnInit {
         alert("Ok");
     }
 
+
 }
