@@ -56,6 +56,8 @@ namespace PIMS3.Data.Entities
         [Range(0.00, 9000.00)]
         public decimal UnitCost { get; set; }
 
+        public bool? PymtDue { get; set; }
+
 
     }
 }
