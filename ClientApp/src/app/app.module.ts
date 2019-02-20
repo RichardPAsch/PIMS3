@@ -16,6 +16,7 @@ import { MessageService } from './message.service';
 import { AgGridModule } from 'ag-grid-angular';
 import { IncomeProjectionsComponent } from './income-projections/income-projections.component';
 import { ProfileService } from './shared/profile.service';
+import { IncomeReceivablesComponent } from './income-receivables/income-receivables.component';
 
 /* Notes:
  *  Medium to large apps should have one or more FEATURE modules. ngModule may have one
@@ -31,7 +32,8 @@ import { ProfileService } from './shared/profile.service';
     FetchDataComponent,
     IncomeSummaryComponent,
     DataImportComponent,
-    IncomeProjectionsComponent
+    IncomeProjectionsComponent,
+    IncomeReceivablesComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -39,12 +41,13 @@ import { ProfileService } from './shared/profile.service';
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-      RouterModule.forRoot([
+    RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'counter', component: CounterComponent },
       { path: 'fetch-data', component: FetchDataComponent },
       { path: 'income-projections', component: IncomeProjectionsComponent },
       { path: 'income-summary', component: IncomeSummaryComponent },
+      { path: 'income-receivables', component: IncomeReceivablesComponent },
       { path: 'data-import', component: DataImportComponent },
     ])
   ],
