@@ -1,0 +1,21 @@
+<header>
+    - Income due schedule for <em> {{currentMonth}} </em> -
+</header>
+<ul>
+    <li>Schedule list all assets for which income is expected during the month.</li>
+    <li>Select [x] row(s) for asset(s) eligible for "Mark as Received".</li>
+    <li>Record/Save actual income via "Data import".</li>
+</ul>
+<p></p>
+<p>
+    <ag-grid-angular #agGridReceivables
+                     id="gridReceivables"
+                     class="ag-theme-blue"
+                     [rowData]="rowData"
+                     [columnDefs]="columnDefs"
+                     rowSelection="multiple">
+    </ag-grid-angular>
+</p>
+<p>
+    <button id="btnReceivables" (click)="getReceivables()">Mark as Received</button>
+ </p>
