@@ -8,6 +8,9 @@ using PIMS3.Data.Repositories.IncomeSummary;
 using PIMS3.ViewModels;
 //using AutoMapper; // deferred use.
 using System.Globalization;
+using PIMS3.Data;
+using PIMS3.BusinessLogic.PositionData;
+
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -23,14 +26,18 @@ namespace PIMS3.Controllers
         private decimal _runningYtdTotal;
         private decimal[] _incomeCount;
         private IList<YtdRevenueSummaryVm> _tempListing = new List<YtdRevenueSummaryVm>();
+        private readonly PIMS3Context _ctx;
+        // TODO: temporary until security implemented.
+        private readonly string investorId = "CF256A53-6DCD-431D-BC0B-A810010F5B88";  // RPA
 
-
-        public IncomeController(IIncomeRepository repo, ILogger<IncomeController> logger)//, IMapper mapper)
+        public IncomeController(IIncomeRepository repo, ILogger<IncomeController> logger, PIMS3Context ctx)//, IMapper mapper)
         {
             _repo = repo;
             _logger = logger;
+            _ctx = ctx;
             //_mapper = mapper;
         }
+
 
 
         [HttpGet("{yearsToBackDate}")]
@@ -53,6 +60,21 @@ namespace PIMS3.Controllers
                 _logger.LogError($"Unable to fetch/calculate income via GetRevenueSummary() due to: {ex}");
                 return null;
             }
+        }
+
+
+        [HttpGet()]
+        public string GetMissingIncomeSchedule()
+        {
+            // Creates on a monthly basis, a schedule of due income receipts; to be used for validating received
+            // revenue during each month before income is actually imported at months' end. Each ticker acknowledgement
+            // of received income, removes that ticker from the schedule.
+
+            // Qualifying Positions will drive processing in 'PositionProcessing'.
+            var positionBusLogicComponent = new PositionProcessing(_ctx);
+            var positionsDuePymt = positionBusLogicComponent.GetPositionsWithIncomeDue(investorId);
+
+            return positionsDuePymt;
         }
 
 
