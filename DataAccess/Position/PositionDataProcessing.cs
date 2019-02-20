@@ -27,5 +27,15 @@ namespace PIMS3.DataAccess.Position
 
             return assetInfo.AsQueryable();
         }
+
+
+        public IQueryable<Data.Entities.Position> GetPositionsByInvestorId(string investorId)
+        {
+            return _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId && 
+                                            p.Status == "A" &&
+                                            (p.PymtDue == null || p.PymtDue == false))
+                                .AsQueryable();
+
+        }
     }
 }
