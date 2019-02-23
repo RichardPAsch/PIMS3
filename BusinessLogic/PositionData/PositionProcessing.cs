@@ -1,9 +1,8 @@
-﻿using Newtonsoft.Json;
-using PIMS3.DataAccess.Position;
+﻿using PIMS3.DataAccess.Position;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using PIMS3.ViewModels;
 
 namespace PIMS3.BusinessLogic.PositionData
 {
@@ -16,39 +15,49 @@ namespace PIMS3.BusinessLogic.PositionData
             _ctx = ctx;
         }
 
-        public string GetPositionsWithIncomeDue(string investor)
+        public IQueryable<IncomeReceivablesVm> GetPositionsWithIncomeDue(string investor)
         {
             var positionDataAccessComponent = new PositionDataProcessing(_ctx);
-            var fetchedPositions = positionDataAccessComponent.GetPositionsByInvestorId("");
+            var filteredJoinedPositionProfileData = positionDataAccessComponent.GetPositionsForIncomeReceivables(investor);
+                       
             var currentMonth = DateTime.Now.Month;
-            List<string> tickersWithIncomeDue = new List<string>();
+            List<IncomeReceivablesVm> tickersWithIncomeDue = new List<IncomeReceivablesVm>();
 
-            // fetchedPositions = filtered via [investorId] & [status: "A"] & [pymtDue: null || false].
-            foreach (var position in fetchedPositions)
+            if (!filteredJoinedPositionProfileData.Any())
+                return null; ;
+
+            foreach (IncomeReceivablesVm position in filteredJoinedPositionProfileData)
             {
-                // Add 'PositionId' for later db updates.
-                if (position.PositionAsset.Profile.DividendFreq == "M")
+                if (position.DividendFreq == "M")
                 {
-                    tickersWithIncomeDue.Add(position.PositionAsset.Profile.TickerSymbol + ", " +
-                                             position.AccountType.AccountTypeDesc + ", " +
-                                             position.PositionAsset.Profile.DividendPayDay + ", " +
-                                             position.PositionAsset.Profile.DividendFreq.ToUpper());
+                    tickersWithIncomeDue.Add(new IncomeReceivablesVm
+                    {
+                        PositionId = position.PositionId,
+                        TickerSymbol = position.TickerSymbol,
+                        AccountTypeDesc = position.AccountTypeDesc,
+                        DividendPayDay = position.DividendPayDay,
+                        DividendFreq = position.DividendFreq
+                    });
                 }
 
-                if (position.PositionAsset.Profile.DividendFreq == "Q" || position.PositionAsset.Profile.DividendFreq == "S"
-                                                                       || position.PositionAsset.Profile.DividendFreq == "A")
+                if (position.DividendFreq == "Q" || position.DividendFreq == "S"
+                                                 || position.DividendFreq == "A")
                 {
-                    if (CurrentMonthIsApplicable(position.PositionAsset.Profile.DividendMonths, currentMonth.ToString()))
+                    if (CurrentMonthIsApplicable(position.DividendMonths, currentMonth.ToString()))
                     {
-                        tickersWithIncomeDue.Add(position.PositionAsset.Profile.TickerSymbol + ", " +
-                                             position.AccountType.AccountTypeDesc + ", " +
-                                             position.PositionAsset.Profile.DividendPayDay + ", " +
-                                             position.PositionAsset.Profile.DividendFreq.ToUpper());
+                        tickersWithIncomeDue.Add(new IncomeReceivablesVm
+                        {
+                            PositionId = position.PositionId,
+                            TickerSymbol = position.TickerSymbol,
+                            AccountTypeDesc = position.AccountTypeDesc,
+                            DividendPayDay = position.DividendPayDay,
+                            DividendFreq = position.DividendFreq
+                        });
                     }
                 }
             }
 
-            return JsonConvert.SerializeObject(tickersWithIncomeDue);
+            return tickersWithIncomeDue.AsQueryable(); ;
         }
 
 
@@ -59,6 +68,6 @@ namespace PIMS3.BusinessLogic.PositionData
             return months.Contains(thisMonth);
         }
 
-               
+        
     }
 }
