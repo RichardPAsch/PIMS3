@@ -50,10 +50,11 @@ import { IncomeReceivablesComponent } from './income-receivables/income-receivab
       { path: 'income-receivables', component: IncomeReceivablesComponent },
       { path: 'data-import', component: DataImportComponent },
     ])
-  ],
-  providers: [DataImportService, MessageService, ProfileService], // Creators of services that NgModule contributes to the global collection of services;
-    // they become accessible in all parts of the app. (You can also specify providers at the component level,
-    // which is often preferred.)
+    ],
+   // Creators of services that NgModule contributes to the global collection of services;
+   // they become accessible in all parts of the app. (You can also specify providers at the component level,
+   // which is often preferred.)
+  providers: [DataImportService, MessageService, ProfileService], //, IncomeReceivablesService], 
 
   bootstrap: [AppComponent] // The main application view, called the root component, which HOSTS all other app views.
                             // Only NgModule should set the bootstrap property.
