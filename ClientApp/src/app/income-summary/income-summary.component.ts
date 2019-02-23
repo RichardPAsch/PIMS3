@@ -32,7 +32,7 @@ export class IncomeSummaryComponent {
     }
 
     processIncomeSummary() {
-
+        // TODO: refactor into seperate service component.
         this.httpCilentReference.get<any[]>(this.apiUrl)
             .retry(2)
             .subscribe(result =>
