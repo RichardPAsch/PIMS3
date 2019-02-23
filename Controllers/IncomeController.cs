@@ -16,6 +16,7 @@ using PIMS3.BusinessLogic.PositionData;
 
 namespace PIMS3.Controllers
 {
+    // Using token replacement in route templates ([controller], [action], [area]).
     [Route("api/[controller]")]
     public class IncomeController : Controller
     {
@@ -39,8 +40,8 @@ namespace PIMS3.Controllers
         }
 
 
-
-        [HttpGet("{yearsToBackDate}")]
+        // Using attribute routing with Http[Verb] attributes.
+        [HttpGet("{yearsToBackDate:int}")]
         public IEnumerable<YtdRevenueSummaryVm> GetRevenueSummary(int yearsToBackDate)
         {
             // AutoMapper not needed; summary data is read-only.
@@ -63,8 +64,8 @@ namespace PIMS3.Controllers
         }
 
 
-        [HttpGet()]
-        public string GetMissingIncomeSchedule()
+        [HttpGet("GetMissingIncomeSchedule")]
+        public IEnumerable<IncomeReceivablesVm> GetMissingIncomeSchedule()
         {
             // Creates on a monthly basis, a schedule of due income receipts; to be used for validating received
             // revenue during each month before income is actually imported at months' end. Each ticker acknowledgement
@@ -72,6 +73,7 @@ namespace PIMS3.Controllers
 
             // Qualifying Positions will drive processing in 'PositionProcessing'.
             var positionBusLogicComponent = new PositionProcessing(_ctx);
+
             var positionsDuePymt = positionBusLogicComponent.GetPositionsWithIncomeDue(investorId);
 
             return positionsDuePymt;
