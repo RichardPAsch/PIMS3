@@ -91,7 +91,10 @@ export class IncomeReceivablesComponent implements OnInit {
         this.receivablesSvc.UpdateIncomeReceivables(selectedPositionData)
             .retry(2)
             .subscribe(updateResponse => {
-                alert("Update(s) successfull for :" + selectedPositionData.length + " Position(s)." );
+                if (updateResponse)
+                    alert("Update(s) successfull for :" + selectedPositionData.length + " Position(s).");
+                else
+                    alert("Error marking Position(s) as payment received, check Position data.");
             },
             (apiError: HttpErrorResponse) => {
                 if (apiError.error instanceof Error)
