@@ -79,13 +79,15 @@ namespace PIMS3
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
-            });
+            //app.UseMvc(routes =>
+            //{
+            //    routes.MapRoute(
+            //        name: "default",
+            //        template: "{controller}/{action=Index}/{id?}");
+            //});
 
+            // Convenience method replaces above "app.UseMvc(routes => ..."
+            app.UseMvcWithDefaultRoute();
             
             app.UseSpa(spa =>
             {
