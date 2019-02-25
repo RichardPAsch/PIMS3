@@ -17,6 +17,7 @@ import { AgGridModule } from 'ag-grid-angular';
 import { IncomeProjectionsComponent } from './income-projections/income-projections.component';
 import { ProfileService } from './shared/profile.service';
 import { IncomeReceivablesComponent } from './income-receivables/income-receivables.component';
+import { PositionsComponent } from './positions/positions.component';
 
 /* Notes:
  *  Medium to large apps should have one or more FEATURE modules. ngModule may have one
@@ -33,7 +34,8 @@ import { IncomeReceivablesComponent } from './income-receivables/income-receivab
     IncomeSummaryComponent,
     DataImportComponent,
     IncomeProjectionsComponent,
-    IncomeReceivablesComponent
+    IncomeReceivablesComponent,
+    PositionsComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -49,6 +51,7 @@ import { IncomeReceivablesComponent } from './income-receivables/income-receivab
       { path: 'income-summary', component: IncomeSummaryComponent },
       { path: 'income-receivables', component: IncomeReceivablesComponent },
       { path: 'data-import', component: DataImportComponent },
+      { path: 'positions', component: PositionsComponent },
     ])
     ],
    // Creators of services that NgModule contributes to the global collection of services;
