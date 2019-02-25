@@ -49,6 +49,11 @@
                         <span class='glyphicon glyphicon-th-list'></span> Fetch data
                     </a>
                 </li>
+                <li [routerLinkActive]='["link-active"]'>
+                    <a [routerLink]='["/positions"]' (click)='collapse()'>
+                        <span class='glyphicon glyphicon-th-list'></span> Positions
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
