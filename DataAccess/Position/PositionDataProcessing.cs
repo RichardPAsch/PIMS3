@@ -73,6 +73,7 @@ namespace PIMS3.DataAccess.Position
 
             var assets = _ctx.Asset.Select(a => a);
 
+            // p1: join table; p2&p3: join PKs; p4: projection form.
             var dataJoin = positions.Join(assets, p => p.AssetId, a => a.AssetId, (positionData, assetData) => new IncomeReceivablesVm
             {
                 PositionId = positionData.PositionId,
@@ -89,5 +90,28 @@ namespace PIMS3.DataAccess.Position
                            .ThenBy(data => data.TickerSymbol)
                            .AsQueryable();
         }
+
+
+        public IQueryable<PositionsForEditVm> GetPositions(string investorId)
+        {
+            // Skipping filter for (I)nactive recs, allowing investor to view all.
+            var positions = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId).AsQueryable();
+            var assets = _ctx.Asset.Select(asset => asset).AsQueryable();
+
+            return positions.Join(assets, p => p.AssetId, a => a.AssetId, (positionsInfo, assetsInfo) => new PositionsForEditVm
+            {
+                PositionId = positionsInfo.PositionId,
+                TickerSymbol = assetsInfo.Profile.TickerSymbol,
+                Account = positionsInfo.AccountType.AccountTypeDesc,
+                LastUpdate = positionsInfo.LastUpdate.ToShortDateString(),
+                Status = positionsInfo.Status,
+                PymtDue = positionsInfo.PymtDue?? true,
+                Revenue = positionsInfo.Incomes
+            })
+            .OrderBy(p => p.Status)
+            .ThenBy(p => p.TickerSymbol)
+            .AsQueryable();
+        }
+
     }
 }
