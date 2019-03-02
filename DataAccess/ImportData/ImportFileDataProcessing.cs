@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using PIMS3.DataAccess.Profile;
+using PIMS3.DataAccess.Position;
 
 namespace PIMS3.DataAccess.ImportData
 {
@@ -36,6 +37,7 @@ namespace PIMS3.DataAccess.ImportData
             if (busLayerComponent.ValidateVm())
             {
                 revenueListingToSave = busLayerComponent.ParseRevenueSpreadsheetForIncomeRecords(importVmToUpdate.ImportFilePath.Trim(), this);
+                
 
                 if (revenueListingToSave == null)
                 {
@@ -44,11 +46,9 @@ namespace PIMS3.DataAccess.ImportData
                 }
                 else
                 {
-                    using (_ctx)
-                    {
-                        _ctx.AddRange(revenueListingToSave);
-                        recordsSaved = _ctx.SaveChanges();
-                    }
+                    // Deferring use of using{}: ctx scope needed.
+                    _ctx.AddRange(revenueListingToSave);
+                    recordsSaved = _ctx.SaveChanges();
                 }
 
                 if (recordsSaved > 0)
@@ -61,7 +61,12 @@ namespace PIMS3.DataAccess.ImportData
 
                     importVmToUpdate.AmountSaved = totalAmtSaved;
                     importVmToUpdate.RecordsSaved = recordsSaved;
+
+                    // Now update Position records to reflect new payment is due.
+                    var positionDataAccessComponent = new PositionDataProcessing(_ctx);
+                    positionDataAccessComponent.UpdatePositionPymtDueFlags(ExtractPositionIdsForPymtDueProcessing(revenueListingToSave), true);
                 }
+                _ctx.Dispose();
             }
 
             // Missing amount & record count reflects error condition.
@@ -235,6 +240,19 @@ namespace PIMS3.DataAccess.ImportData
                     break;
             }
             return currentType;
+        }
+
+
+        private string[] ExtractPositionIdsForPymtDueProcessing(IEnumerable<Data.Entities.Income> incomeCollection)
+        {
+            // Use successfully saved income records to gather positionIds, which will be used for updating corresponding
+            // Position records with: 'PymtDue = true'.
+            List<string> idsForUpdating = new List<string>();
+            foreach (var incomeRec in incomeCollection)
+            {
+                idsForUpdating.Add(incomeRec.PositionId);
+            }
+            return idsForUpdating.ToArray();
         }
 
 
