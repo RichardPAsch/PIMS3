@@ -32,7 +32,7 @@ namespace PIMS3.DataAccess.Position
         }
 
 
-        public bool UpdatePositionPymtDueFlags(string[] positionIds)
+        public bool UpdatePositionPymtDueFlags(string[] positionIds, bool? isRecorded = null)
         {
             var updatesAreOk = false;
             var positionsToUpdate = new List<Data.Entities.Position>();
@@ -49,7 +49,10 @@ namespace PIMS3.DataAccess.Position
             {
                 foreach(var position in positionsToUpdate)
                 {
-                    position.PymtDue = false;
+                    // isRecorded: null/false - income received, but not yet recorded.
+                    // isRecorded: true - income received & recorded, & now eligible for next receivable.
+                    // position.PymtDue = false;
+                    position.PymtDue = isRecorded == null ? false : true;
                     position.LastUpdate = DateTime.Now;
                 }
 
@@ -94,23 +97,53 @@ namespace PIMS3.DataAccess.Position
 
         public IQueryable<PositionsForEditVm> GetPositions(string investorId)
         {
-            // Skipping filter for (I)nactive recs, allowing investor to view all.
-            var positions = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId).AsQueryable();
+            var positions = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId && p.Status == "A").AsQueryable();
             var assets = _ctx.Asset.Select(asset => asset).AsQueryable();
 
             return positions.Join(assets, p => p.AssetId, a => a.AssetId, (positionsInfo, assetsInfo) => new PositionsForEditVm
             {
                 PositionId = positionsInfo.PositionId,
                 TickerSymbol = assetsInfo.Profile.TickerSymbol,
+                TickerDescription = assetsInfo.Profile.TickerDescription,
                 Account = positionsInfo.AccountType.AccountTypeDesc,
                 LastUpdate = positionsInfo.LastUpdate.ToShortDateString(),
                 Status = positionsInfo.Status,
-                PymtDue = positionsInfo.PymtDue?? true,
-                Revenue = positionsInfo.Incomes
+                PymtDue = positionsInfo.PymtDue?? true
             })
             .OrderBy(p => p.Status)
             .ThenBy(p => p.TickerSymbol)
             .AsQueryable();
+        }
+
+
+        public IQueryable<PositionsForEditVm> UpdatePositions(string[] editedPositionIds)
+        {
+            // Persist edits due to changes in PymtDue and/or Status.
+            var editedPositionsToUpdate = new List<Data.Entities.Position>();
+
+            foreach (var id in editedPositionIds)
+            {
+                editedPositionsToUpdate.Add(_ctx.Position.Where(p => p.PositionId == id).FirstOrDefault());
+            }
+
+            if (editedPositionsToUpdate.Count() == editedPositionIds.Length)
+            {
+                //foreach (var position in editedPositionsToUpdate)
+                //{
+                //    position.PymtDue = false;
+                //    position.Status 
+                //    position.LastUpdate = DateTime.Now;
+                //}
+
+                //_ctx.UpdateRange(positionsToUpdate);
+                //positionsUpdated = _ctx.SaveChanges();
+
+                //if (positionsUpdated == positionsToUpdate.Count())
+                //    updatesAreOk = true;
+            }
+
+            return null;
+
         }
 
     }
