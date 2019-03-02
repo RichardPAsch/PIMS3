@@ -26,7 +26,7 @@ export class IncomeReceivablesComponent implements OnInit {
     }
 
     columnDefs = [
-        { headerName: "Ticker", field: "tickerSymbol", sortable: true, filter: true, checkboxSelection: true, width: 100 },
+        { headerName: "Ticker", field: "tickerSymbol", sortable: true, filter: true, checkboxSelection: true, width: 100, resizable: true },
         { headerName: "Account", field: "accountTypeDesc", width: 100 },
         { headerName: "Div. Day", field: "dividendPayDay", width: 90, type: "numericColumn", sortable: true, filter: true },
         { headerName: "Div. Freq.", field: "dividendFreq", width: 100, sortable: true },
