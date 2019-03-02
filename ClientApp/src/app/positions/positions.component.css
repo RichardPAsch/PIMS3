@@ -1,0 +1,24 @@
+header {
+    background-color: #222;
+    padding: 5px;
+    text-align: center;
+    font-size: 17px;
+    color: white;
+    width: 633px;
+    height: 34px;
+}
+
+ul {
+    margin-top: 10px;
+    margin-bottom: 12px;
+    font-size: 15px;
+}
+
+#gridPositions {
+    width: 635px;
+    height: 400px;
+    /*height: 900px;*/
+}
+/*.ag-cell-edit-input { // doesn't work for dropdown width
+    width: 70px;
+}*/

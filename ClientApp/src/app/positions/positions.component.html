@@ -1,0 +1,22 @@
+<header>
+    - Current portfolio Positions -
+</header>
+<ul>
+    <li>'Status' may be (A)ctive or (I)nactive, to reflect trade(s), and may be edited.</li>
+    <li>'Paid' may be true or false, to reflect income received, and may be edited for correction(s).</li>
+    <li>Select [x] ticker(s) to mark for update(s), prior to "Update Position(s)".</li>
+    <li>Total Position(s) count: &nbsp; <strong>{{positionCount|number}}</strong></li>
+</ul>
+<p></p>
+<p>
+    <ag-grid-angular #agGridPositions
+                     id="gridPositions"
+                     class="ag-theme-blue"
+                     [rowData]="rowData"
+                     [columnDefs]="columnDefs"
+                     rowSelection="multiple">
+    </ag-grid-angular>
+</p>
+<p>
+    <button id="btnPositions" (click)="processEditedPositions()">Update Position(s)</button>
+</p>
