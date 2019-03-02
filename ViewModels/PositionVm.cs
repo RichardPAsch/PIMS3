@@ -33,4 +33,23 @@ namespace PIMS3.ViewModels
         public decimal Fees { get; set; }
 
     }
+
+
+    public class PositionsForEditVm
+    {
+        public string PositionId { get; set; }
+
+        public string TickerSymbol { get; set; }
+
+        public string TickerDescription { get; set; }
+
+        public string Account { get; set; }
+
+        public string LastUpdate { get; set; }
+
+        public string Status { get; set; }
+
+        public bool PymtDue { get; set; }
+
+    }
 }
