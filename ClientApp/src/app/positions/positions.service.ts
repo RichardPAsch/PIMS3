@@ -18,9 +18,10 @@ export class PositionsService {
         return this.http.get<string>(webApi);
     }
 
-    SaveEditedPositions(positionEdits:Position[]): Observable<string> {
+
+    UpdateEditedPositions(positionEdits: any[]): Observable<string> {
 
         let webApi = baseUrl + "/api/Position/UpdateEditedPositions";
-        return this.http.get<string>(webApi);
+        return this.http.put<any>(webApi, positionEdits);
     }
 }
