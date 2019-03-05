@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { AgGridNg2 } from 'ag-grid-angular';
 import { Position } from '../positions/position';
 import { PositionsService } from '../positions/positions.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-positions',
@@ -10,7 +11,7 @@ import { PositionsService } from '../positions/positions.service';
 })
 export class PositionsComponent implements OnInit {
 
-    constructor(private service: PositionsService) {
+    constructor(private positionSvc: PositionsService) {
 
     }
 
@@ -37,8 +38,9 @@ export class PositionsComponent implements OnInit {
             }
         },
         { headerName: "Last Update", field: "lastUpdate", width: 120, sortable: true, filter: true, resizable: true},
-        {   headerName: "Paid",
+        {   headerName: "Unpaid",
             field: "pymtDue",
+            resizable: true,
             width: 70,
             sortable: true,
             editable: true,
@@ -54,7 +56,7 @@ export class PositionsComponent implements OnInit {
     
     fetchPositions(): void {
 
-        this.service.BuildPositions()
+        this.positionSvc.BuildPositions()
             .retry(1)
             .subscribe(positionsResponse => {
                 this.agGridPositions.api.setRowData(this.mapResponseToGrid(positionsResponse));
@@ -62,7 +64,6 @@ export class PositionsComponent implements OnInit {
             });
     }
 
-    // TODO: 3.1.2019 - complete code for processPositions(). Then deal with how to handle revenue records.
 
     mapResponseToGrid(responseData: any): Position[] {
 
@@ -98,39 +99,38 @@ export class PositionsComponent implements OnInit {
 
         var selectedNodes = this.agGridPositions.api.getSelectedNodes();
         var selectedPositionEdits = selectedNodes.map(node => node.data);
+        let editedPositions = new Array<Position>();
 
         for (let pos = 0; pos < selectedPositionEdits.length; pos++) {
-            let editedPositions = new Array<Position>();
+                        
             let editedPosition = new Position();
-            // Capture just needed edited fields for each id.
+
+            // Capture only necessary column edit(s) for each Id.
             editedPosition.positionId = selectedPositionEdits[pos].positionId;
             editedPosition.status = selectedPositionEdits[pos].status;
             editedPosition.pymtDue = selectedPositionEdits[pos].pymtDue;
 
             editedPositions.push(editedPosition);
         }
-        // -- TO BE CONTINUED -- 3.1.2019
-
-
-        //this.receivablesSvc.UpdateIncomeReceivables(selectedPositionData)
-        //    .retry(2)
-        //    .subscribe(updateResponse => {
-        //        if (updateResponse) {
-        //            alert("Successfully marked : " + selectedPositionData.length + " Position(s) as paid.");
-        //            // Refresh.
-        //            this.getReceivables();
-        //        }
-        //        else
-        //            alert("Error marking Position(s) as payment received, check Position data.");
-        //    },
-        //        (apiError: HttpErrorResponse) => {
-        //            if (apiError.error instanceof Error)
-        //                alert("Error processing Position update(s) : \network or application error. Please try later.");
-        //            else {
-        //                alert("Error processing Position update(s) due to : \n" + apiError.message);
-        //            }
-        //        }
-        //    )
+        
+        this.positionSvc.UpdateEditedPositions(editedPositions)
+            .retry(2)
+            .subscribe(updateResponseCount => {
+                if (Number(updateResponseCount) > 0) {
+                    alert("Successfully updated " + updateResponseCount + " Position(s).");
+                    this.fetchPositions();
+                }
+                else
+                    alert("Error updating Position(s).");
+            },
+            (apiError: HttpErrorResponse) => {
+                if (apiError.error instanceof Error)
+                    alert("Error processing Position update(s) : \network or application error. Please try later.");
+                else {
+                    alert("Error processing Position update(s) due to : \n" + apiError.message);
+                }
+            }
+         ) // end subscribe()
 
     }
 
