@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PIMS3.Data;
 using PIMS3.DataAccess.Position;
+using PIMS3.ViewModels;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace PIMS3.Controllers
@@ -41,12 +43,40 @@ namespace PIMS3.Controllers
 
 
         [HttpPut("UpdateEditedPositions")]
-        public ActionResult UpdateEditedPositions()
+        public ActionResult UpdateEditedPositions([FromBody] dynamic[] positionEdits)
         {
             var positionDataAccessComponent = new PositionDataProcessing(_ctx);
+            var positionsUpdated = positionDataAccessComponent.UpdatePositions(MapToVm(positionEdits));
+
+            if (positionsUpdated == positionEdits.Length)
+                return Ok(positionsUpdated);
 
             return null;
+        }
 
+
+        private PositionsForEditVm[] MapToVm(dynamic[] sourcePositions)
+        {
+            var posVms = new List<PositionsForEditVm>();
+
+            for(var i =0; i < sourcePositions.Length; i++)
+            {
+                var updatedPos = new PositionsForEditVm
+                {
+                    PositionId = sourcePositions[i].positionId.Value,
+                    Status = sourcePositions[i].status.Value,
+                    // Any change in 'PymtDue' results in true/false cast as a string -- not a boolean.
+                    // TODO: able to specify type in agGrid dropdown?
+                    PymtDue = sourcePositions[i].pymtDue.Value.GetType() == typeof(string)
+                                            ? bool.Parse(sourcePositions[i].pymtDue.Value)
+                                            : sourcePositions[i].pymtDue.Value
+                };
+
+                posVms.Add(updatedPos);
+                updatedPos = null;
+            }
+
+            return posVms.ToArray();
         }
 
     }
