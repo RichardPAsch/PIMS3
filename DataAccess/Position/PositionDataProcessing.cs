@@ -97,7 +97,8 @@ namespace PIMS3.DataAccess.Position
 
         public IQueryable<PositionsForEditVm> GetPositions(string investorId)
         {
-            var positions = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId && p.Status == "A").AsQueryable();
+            // Include "I" positions, to allow for corrections.
+            var positions = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId && (p.Status == "A" || p.Status == "I")).AsQueryable();
             var assets = _ctx.Asset.Select(asset => asset).AsQueryable();
 
             return positions.Join(assets, p => p.AssetId, a => a.AssetId, (positionsInfo, assetsInfo) => new PositionsForEditVm
@@ -116,33 +117,36 @@ namespace PIMS3.DataAccess.Position
         }
 
 
-        public IQueryable<PositionsForEditVm> UpdatePositions(string[] editedPositionIds)
+        public int UpdatePositions(PositionsForEditVm[] editedPositionsAbridged)
         {
-            // Persist edits due to changes in PymtDue and/or Status.
-            var editedPositionsToUpdate = new List<Data.Entities.Position>();
+            // Persist 'PymtDue' and/or 'Status' edit(s).
+            var positionsToUpdateListing = new List<Data.Entities.Position>();
+            var updateCount = 0;
 
-            foreach (var id in editedPositionIds)
+            foreach (var pos in editedPositionsAbridged)
+                positionsToUpdateListing.Add(_ctx.Position.Where(p => p.PositionId == pos.PositionId).First());
+
+            positionsToUpdateListing.OrderBy(p => p.PositionId);
+            editedPositionsAbridged.OrderBy(p => p.PositionId);
+
+            // Update fetched corresponding positions.
+            if (positionsToUpdateListing.Count() == editedPositionsAbridged.Length)
             {
-                editedPositionsToUpdate.Add(_ctx.Position.Where(p => p.PositionId == id).FirstOrDefault());
+                foreach (var position in positionsToUpdateListing)
+                {
+                    if(positionsToUpdateListing.First().PositionId == editedPositionsAbridged.First().PositionId)
+                    {
+                        position.PymtDue = editedPositionsAbridged.First().PymtDue;
+                        position.Status = editedPositionsAbridged.First().Status;
+                        position.LastUpdate = DateTime.Now;
+                    }
+                }
+
+                _ctx.UpdateRange(positionsToUpdateListing);
+                updateCount = _ctx.SaveChanges();
             }
 
-            if (editedPositionsToUpdate.Count() == editedPositionIds.Length)
-            {
-                //foreach (var position in editedPositionsToUpdate)
-                //{
-                //    position.PymtDue = false;
-                //    position.Status 
-                //    position.LastUpdate = DateTime.Now;
-                //}
-
-                //_ctx.UpdateRange(positionsToUpdate);
-                //positionsUpdated = _ctx.SaveChanges();
-
-                //if (positionsUpdated == positionsToUpdate.Count())
-                //    updatesAreOk = true;
-            }
-
-            return null;
+            return updateCount;
 
         }
 
