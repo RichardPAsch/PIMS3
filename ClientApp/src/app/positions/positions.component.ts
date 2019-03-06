@@ -25,7 +25,7 @@ export class PositionsComponent implements OnInit {
     }
 
     columnDefs = [
-        { headerName: "Ticker", field: "tickerSymbol", sortable: true, filter: true, checkboxSelection: true, width: 90, resizable: true },
+        { headerName: "Ticker", field: "tickerSymbol", sortable: true, filter: true, checkboxSelection: true, width: 90, resizable: true, editable: true },
         { headerName: "Description", field: "tickerDescription", width: 160, resizable: true },
         { headerName: "Account", field: "accountTypeDesc", width: 92, editable: true, resizable: true, filter: true },
         { headerName: "Status", field: "status", width: 80,
@@ -38,7 +38,7 @@ export class PositionsComponent implements OnInit {
             }
         },
         { headerName: "Last Update", field: "lastUpdate", width: 120, sortable: true, filter: true, resizable: true},
-        {   headerName: "Unpaid",
+        { headerName: "Unpaid",
             field: "pymtDue",
             resizable: true,
             width: 70,
