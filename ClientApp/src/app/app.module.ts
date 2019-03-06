@@ -18,6 +18,7 @@ import { IncomeProjectionsComponent } from './income-projections/income-projecti
 import { ProfileService } from './shared/profile.service';
 import { IncomeReceivablesComponent } from './income-receivables/income-receivables.component';
 import { PositionsComponent } from './positions/positions.component';
+import { IncomeComponent } from './income/income.component';
 
 /* Notes:
  *  Medium to large apps should have one or more FEATURE modules. ngModule may have one
@@ -35,7 +36,8 @@ import { PositionsComponent } from './positions/positions.component';
     DataImportComponent,
     IncomeProjectionsComponent,
     IncomeReceivablesComponent,
-    PositionsComponent
+    PositionsComponent,
+    IncomeComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
