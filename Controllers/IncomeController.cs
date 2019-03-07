@@ -10,6 +10,7 @@ using PIMS3.ViewModels;
 using System.Globalization;
 using PIMS3.Data;
 using PIMS3.BusinessLogic.PositionData;
+using PIMS3.DataAccess.IncomeData;
 
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -41,9 +42,10 @@ namespace PIMS3.Controllers
 
 
         // Using attribute routing with Http[Verb] attributes.
-        [HttpGet("{yearsToBackDate:int}")]
-        public IEnumerable<YtdRevenueSummaryVm> GetRevenueSummary(int yearsToBackDate)
+        [HttpGet("{yearsToBackDate:int}/{isRevenueSummary:bool}")]
+        public IEnumerable<YtdRevenueSummaryVm> GetRevenueSummary(int yearsToBackDate, bool isRevenueSummary)
         {
+            // isRevenueSummary param used only for URL routing here vs. GetRevenue().
             // AutoMapper not needed; summary data is read-only.
             IEnumerable<Income> incomeData;
             try
@@ -77,6 +79,14 @@ namespace PIMS3.Controllers
             var positionsDuePymt = positionBusLogicComponent.GetPositionsWithIncomeDue(investorId);
 
             return positionsDuePymt;
+        }
+
+
+        [HttpGet("{backDatedYears:int}")]
+        public IEnumerable<IncomeSavedVm> GetRevenue(int backDatedYears)
+        {
+            var incomeDataAccessComponent = new IncomeDataProcessing(_ctx);
+            return incomeDataAccessComponent.GetRevenueHistory(1, investorId);
         }
 
 
