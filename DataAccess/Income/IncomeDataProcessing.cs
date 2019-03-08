@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using PIMS3.ViewModels;
 
 
 namespace PIMS3.DataAccess.IncomeData
@@ -24,6 +25,37 @@ namespace PIMS3.DataAccess.IncomeData
                                        .AsQueryable();
 
             return duplicateRecords;
+        }
+
+
+        public IQueryable<IncomeSavedVm> GetRevenueHistory(int yearsToBackDate, string investorId)
+        {
+            var currentYear = DateTime.Now.Year;
+            var fromYear = currentYear - yearsToBackDate;
+
+            var income = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId && p.Status == "A")
+                                      .SelectMany(i => i.Incomes)
+                                      .Where(i => i.DateRecvd >= Convert.ToDateTime("1/1/" + fromYear.ToString()) &&
+                                                  i.DateRecvd <= Convert.ToDateTime("12/31/" + currentYear.ToString()))
+                                      .AsQueryable();
+
+            var positions = _ctx.Position.Select(p => p.PositionAsset)
+                                .SelectMany(a => a.Positions)
+                                .AsQueryable();
+
+            var joinData = income.Join(positions, p => p.PositionId, i => i.PositionId, (incomeInfo, positionInfo) => new IncomeSavedVm
+            {
+                TickerSymbol = positionInfo.PositionAsset.Profile.TickerSymbol,
+                AccountTypeDesc = positionInfo.AccountType.AccountTypeDesc,
+                DividendFreq = positionInfo.PositionAsset.Profile.DividendFreq,
+                DateRecvd = incomeInfo.DateRecvd,
+                AmountReceived = incomeInfo.AmountRecvd,
+                IncomeId = incomeInfo.IncomeId
+            })
+            .AsQueryable();
+
+            return joinData.OrderByDescending(i => i.DateRecvd)
+                           .ThenBy(i => i.TickerSymbol);
         }
 
 
