@@ -16,6 +16,9 @@ export class IncomeComponent implements OnInit {
     @ViewChild('agGridRevenue')
     agGridRevenue: AgGridNg2;
 
+    yearsOfIncomeToDisplay: number = 0;
+    incomeRecordCount: number;
+
     ngOnInit() {
         this.fetchRevenue();
     }
@@ -24,25 +27,20 @@ export class IncomeComponent implements OnInit {
         { headerName: "Ticker", field: "tickerSymbol", sortable: true, filter: true, checkboxSelection: true, width: 100, resizable: true },
         { headerName: "Div.Freq.", field: "dividendFreq", width: 97, resizable: true, filter: true, sortable: true },
         { headerName: "Account", field: "accountTypeDesc", width: 92, resizable: true, filter: true, sortable: true },
-        { headerName: "Date Recvd", field: "dateRecvd", width: 120, resizable: true, editable: true, sortable: true },
-        { headerName: "Amount", field: "amountRecvd", width: 92,
-            editable: true, resizable: true,
-            cellStyle: { textAlign: "right" }
-        },
+        { headerName: "Date Recvd", field: "dateRecvd", width: 120, resizable: true, editable: true, sortable: true,
+            cellStyle: { textAlign: "right" },
+            cellRenderer: (data) => { return data.value ? (new Date(data.value)).toLocaleDateString() : ''; } },
+        { headerName: "Amount", field: "amountRecvd", width: 92, editable: true, resizable: true, cellStyle: { textAlign: "right" } },
         { headerName: "IncomeId", field: "incomeId", width: 50, hide: true }
     ];
 
     rowData: any;
 
-    //rowData = [
-    //    { tickerSymbol: 'AAPL', dividendFreq: 'M', accountTypeDesc: 'CMA', dateRecvd: '3/6/2019', amtRecvd: '125.68', incomeId: 'abc722yt' },
-    //    { tickerSymbol: 'MSFT', dividendFreq: 'Q', accountTypeDesc: 'IRA', dateRecvd: '3/1/2019', amtRecvd: '287.11', incomeId: 'mks8sw6d' }
-    //];
-
     fetchRevenue(): any {
-        this.incomeSvc.GetRevenue(0)
+        this.incomeSvc.GetRevenue(this.yearsOfIncomeToDisplay)  
             .retry(2)
             .subscribe(incomeResponse => {
+                this.incomeRecordCount = incomeResponse.length;
                 this.agGridRevenue.api.setRowData(this.mapRevenueForGrid(incomeResponse));
             },
             (apiError: HttpErrorResponse) => {
@@ -57,6 +55,11 @@ export class IncomeComponent implements OnInit {
                 }
             });
 
+    }
+
+    onYearsToShow(years : number) {
+        this.yearsOfIncomeToDisplay = years;
+        this.fetchRevenue();
     }
 
 
