@@ -86,7 +86,7 @@ namespace PIMS3.Controllers
         public IEnumerable<IncomeSavedVm> GetRevenue(int backDatedYears)
         {
             var incomeDataAccessComponent = new IncomeDataProcessing(_ctx);
-            return incomeDataAccessComponent.GetRevenueHistory(1, investorId);
+            return incomeDataAccessComponent.GetRevenueHistory(backDatedYears, investorId);
         }
 
 
