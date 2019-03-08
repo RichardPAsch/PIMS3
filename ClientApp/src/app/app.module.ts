@@ -52,6 +52,7 @@ import { IncomeComponent } from './income/income.component';
       { path: 'income-projections', component: IncomeProjectionsComponent },
       { path: 'income-summary', component: IncomeSummaryComponent },
       { path: 'income-receivables', component: IncomeReceivablesComponent },
+      { path: 'income', component: IncomeComponent },
       { path: 'data-import', component: DataImportComponent },
       { path: 'positions', component: PositionsComponent },
     ])
