@@ -20,14 +20,15 @@ export class IncomeSummaryComponent {
 
     constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string)
     {
-        this.apiUrl = baseUrl + 'api/Income/' + '0';
+        // 'true' required param used only for WebApi :  GetRevenueSummary() vs. GetRevenue().
+        this.apiUrl = baseUrl + 'api/Income/' + '0' + '/true';
         this.httpCilentReference = http;
         this.processIncomeSummary();
     }
 
     onYearSelected(yearsBackDated: number) {
         this.currentYearHeading = this.currentYear - yearsBackDated;
-        this.apiUrl = this.apiUrl.substr(0, this.apiUrl.lastIndexOf("/") + 1) + yearsBackDated.toString();
+        this.apiUrl = this.apiUrl.substr(0, this.apiUrl.lastIndexOf("/") - 2) + "/" + yearsBackDated.toString() + "/" + true;
         this.processIncomeSummary();
     }
 
