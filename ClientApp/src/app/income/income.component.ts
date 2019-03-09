@@ -3,6 +3,8 @@ import { AgGridNg2 } from 'ag-grid-angular';
 import { IncomeService } from '../income/income.service';
 import { Income } from '../income/income';
 import { HttpErrorResponse } from '@angular/common/http';
+import { CurrencyPipe } from '@angular/common';
+//import { map, reduce } from 'rxjs/operators';
 
 @Component({
   selector: 'app-income',
@@ -18,6 +20,7 @@ export class IncomeComponent implements OnInit {
 
     yearsOfIncomeToDisplay: number = 0;
     incomeRecordCount: number;
+    incomeRecordTotal: number | CurrencyPipe;
 
     ngOnInit() {
         this.fetchRevenue();
@@ -41,6 +44,8 @@ export class IncomeComponent implements OnInit {
             .retry(2)
             .subscribe(incomeResponse => {
                 this.incomeRecordCount = incomeResponse.length;
+                // Can't use 'reduce' on type string ?? / incomeResponse.reduce((sum, current) => sum + current.total, 0);
+                this.incomeRecordTotal = this.calculateRecordSum(incomeResponse); 
                 this.agGridRevenue.api.setRowData(this.mapRevenueForGrid(incomeResponse));
             },
             (apiError: HttpErrorResponse) => {
@@ -61,10 +66,9 @@ export class IncomeComponent implements OnInit {
         this.yearsOfIncomeToDisplay = years;
         this.fetchRevenue();
     }
-
-
-    mapRevenueForGrid(recvdRevenue: any): Income[] {
-
+    
+    mapRevenueForGrid(recvdRevenue: any): Income[]
+    {
         let mappedRevenue = new Array<Income>();
         for (let idx = 0; idx < recvdRevenue.length; idx++) {
             let modelRecord = new Income();
@@ -80,6 +84,31 @@ export class IncomeComponent implements OnInit {
         }
 
         return mappedRevenue;
+    }
+
+    processEditedRevenue() {
+
+        var selectedNodes = this.agGridRevenue.api.getSelectedNodes();
+        var selectedIncomeData = selectedNodes.map(node => node.data);
+
+        this.incomeSvc.UpdateIncome(selectedIncomeData)
+            .retry(2)
+            .subscribe(updateResponse => {
+                alert("Successfully updated " + updateResponse + " record(s).");
+                this.fetchRevenue();
+            },
+            (apiError: HttpErrorResponse) => {
+                alert("Error updating income record(s) due to: " + apiError.message);
+            }
+        );
+    }
+
+    calculateRecordSum(sourceData: any): number {
+        let runningTotal: number = 0;
+        for (let i = 0; i < sourceData.length; i++) {
+            runningTotal = runningTotal + sourceData[i].amountReceived;
+        }
+        return runningTotal;
     }
 
 }
