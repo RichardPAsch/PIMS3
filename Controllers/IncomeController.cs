@@ -89,11 +89,20 @@ namespace PIMS3.Controllers
             return incomeDataAccessComponent.GetRevenueHistory(backDatedYears, investorId);
         }
 
+        [HttpPut("")]
+        public ActionResult UpdateEditedIncome([FromBody] dynamic editedIncome)
+        {
+            var incomeDataAccessComponent = new IncomeDataProcessing(_ctx);
+            dynamic updatedCount = incomeDataAccessComponent.UpdateRevenue(MapToVm(editedIncome));
+
+            return updatedCount == editedIncome.Count ? (ActionResult)Ok(updatedCount) : null;
+        }
+
 
 
         #region Helpers
-
-            private static IEnumerable<YtdRevenueSummaryVm> CalculateRevenueTotals(IQueryable<Income> recvdIncome)
+        // TODO: Move to busLogic compenent !
+        private static IEnumerable<YtdRevenueSummaryVm> CalculateRevenueTotals(IQueryable<Income> recvdIncome)
             {
                 IList<YtdRevenueSummaryVm> averages = new List<YtdRevenueSummaryVm>();
                 var currentMonth = 0;
@@ -135,7 +144,7 @@ namespace PIMS3.Controllers
                 return averages.AsQueryable();
             }
 
-            private void CalculateAverages(YtdRevenueSummaryVm item)
+        private void CalculateAverages(YtdRevenueSummaryVm item)
             {
                 // YTD & 3Mos rolling averages.
                 _runningYtdTotal += item.AmountRecvd;
@@ -148,6 +157,24 @@ namespace PIMS3.Controllers
                 _tempListing.Add(item);
                 _counter += 1;
             }
+
+        private IncomeForEditVm[] MapToVm(dynamic sourceData)
+        {
+            // Mapping only necessary fields.
+            var listing = new List<IncomeForEditVm>();
+
+            foreach(var item in sourceData)
+            {
+                listing.Add(new IncomeForEditVm
+                {
+                    IncomeId = item.incomeId,
+                    DateRecvd = item.dateRecvd,
+                    AmountReceived = item.amountRecvd
+                });
+            }
+
+            return listing.ToArray();
+        }
 
         #endregion
 
