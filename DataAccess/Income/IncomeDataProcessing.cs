@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using PIMS3.ViewModels;
+using PIMS3.Data.Entities;
 
 
 namespace PIMS3.DataAccess.IncomeData
@@ -33,17 +35,13 @@ namespace PIMS3.DataAccess.IncomeData
             var currentYear = DateTime.Now.Year;
             var fromYear = currentYear - yearsToBackDate;
 
-            var income = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId && p.Status == "A")
-                                      .SelectMany(i => i.Incomes)
-                                      .Where(i => i.DateRecvd >= Convert.ToDateTime("1/1/" + fromYear.ToString()) &&
-                                                  i.DateRecvd <= Convert.ToDateTime("12/31/" + currentYear.ToString()))
-                                      .AsQueryable();
+            IQueryable<Income> income = _ctx.Income.Where(i => i.DateRecvd >= Convert.ToDateTime("1/1/" + fromYear.ToString()) &&
+                                                               i.DateRecvd <= Convert.ToDateTime("12/31/" + currentYear.ToString()));
 
-            var positions = _ctx.Position.Select(p => p.PositionAsset)
-                                .SelectMany(a => a.Positions)
-                                .AsQueryable();
+            IQueryable<Data.Entities.Position> positions = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId &&
+                                                                                    p.Status == "A");
 
-            var joinData = income.Join(positions, p => p.PositionId, i => i.PositionId, (incomeInfo, positionInfo) => new IncomeSavedVm
+            IQueryable <IncomeSavedVm> joinData = income.Join(positions, p => p.PositionId, i => i.PositionId, (incomeInfo, positionInfo) => new IncomeSavedVm
             {
                 TickerSymbol = positionInfo.PositionAsset.Profile.TickerSymbol,
                 AccountTypeDesc = positionInfo.AccountType.AccountTypeDesc,
@@ -59,5 +57,37 @@ namespace PIMS3.DataAccess.IncomeData
         }
 
 
+        public int UpdateRevenue(IncomeForEditVm[] editedRevenue)
+        {
+            var revenueToUpdateListing = new List<Data.Entities.Income>();
+            int updateCount = 0;
+
+            // Get existing Income for pending updates.
+            foreach (IncomeForEditVm incomeRecord in editedRevenue)
+                revenueToUpdateListing.Add(_ctx.Income.Where(i => i.IncomeId == incomeRecord.IncomeId).FirstOrDefault());
+               
+
+            revenueToUpdateListing.OrderBy(i => i.IncomeId);
+            editedRevenue.OrderBy(i => i.IncomeId);
+
+            // Update.
+            if (revenueToUpdateListing.Count() == editedRevenue.Length)
+            {
+                for(int i = 0; i < revenueToUpdateListing.Count; i++)
+                {
+                    if (revenueToUpdateListing.ElementAt(i).IncomeId == editedRevenue.ElementAt(i).IncomeId)
+                    {
+                        revenueToUpdateListing.ElementAt(i).DateRecvd = editedRevenue.ElementAt(i).DateRecvd;
+                        revenueToUpdateListing.ElementAt(i).AmountRecvd = editedRevenue.ElementAt(i).AmountReceived;
+                        revenueToUpdateListing.ElementAt(i).LastUpdate = DateTime.Now;
+                    }
+                }
+               
+                _ctx.UpdateRange(revenueToUpdateListing);
+                updateCount = _ctx.SaveChanges();
+            }
+
+            return updateCount;
+        }
     }
 }
