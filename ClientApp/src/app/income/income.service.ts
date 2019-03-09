@@ -16,4 +16,10 @@ export class IncomeService {
         let webApi = baseUrl + "/api/Income/" + yearsOfHx;
         return this.http.get<any>(webApi);
     }
+
+    UpdateIncome(editedRevenue: any[]): Observable<any>
+    {
+        let webApi = baseUrl + "/api/Income/";
+        return this.http.put<any>(webApi, editedRevenue);
+    }
 }
