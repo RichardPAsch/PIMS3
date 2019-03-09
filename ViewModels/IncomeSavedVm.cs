@@ -12,4 +12,11 @@ namespace PIMS3.ViewModels
         public string IncomeId { get; set; }
        
     }
+
+    public class IncomeForEditVm
+    {
+        public DateTime DateRecvd { get; set; }
+        public decimal AmountReceived { get; set; }
+        public string IncomeId { get; set; }
+    }
 }
