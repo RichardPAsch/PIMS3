@@ -31,8 +31,31 @@ export class IncomeComponent implements OnInit {
         { headerName: "Div.Freq.", field: "dividendFreq", width: 97, resizable: true, filter: true, sortable: true },
         { headerName: "Account", field: "accountTypeDesc", width: 92, resizable: true, filter: true, sortable: true },
         { headerName: "Date Recvd", field: "dateRecvd", width: 120, resizable: true, editable: true, sortable: true,
+            filter: "agDateColumnFilter",
+            filterParams: {
+                comparator: function (filterLocalDateAtMidnight, cellValue) {
+                    // Dates are stored as mm/dd/yyyy - we create a Date object for comparison against the filter date.
+                    var dateParts = cellValue.split("-");
+                    var month = Number(dateParts[1]);
+                    var day = Number(dateParts[2].substring(0, 2));
+                    var year = Number(dateParts[0]);
+                    var cellDate = new Date(year, month - 1, day);
+
+                    // Compare date objects.
+                    if (cellDate < filterLocalDateAtMidnight) {
+                        return -1;
+                    } else if (cellDate > filterLocalDateAtMidnight) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                },
+                browserDatePicker: true,
+                applyButton: true,
+            },
             cellStyle: { textAlign: "right" },
-            cellRenderer: (data) => { return data.value ? (new Date(data.value)).toLocaleDateString() : ''; } },
+            cellRenderer: (data) => { return data.value ? (new Date(data.value)).toLocaleDateString() : ''; }
+        },
         { headerName: "Amount", field: "amountRecvd", width: 92, editable: true, resizable: true, cellStyle: { textAlign: "right" } },
         { headerName: "IncomeId", field: "incomeId", width: 50, hide: true }
     ];
