@@ -3,7 +3,6 @@ import { AgGridNg2 } from 'ag-grid-angular';
 import { Position } from '../positions/position';
 import { PositionsService } from '../positions/positions.service';
 import { HttpErrorResponse } from '@angular/common/http';
-//import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-positions',
