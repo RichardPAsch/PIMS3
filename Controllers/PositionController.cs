@@ -32,7 +32,6 @@ namespace PIMS3.Controllers
         }
 
 
-        //[HttpGet("GetPositions")]
         [HttpGet("{includeInactiveStatus}")]
         public ActionResult GetPositions(bool includeInactiveStatus)
         {
