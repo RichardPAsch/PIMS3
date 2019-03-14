@@ -95,25 +95,46 @@ namespace PIMS3.DataAccess.Position
         }
 
 
-        public IQueryable<PositionsForEditVm> GetPositions(string investorId)
+        public IQueryable<PositionsForEditVm> GetPositions(string investorId, bool includeInactiveStatusRecs)
         {
-            // Include "I" positions, to allow for corrections.
-            var positions = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId && (p.Status == "A" || p.Status == "I")).AsQueryable();
-            var assets = _ctx.Asset.Select(asset => asset).AsQueryable();
+            // Explicitly querying for status, as other statuses may be used in future versions.
+            var positionAssetJoin = _ctx.Position.Where(p => (p.Status == "A" || p.Status == "I") && p.PositionAsset.InvestorId == investorId)
+                                                  .Join(_ctx.Asset, a => a.AssetId, p => p.AssetId, (assetsData, positionData) =>
+                                                              new
+                                                              {
+                                                                  posId = assetsData.PositionId,
+                                                                  ticker = positionData.Profile.TickerSymbol,
+                                                                  desc = positionData.Profile.TickerDescription,
+                                                                  acct = assetsData.AccountType.AccountTypeDesc,
+                                                                  pymt = assetsData.PymtDue,
+                                                                  status = assetsData.Status,
+                                                                  classId = positionData.AssetClassId
+                                                              }
+                                                        )
+                                                  .AsQueryable();
 
-            return positions.Join(assets, p => p.AssetId, a => a.AssetId, (positionsInfo, assetsInfo) => new PositionsForEditVm
+            if (!includeInactiveStatusRecs)
             {
-                PositionId = positionsInfo.PositionId,
-                TickerSymbol = assetsInfo.Profile.TickerSymbol,
-                TickerDescription = assetsInfo.Profile.TickerDescription,
-                Account = positionsInfo.AccountType.AccountTypeDesc,
-                LastUpdate = positionsInfo.LastUpdate.ToShortDateString(),
-                Status = positionsInfo.Status,
-                PymtDue = positionsInfo.PymtDue?? true
-            })
-            .OrderBy(p => p.Status)
-            .ThenBy(p => p.TickerSymbol)
-            .AsQueryable();
+                positionAssetJoin = positionAssetJoin.Where(p => p.status == "A");
+            }
+
+            return positionAssetJoin.Join(_ctx.AssetClass, paJoin => paJoin.classId, ac => ac.AssetClassId, (paJoinInfo, acInfo) => 
+                                                new PositionsForEditVm
+                                                {
+                                                    PositionId = paJoinInfo.posId,
+                                                    TickerSymbol = paJoinInfo.ticker,
+                                                    TickerDescription = paJoinInfo.desc,
+                                                    Account = paJoinInfo.acct,
+                                                    AssetClass = acInfo.Code,
+                                                    PymtDue = (Convert.ToBoolean(paJoinInfo.pymt) == true || paJoinInfo.pymt == null) 
+                                                                    ? true 
+                                                                    : false,
+                                                    Status = paJoinInfo.status
+
+                                                })
+                                    .AsQueryable()
+                                    .OrderBy(p => p.Status)
+                                    .ThenBy(p => p.TickerSymbol);
         }
 
 

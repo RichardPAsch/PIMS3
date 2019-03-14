@@ -20,6 +20,7 @@ import { IncomeReceivablesComponent } from './income-receivables/income-receivab
 import { PositionsComponent } from './positions/positions.component';
 import { IncomeComponent } from './income/income.component';
 
+
 /* Notes:
  *  Medium to large apps should have one or more FEATURE modules. ngModule may have one
  *  or more child modules. Do create an NgModule for each feature area.

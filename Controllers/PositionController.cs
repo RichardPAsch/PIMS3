@@ -32,11 +32,12 @@ namespace PIMS3.Controllers
         }
 
 
-        [HttpGet("GetPositions")]
-        public ActionResult GetPositions()
+        //[HttpGet("GetPositions")]
+        [HttpGet("{includeInactiveStatus}")]
+        public ActionResult GetPositions(bool includeInactiveStatus)
         {
-            var positionDataAccessComponent = new PositionDataProcessing(_ctx);
-            IQueryable<ViewModels.PositionsForEditVm> positionInfo = positionDataAccessComponent.GetPositions(investorId);
+            PositionDataProcessing positionDataAccessComponent = new PositionDataProcessing(_ctx);
+            IQueryable<PositionsForEditVm> positionInfo = positionDataAccessComponent.GetPositions(investorId, includeInactiveStatus);
 
             return Ok(positionInfo);
         }

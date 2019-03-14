@@ -5,9 +5,15 @@
     <li>'Status': editable to <em>(A)</em>ctive / <em>(I)</em>nactive, to reflect trade(s) and/or correction(s).</li>
     <li>'Unpaid': true / false, to reflect income received, but not yet recorded; editable for correction(s).</li>
     <li>Select [x] ticker(s) to mark for update(s), prior to submitting via "Update Position(s)".</li>
-    <li>Total Position(s) count: &nbsp; <strong>{{positionCount|number}}</strong> -  [ includes <em>(I)</em>nactive ]</li>
+    <li>Total Position(s) count: &nbsp; <strong>{{positionCount|number}}</strong></li>
 </ul>
-<p></p>
+
+<div>
+    <input type="checkbox" [(ngModel)]="includeInactive" (change)="processInactiveData(includeInactive ? 'true' : 'false')" />
+    &nbsp;
+    <label>Include Positions with inactive status</label>
+</div>
+
 <p>
     <ag-grid-angular #agGridPositions
                      id="gridPositions"

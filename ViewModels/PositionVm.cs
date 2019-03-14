@@ -45,7 +45,8 @@ namespace PIMS3.ViewModels
 
         public string Account { get; set; }
 
-        public string LastUpdate { get; set; }
+        //public string LastUpdate { get; set; }
+        public string AssetClass { get; set; }
 
         public string Status { get; set; }
 

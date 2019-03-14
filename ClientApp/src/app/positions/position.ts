@@ -3,7 +3,7 @@ export class Position {
     tickerSymbol: string;
     tickerDescription: string;
     accountTypeDesc: string;
-    lastUpdate: string;
+    assetClass: string;
     status: string;
     pymtDue: boolean;
     revenue: any;

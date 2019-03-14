@@ -3,6 +3,7 @@ import { AgGridNg2 } from 'ag-grid-angular';
 import { Position } from '../positions/position';
 import { PositionsService } from '../positions/positions.service';
 import { HttpErrorResponse } from '@angular/common/http';
+//import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'app-positions',
@@ -16,19 +17,20 @@ export class PositionsComponent implements OnInit {
     }
 
     positionCount: number;
+    includeInactive: boolean = false;
 
     @ViewChild('agGridPositions')
     agGridPositions: AgGridNg2;
 
     ngOnInit() {
-        this.fetchPositions();
+        this.fetchPositions(false);
     }
 
     columnDefs = [
-        { headerName: "Ticker", field: "tickerSymbol", sortable: true, filter: true, checkboxSelection: true, width: 90, resizable: true, editable: true },
+        { headerName: "Ticker", field: "tickerSymbol", sortable: true, filter: true, checkboxSelection: true, width: 98, resizable: true, editable: true },
         { headerName: "Description", field: "tickerDescription", width: 160, resizable: true },
         { headerName: "Account", field: "accountTypeDesc", width: 92, editable: true, resizable: true, filter: true },
-        { headerName: "Status", field: "status", width: 80,
+        { headerName: "Status", field: "status", width: 77,
             sortable: true,
             resizable: true,
             editable: true,
@@ -37,11 +39,11 @@ export class PositionsComponent implements OnInit {
                 values: ["A", "I"]
             }
         },
-        { headerName: "Last Update", field: "lastUpdate", width: 120, sortable: true, filter: true, resizable: true},
+        { headerName: "Asset Class", field: "assetClass", width: 117, sortable: true, filter: true, filterParams: { applyButton: true}, resizable: true},
         { headerName: "Unpaid",
             field: "pymtDue",
             resizable: true,
-            width: 70,
+            width: 85,
             sortable: true,
             editable: true,
             cellEditor: "agPopupSelectCellEditor",
@@ -54,9 +56,9 @@ export class PositionsComponent implements OnInit {
 
     rowData: any;
     
-    fetchPositions(): void {
+    fetchPositions(doWeIncludeInactiveRecs: boolean): void {
 
-        this.positionSvc.BuildPositions()
+        this.positionSvc.BuildPositions(doWeIncludeInactiveRecs)
             .retry(1)
             .subscribe(positionsResponse => {
                 this.agGridPositions.api.setRowData(this.mapResponseToGrid(positionsResponse));
@@ -72,7 +74,6 @@ export class PositionsComponent implements OnInit {
 
         for (var i = 0; i < responseData.length; i++) {
             let position: Position = new Position();
-            //console.log("ticker : " + responseData[i].tickerSymbol);
 
             position.tickerSymbol = responseData[i].tickerSymbol;
             if (i >= 1) {
@@ -83,10 +84,10 @@ export class PositionsComponent implements OnInit {
                 position.tickerDescription = responseData[i].tickerDescription;
             }
             position.accountTypeDesc = responseData[i].account;
-            position.lastUpdate = responseData[i].lastUpdate;
+            position.assetClass = responseData[i].assetClass;
             position.status = responseData[i].status;
             position.pymtDue = responseData[i].pymtDue;
-            // reference: https://next.plnkr.co/edit/AcfU8spNR4C5gwWu4vtw?utm_source=legacy&utm_medium=worker&utm_campaign=next&preview
+            // using links reference: https://next.plnkr.co/edit/AcfU8spNR4C5gwWu4vtw?utm_source=legacy&utm_medium=worker&utm_campaign=next&preview
             position.positionId = responseData[i].positionId;
 
             mappedPositions.push(position);
@@ -94,6 +95,7 @@ export class PositionsComponent implements OnInit {
 
         return mappedPositions;
     }
+
 
     processEditedPositions() {
 
@@ -118,7 +120,7 @@ export class PositionsComponent implements OnInit {
             .subscribe(updateResponseCount => {
                 if (Number(updateResponseCount) > 0) {
                     alert("Successfully updated " + updateResponseCount + " Position(s).");
-                    this.fetchPositions();
+                    this.fetchPositions(this.includeInactive);
                 }
                 else
                     alert("Error updating Position(s).");
@@ -132,6 +134,11 @@ export class PositionsComponent implements OnInit {
             }
          ) // end subscribe()
 
+    }
+
+
+    processInactiveData(includeInactive: any) {
+        this.fetchPositions(includeInactive);
     }
 
 }

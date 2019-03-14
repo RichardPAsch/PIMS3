@@ -12,9 +12,9 @@ export class PositionsService {
     constructor(private http: HttpClient) { }
 
 
-    BuildPositions(): Observable<string> {
+    BuildPositions(includeInactiveStatus: boolean): Observable<string> {
 
-        let webApi = baseUrl + "/api/Position/GetPositions";
+        let webApi = baseUrl + "/api/Position/" + includeInactiveStatus;
         return this.http.get<string>(webApi);
     }
 
