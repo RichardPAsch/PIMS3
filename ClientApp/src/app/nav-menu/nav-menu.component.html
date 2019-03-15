@@ -59,6 +59,11 @@
                         <span class='glyphicon glyphicon-th-list'></span> Positions
                     </a>
                 </li>
+                <li [routerLinkActive]='["link-active"]'>
+                    <a [routerLink]='["/profile"]' (click)='collapse()'>
+                        <span class='glyphicon glyphicon-file'></span> Profile
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
