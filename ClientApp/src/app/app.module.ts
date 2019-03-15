@@ -19,6 +19,7 @@ import { ProfileService } from './shared/profile.service';
 import { IncomeReceivablesComponent } from './income-receivables/income-receivables.component';
 import { PositionsComponent } from './positions/positions.component';
 import { IncomeComponent } from './income/income.component';
+import { ProfileComponent } from './profile/profile.component';
 
 
 /* Notes:
@@ -38,7 +39,8 @@ import { IncomeComponent } from './income/income.component';
     IncomeProjectionsComponent,
     IncomeReceivablesComponent,
     PositionsComponent,
-    IncomeComponent
+    IncomeComponent,
+    ProfileComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -56,6 +58,7 @@ import { IncomeComponent } from './income/income.component';
       { path: 'income', component: IncomeComponent },
       { path: 'data-import', component: DataImportComponent },
       { path: 'positions', component: PositionsComponent },
+      { path: 'profile', component: ProfileComponent },
     ])
     ],
    // Creators of services that NgModule contributes to the global collection of services;
