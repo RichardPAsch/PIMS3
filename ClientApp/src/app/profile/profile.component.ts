@@ -9,10 +9,13 @@ export class ProfileComponent implements OnInit {
 
     constructor() { }
 
-    currentDateTime = new Date;
+    date1 = new Date();
+    currentDateTime: string;
     isReadOnly: boolean = true;
 
     ngOnInit() {
+        let idx = this.date1.toString().indexOf("GMT");
+        this.currentDateTime = this.date1.toString().substr(0, idx);
     }
 
     getProfile(): any {
