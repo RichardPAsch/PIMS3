@@ -1,0 +1,95 @@
+<header>
+    - Profile for asset -
+</header>
+<ul>
+    <li>Displays fetched profile information for any ticker symbol entered.</li>
+    <li>Profile information may either be retreived via web, OR created manually if profile data is unavailable.</li>
+    <li>All fields are read-only (excluding 'ticker'), except when a customized Profile is created manually.</li>
+    <li>Customized Profiles are accessible only to the investor who created them. </li>
+</ul>
+
+<div class="col-md-12" data-ng-app="incomeMgmt">
+    <section class="panel panel-default" style="width:990px;">
+        <div class="panel-heading">
+            <strong>
+                <span class="glyphicon glyphicon-th"></span>&nbsp;&nbsp;Asset profile attributes
+            </strong>
+            <span class="glyphicon glyphicon-time" id="lastUpdate">&nbsp;{{currentDateTime}}</span>
+        </div>
+        <div class="panel-body">
+            <form class="form-horizontal ng-pristine ng-valid" role="form">
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="tickerSymbol">Ticker symbol:</label>
+                    <div class="col-sm-2">
+                        <input class="form-control" id="tickerSymbol" placeholder="Enter ticker"> <!--upperCase ?-->
+                    </div>
+                    <label class="col-sm-2 control-label" for="divRate">Dividend rate ($):</label>
+                    <div class="col-sm-2">
+                        <input class="form-control" id="divRate" [readonly]="isReadOnly">
+                    </div>
+                    <label class="col-sm-2 control-label" for="divYield">Dividend yield (%):</label>
+                    <div class="col-sm-2">
+                        <input class="form-control" id="divYield" [readonly]="isReadOnly">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="tickerSymbol">Ticker description:</label>
+                    <div class="col-sm-2">
+                        <input class="form-control" id="tickerDesc" [readonly]="isReadOnly" maxlength="50" placeholder="NYSE description - 50 characters max.">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="divFreq">Dividend frequency:</label>
+                    <div class="col-sm-2">
+                        <input class="form-control" id="divFreq" placeholder="A,S,Q,M" data-ng-model="vm.assetDivFreq" [readonly]="isReadOnly">
+                    </div>
+                    <label class="col-sm-2 control-label" for="peRatio">Price/Earnings:</label>
+                    <div class="col-sm-2">
+                        <input class="form-control" id="peRatio" [readonly]="isReadOnly">
+                    </div>
+                    <label class="col-sm-2 control-label" for="eps">Earnings/Share ($):</label>
+                    <div class="col-sm-2">
+                        <input class="form-control" id="eps" [readonly]="isReadOnly">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="unitPrice">Unit Price ($):</label>
+                    <div class="col-sm-2">
+                        <input class="form-control" id="unitPrice" [readonly]="isReadOnly">
+                    </div>
+                    <label class="col-sm-2 control-label" for="divPayDate">Div. pay months:</label>
+                    <div class="col-sm-2">
+                        <input class="form-control" id="divPayDate" [readonly]="isReadOnly">
+                    </div>
+                    <!--<label class="col-sm-2 control-label" for="ExDivDate">Ex-dividend date:</label>
+                    <div class="col-sm-2">
+                        <input class="form-control" id="ExDivDate" [readonly]="isReadOnly">
+                    </div>-->
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-4 col-md-offset-2">
+                        <span>
+                            <button class="btn btn-w-md btn-gap-v btn-info" type="button" style="width: 130px;" (click)="getProfile()">
+                                Get Profile data
+                            </button>
+                            <button id="btnNewProfile" data-ng-disabled="vm.createProfileBtnDisabled" class="btn btn-w-md btn-gap-v btn-info" type="button" data-ng-click="vm.createProfile()">
+                                Save/Update Profile
+                            </button>
+                        </span>
+
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </section>
+
+</div>
+
+
+

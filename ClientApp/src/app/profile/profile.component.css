@@ -1,0 +1,62 @@
+#divRate, #divYield, #tickerSymbol, #peRatio, #eps, #ExDivDate, #divPayDate, #unitPrice, #divFreq, #tickerDesc {
+    background-color: lightgoldenrodyellow;
+}
+
+#tickerSymbol {
+    width: 71%;
+}
+
+#divRate, #divYield, #peRatio, #eps, #unitPrice {
+    width: 50%;
+}
+
+#ExDivDate, #divPayDate {
+    width: 70%;
+}
+
+#divFreq {
+    width: 71%;
+}
+
+.panel .panel-default { /* adjust height as new fileds are added.*/
+    height: 325px;
+    margin-top: 325px;
+}
+
+#lastUpdate {
+    float: right;
+}
+
+#tickerDesc {
+    width: 727px;
+}
+
+#uiView {
+    /*margin-top: 110px;*/
+    margin-top: 310px;
+}
+
+#btnNewProfile {
+    margin-left: 10px;
+    width: 150px;
+}
+
+.col-md-12 {
+    margin-top: 7px;
+    margin-left: -14px;
+}
+header {
+    background-color: #222;
+    padding: 5px;
+    text-align: center;
+    font-size: 17px;
+    color: white;
+    width: 633px;
+    height: 34px;
+}
+
+ul {
+    margin-top: 15px;
+    margin-bottom: 12px;
+    font-size: 15px;
+}
