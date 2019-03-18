@@ -6,15 +6,18 @@
     width: 71%;
 }
 
-#divRate, #divYield, #peRatio, #eps, #unitPrice {
+ #divYield, #peRatio, #eps {
     width: 50%;
 }
+#divRate, #divPayMonths, #peRatio {
+    width: 90px;
+}
 
-#ExDivDate, #divPayDate {
+#ExDivDate,  {
     width: 70%;
 }
 
-#divFreq {
+#divFreq, #unitPrice {
     width: 71%;
 }
 
@@ -22,9 +25,8 @@
     height: 325px;
     margin-top: 325px;
 }
-
-#lastUpdate {
-    float: right;
+.panel-default > .panel-heading { /*time stamp needs correcting*/
+    background-color: #9bc2e6;
 }
 
 #tickerDesc {
@@ -59,4 +61,13 @@ ul {
     margin-top: 15px;
     margin-bottom: 12px;
     font-size: 15px;
+}
+#btnNewProfile, #btnProfile {
+    background-color: #DDDDDD;
+    color:#333333;
+
+}
+#lastUpdate {
+    float: right;
+    font-weight: bold;
 }
