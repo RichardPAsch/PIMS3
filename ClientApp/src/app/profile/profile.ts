@@ -1,4 +1,5 @@
 export class Profile {
+    // view model.
     tickerSymbol: string;
     tickerDesc: string;
     divRate: number;
@@ -9,4 +10,4 @@ export class Profile {
     unitPrice: number;
     divPayMonths: string;
 
-}
+  }
