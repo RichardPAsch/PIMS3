@@ -1,5 +1,5 @@
 <header>
-    - Profile for asset -
+    - Profile for Asset -
 </header>
 <ul>
     <li>Displays fetched profile information for any ticker symbol entered.</li>
@@ -14,56 +14,59 @@
             <strong>
                 <span class="glyphicon glyphicon-th"></span>&nbsp;&nbsp;Asset profile attributes
             </strong>
-            <span class="glyphicon glyphicon-time" id="lastUpdate">&nbsp;{{currentDateTime}}</span>
+            <strong>
+                <span class="glyphicon glyphicon-time" id="lastUpdate">&nbsp;{{currentDateTime}}</span>
+            </strong>
         </div>
         <div class="panel-body">
-            <form class="form-horizontal ng-pristine ng-valid" role="form">
+
+            <form class="form-horizontal ng-pristine ng-valid" role="form" [formGroup]="assetProfileForm">
 
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="tickerSymbol">Ticker symbol:</label>
                     <div class="col-sm-2">
-                        <input class="form-control" id="tickerSymbol" placeholder="Enter ticker"> <!--upperCase ?-->
+                        <input class="form-control" id="tickerSymbol" formControlName="ticker" placeholder="Enter ticker" /><!--upperCase ?-->
                     </div>
                     <label class="col-sm-2 control-label" for="divRate">Dividend rate ($):</label>
                     <div class="col-sm-2">
-                        <input class="form-control" id="divRate" [readonly]="isReadOnly">
+                        <input class="form-control" formControlName="divRate" id="divRate" [readonly]="isReadOnly">
                     </div>
                     <label class="col-sm-2 control-label" for="divYield">Dividend yield (%):</label>
                     <div class="col-sm-2">
-                        <input class="form-control" id="divYield" [readonly]="isReadOnly">
+                        <input class="form-control" formControlName="divYield" id="divYield" [readonly]="isReadOnly">
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="col-sm-2 control-label" for="tickerSymbol">Ticker description:</label>
+                    <label class="col-sm-2 control-label" for="tickerDesc">Ticker description:</label>
                     <div class="col-sm-2">
-                        <input class="form-control" id="tickerDesc" [readonly]="isReadOnly" maxlength="50" placeholder="NYSE description - 50 characters max.">
+                        <input class="form-control" id="tickerDesc" formControlName="tickerDesc"  [readonly]="isReadOnly" maxlength="50" placeholder="NYSE description - 50 characters max.">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="divFreq">Dividend frequency:</label>
                     <div class="col-sm-2">
-                        <input class="form-control" id="divFreq" placeholder="A,S,Q,M" data-ng-model="vm.assetDivFreq" [readonly]="isReadOnly">
+                        <input class="form-control" id="divFreq" formControlName="divFreq" placeholder="A,S,Q,M" data-ng-model="vm.assetDivFreq" [readonly]="isReadOnly">
                     </div>
                     <label class="col-sm-2 control-label" for="peRatio">Price/Earnings:</label>
                     <div class="col-sm-2">
-                        <input class="form-control" id="peRatio" [readonly]="isReadOnly">
+                        <input class="form-control" formControlName="peRatio" id="peRatio" [readonly]="isReadOnly">
                     </div>
                     <label class="col-sm-2 control-label" for="eps">Earnings/Share ($):</label>
                     <div class="col-sm-2">
-                        <input class="form-control" id="eps" [readonly]="isReadOnly">
+                        <input class="form-control" formControlName="eps" id="eps" [readonly]="isReadOnly">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="unitPrice">Unit Price ($):</label>
                     <div class="col-sm-2">
-                        <input class="form-control" id="unitPrice" [readonly]="isReadOnly">
+                        <input class="form-control" formControlName="unitPrice" id="unitPrice" [readonly]="isReadOnly">
                     </div>
-                    <label class="col-sm-2 control-label" for="divPayDate">Div. pay months:</label>
+                    <label class="col-sm-2 control-label" for="divPayMonths">Div. pay months:</label>
                     <div class="col-sm-2">
-                        <input class="form-control" id="divPayDate" [readonly]="isReadOnly">
+                        <input class="form-control" formControlName="divPayMonths" id="divPayMonths" [readonly]="isReadOnly">
                     </div>
                     <!--<label class="col-sm-2 control-label" for="ExDivDate">Ex-dividend date:</label>
                     <div class="col-sm-2">
@@ -74,10 +77,10 @@
                 <div class="form-group">
                     <div class="col-md-4 col-md-offset-2">
                         <span>
-                            <button class="btn btn-w-md btn-gap-v btn-info" type="button" style="width: 130px;" (click)="getProfile()">
+                            <button id="btnProfile" style="width: 130px;" (click)="getProfile()">
                                 Get Profile data
                             </button>
-                            <button id="btnNewProfile" data-ng-disabled="vm.createProfileBtnDisabled" class="btn btn-w-md btn-gap-v btn-info" type="button" data-ng-click="vm.createProfile()">
+                            <button id="btnNewProfile" (click)="vm.createProfile()">
                                 Save/Update Profile
                             </button>
                         </span>
@@ -86,6 +89,7 @@
                 </div>
 
             </form>
+
         </div>
     </section>
 
