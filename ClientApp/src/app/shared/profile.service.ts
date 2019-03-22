@@ -25,5 +25,11 @@ export class ProfileService {
 
         // Returns Profile as an Observable, to be subscribed to.
         return this.http.get<Profile>(webApiUri);
-     }
+    }
+
+    getProfileDividendInfo(searchTicker: string): Observable<any> {
+
+        let webApiUri = baseUrl + "/api/DivInfo/" + searchTicker;
+        return this.http.get<Profile>(webApiUri);
+    }
 }
