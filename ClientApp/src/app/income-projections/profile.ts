@@ -8,5 +8,7 @@ export class Profile {
     dividendRate: number;
     dividendYield: number;
     projectedMonthlyIncome: number;
+    dividendFreq: string;
+    dividendPayMonths: string;
 
 }
