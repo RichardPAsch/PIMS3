@@ -5,6 +5,7 @@
     <li>Displays fetched profile information for any ticker symbol entered.</li>
     <li>Profile information may either be retreived via web, OR created manually if profile data is unavailable.</li>
     <li>All fields are read-only (excluding 'ticker'), except when a customized Profile is created manually.</li>
+    <li>'Div.Pay Months' may be <em>approximations</em>.</li>
     <li>Customized Profiles are accessible only to the investor who created them. </li>
 </ul>
 
@@ -25,7 +26,7 @@
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="tickerSymbol">Ticker symbol:</label>
                     <div class="col-sm-2">
-                        <input class="form-control" id="tickerSymbol" formControlName="ticker" placeholder="Enter ticker" /><!--upperCase ?-->
+                        <input class="form-control" oninput="this.value = this.value.toUpperCase()" id="tickerSymbol" formControlName="ticker" placeholder="Enter ticker"  /><!--upperCase ?-->
                     </div>
                     <label class="col-sm-2 control-label" for="divRate">Dividend rate ($):</label>
                     <div class="col-sm-2">
@@ -66,7 +67,7 @@
                     </div>
                     <label class="col-sm-2 control-label" for="divPayMonths">Div. pay months:</label>
                     <div class="col-sm-2">
-                        <input class="form-control" formControlName="divPayMonths" id="divPayMonths" [readonly]="isReadOnly">
+                        <input class="form-control" formControlName="divPayMonths" id="divPayMonths" [readonly]="isReadOnly" placeholder="3,6">
                     </div>
                     <!--<label class="col-sm-2 control-label" for="ExDivDate">Ex-dividend date:</label>
                     <div class="col-sm-2">
@@ -80,8 +81,8 @@
                             <button id="btnProfile" style="width: 130px;" (click)="getProfile()">
                                 Get Profile data
                             </button>
-                            <button id="btnNewProfile" (click)="vm.createProfile()">
-                                Save/Update Profile
+                            <button id="btnNewProfile" (click)="createProfile()" [disabled]="btnNewProfileIsDisabled">
+                                Create Profile
                             </button>
                         </span>
 
