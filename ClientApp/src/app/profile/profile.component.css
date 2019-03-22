@@ -1,4 +1,4 @@
-#divRate, #divYield, #tickerSymbol, #peRatio, #eps, #ExDivDate, #divPayDate, #unitPrice, #divFreq, #tickerDesc {
+#divRate, #divYield, #tickerSymbol, #peRatio, #eps, #divPayMonths, #divPayDate, #unitPrice, #divFreq, #tickerDesc {
     background-color: lightgoldenrodyellow;
 }
 
@@ -26,7 +26,8 @@
     margin-top: 325px;
 }
 .panel-default > .panel-heading { /*time stamp needs correcting*/
-    background-color: #9bc2e6;
+    background-color: #3387c6;
+    color: white;
 }
 
 #tickerDesc {
