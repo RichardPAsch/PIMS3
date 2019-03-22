@@ -17,7 +17,7 @@ export class ProfileComponent implements OnInit {
     currentDateTime: string;
     isReadOnly: boolean = true;
     enteredTicker: string;
-    assetProfile: Profile;
+    assetProfile: Profile = new Profile();
     assetProfileForm = new FormGroup({
         ticker: new FormControl(''),
         divRate: new FormControl(0),
@@ -29,18 +29,20 @@ export class ProfileComponent implements OnInit {
         unitPrice: new FormControl(0),
         divPayMonths: new FormControl('')
     });
+    assetProfileFreqAndMonths: any;
+    btnNewProfileIsDisabled: boolean = true;
 
     ngOnInit() {
         let idx = this.date1.toString().indexOf("GMT");
         this.currentDateTime = this.date1.toString().substr(0, idx);
     }
 
+    
     getProfile(): void {
         this.profileSvc.getProfileData(this.assetProfileForm.controls["ticker"].value)
             .retry(2)
             .subscribe(profileResponse => {
-                this.assetProfile = this.mapResponseToModel(profileResponse);
-                this.initializeView(this.assetProfile, false);
+                this.initializeView(this.mapResponseToModel(profileResponse), false);
             },
             (apiErr: HttpErrorResponse) => {
                 if (apiErr.error instanceof Error) {
@@ -54,14 +56,39 @@ export class ProfileComponent implements OnInit {
                     }
                     else
                         this.initializeView(null, true);
-                    //alert("Error retreiving profile due to : \n" + apiErr.error.errorMsg.substring(0, truncatedMsgLength)
-                    //    + "."
-                    //    + "\nCheck ticker validity.");
                 }
             }
-        );
+        ).unsubscribe;
+        this.getProfileFreqAndMonths(this.assetProfileForm.controls["ticker"].value);
     }
 
+
+    getProfileFreqAndMonths(ticker: string): void {
+        this.profileSvc.getProfileDividendInfo(ticker)
+            .retry(2)
+            .subscribe(profileResponse => {
+                this.assetProfileFreqAndMonths = profileResponse;
+            },
+                (apiErr: HttpErrorResponse) => {
+                    if (apiErr.error instanceof Error) {
+                        alert("Error retreiving profile dividend frequency and payment months: \network or application error. Please try later.");
+                    }
+                    else {
+                        let truncatedMsgLength = apiErr.error.errorMsg.indexOf(":") - 7;
+                        alert("Error retreiving profile dividend frequency and payment months due to : \n" + apiErr.error.errorMsg.substring(0, truncatedMsgLength)
+                            + "."
+                            + "\nCheck ticker validity.");
+                    }
+                }
+            );
+    }
+
+
+    createProfile(): void {
+        alert("is disabled");
+    }
+
+       
     mapResponseToModel(webProfile: any): Profile {
 
         /* available response fields:
@@ -69,18 +96,32 @@ export class ProfileComponent implements OnInit {
          * tickerSymbol,unitPrice,peRatio,exDividendDate
          */
         let profileModel = new Profile();
+       
         profileModel.tickerSymbol = webProfile.tickerSymbol;
         profileModel.tickerDesc = webProfile.tickerDescription;
-        profileModel.divFreq = webProfile.dividendFreq;
-        profileModel.divPayMonths = webProfile.dividendMonths;
+        profileModel.divFreq = webProfile.dividendFreq == "NA" || webProfile.dividendFreq == ""
+            ? this.assetProfileFreqAndMonths.DF
+            : webProfile.dividendFreq;
+
+        if (profileModel.divFreq != "M") {
+            profileModel.divPayMonths = webProfile.dividendMonths == "0" || webProfile.dividendMonths == ""
+                ? this.assetProfileFreqAndMonths.DM
+                : webProfile.dividendMonths;
+        }
+        else
+            profileModel.divPayMonths = "N/A";
+        
         profileModel.divYield = webProfile.dividendYield;
         profileModel.EPS = webProfile.earningsPerShare;
         profileModel.unitPrice = webProfile.unitPrice;
-        profileModel.PE_ratio = webProfile.peRatio == null ? 0 : webProfile.peRatio;
+        profileModel.PE_ratio = webProfile.peRatio == null
+            ? 0
+            : webProfile.peRatio;
         profileModel.divRate = webProfile.dividendRate;
 
         return profileModel;
     }
+
 
     initializeView(profileData: Profile, refresh: boolean): void {
 
