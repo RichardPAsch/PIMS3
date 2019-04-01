@@ -38,8 +38,8 @@ namespace PIMS3.DataAccess.IncomeData
             IQueryable<Income> income = _ctx.Income.Where(i => i.DateRecvd >= Convert.ToDateTime("1/1/" + fromYear.ToString()) &&
                                                                i.DateRecvd <= Convert.ToDateTime("12/31/" + currentYear.ToString()));
 
-            IQueryable<Data.Entities.Position> positions = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId &&
-                                                                                    p.Status == "A");
+            // Ignoring Position status, as "I"nactive positions would give erroneous results when compared to 'Income Summary'.
+            IQueryable<Data.Entities.Position> positions = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId );
 
             IQueryable <IncomeSavedVm> joinData = income.Join(positions, p => p.PositionId, i => i.PositionId, (incomeInfo, positionInfo) => new IncomeSavedVm
             {
