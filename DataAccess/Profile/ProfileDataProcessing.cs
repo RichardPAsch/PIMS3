@@ -6,8 +6,6 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using PIMS3.BusinessLogic.ProfileData;
-
 
 
 namespace PIMS3.DataAccess.Profile
@@ -61,7 +59,7 @@ namespace PIMS3.DataAccess.Profile
 
             var updatedOrNewProfile = new Data.Entities.Profile();
             // By default, we'll use the last 6 months for pricing history.
-            var priceHistoryStartDate = CalculateStartDate(-180);
+            string priceHistoryStartDate = CalculateStartDate(-180);
 
             using (var client = new HttpClient())
             {
@@ -77,9 +75,9 @@ namespace PIMS3.DataAccess.Profile
                 var url = client.BaseAddress + "/prices?startDate=" + priceHistoryStartDate + "&" + "token=" + TiingoAccountToken;
 
                 // Using 'Tiingo' end-point service for Profile data retreival.
-                var webResponse = FetchProfileViaWebSync(client, url);  
-                if (webResponse == null || webResponse == string.Empty)
-                    return null; // TODO: write error msg to log: [BadRequest("Unable to update Profile price data for: " + ticker);]
+                string webResponse = FetchProfileViaWebSync(client, url);  
+                if (webResponse == "" || webResponse == null)
+                    return null; 
 
                 jsonTickerPriceData = JArray.Parse(webResponse);
 
@@ -217,9 +215,7 @@ namespace PIMS3.DataAccess.Profile
                 string url = client.BaseAddress + "/prices?startDate=" + priceHistoryStartDate + "&" + "token=" + TiingoAccountToken;
                 string webResponse = FetchProfileViaWebSync(client, url);
                 if (webResponse == null || webResponse == string.Empty)
-                {
                     return null;
-                }
 
                 jsonTickerPriceData = JArray.Parse(webResponse);
                 orderedJsonTickerPriceData = new JArray(jsonTickerPriceData.OrderByDescending(obj => obj["date"]));
@@ -310,7 +306,33 @@ namespace PIMS3.DataAccess.Profile
         }
 
 
-        
+        public bool UpdateProfile(ProfileVm editedProfile)
+        {
+            Data.Entities.Profile profileToUpdate = new Data.Entities.Profile();
+            int updateCount = 0;
+
+            try
+            {
+                IQueryable<Data.Entities.Profile> existingProfile = _ctx.Profile.Where(p => p.TickerSymbol == editedProfile.TickerSymbol).AsQueryable();
+
+                existingProfile.First().DividendMonths = editedProfile.DividendMonths;
+                existingProfile.First().DividendPayDay = editedProfile.DividendPayDay;
+                existingProfile.First().LastUpdate = Convert.ToDateTime(editedProfile.LastUpdate);
+
+                _ctx.UpdateRange(existingProfile);
+                updateCount = _ctx.SaveChanges();
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            return updateCount == 1 ? true : false;
+
+        }
+
+
+
 
 
     }
