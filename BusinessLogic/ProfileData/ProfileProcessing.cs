@@ -44,6 +44,14 @@ namespace PIMS3.BusinessLogic.ProfileData
 
             var profileDataAccessComponent = new ProfileDataProcessing(ctx);
             JArray orderedJsonTickerPriceData = profileDataAccessComponent.FetchDividendSpecsForTicker(tickerSymbol);
+
+            // Handle unresolved ticker in Tiingo service.
+            // TODO: write error msg to log: [BadRequest("Unable to update Profile price data for: " + ticker);]
+            if (orderedJsonTickerPriceData == null)
+            {
+                return null;
+            }
+
             foreach (JObject objChild in orderedJsonTickerPriceData.Children<JObject>())
             {
                 // Loop will key in on "divCash" for gathering needed freq & month specs.
@@ -63,6 +71,9 @@ namespace PIMS3.BusinessLogic.ProfileData
                     }
                 }
             }
+
+            if (oneYearDivPayMonths_1.Length == 0)
+                return null;
 
             // Strip trailing comma.
             oneYearDivPayMonths_2 = oneYearDivPayMonths_1.ToString().Substring(0, oneYearDivPayMonths_1.Length-1);
