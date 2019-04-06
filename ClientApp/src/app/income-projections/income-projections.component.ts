@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { AgGridNg2 } from 'ag-grid-angular';
 import { ProfileService } from '../shared/profile.service';
-import { Profile } from '../income-projections/profile';
+import { ProjectionProfile } from '../income-projections/projection-profile';
 import { HttpErrorResponse } from '@angular/common/http';
 import 'rxjs/add/operator/retry'; 
 //import { map } from 'rxjs/operators';
@@ -46,7 +46,7 @@ export class IncomeProjectionsComponent implements OnInit {
 
     getProjections()
     {
-        let profiles = new Array<Profile>();
+        let profiles = new Array<ProjectionProfile>();
         var selectedNodes = this.agGrid.api.getSelectedNodes();
         var selectedData = selectedNodes.map(node => node.data);
                 
@@ -109,10 +109,10 @@ export class IncomeProjectionsComponent implements OnInit {
     }
 
 
-    initializeGridModel(recvdProfile: any, capitalToInvest: number): Profile {
+    initializeGridModel(recvdProfile: any, capitalToInvest: number): ProjectionProfile {
 
         // Calculating projected income (bus. logic) done here, as projectedIncome is not a 'Profile.cs' attribute.
-        let profileRecord = new Profile();
+        let profileRecord = new ProjectionProfile();
         profileRecord.ticker = recvdProfile.tickerSymbol;
         profileRecord.ticker = profileRecord.ticker.toUpperCase();
         profileRecord.capital = capitalToInvest;
@@ -124,7 +124,7 @@ export class IncomeProjectionsComponent implements OnInit {
         return profileRecord;
     };
 
-    calculateProjectedMonthlyIncome(incompleteProfile: Profile): number {
+    calculateProjectedMonthlyIncome(incompleteProfile: ProjectionProfile): number {
         // ** Received 'divCash' (aka dividendRate) amount(s), from web service API, is/are always given as MONTHLY rates,
         //    despite distribution frequencies, and are in accordance/verified with the 'last announced dividend' shown
         //    via 'Seeking Alpha'. **
