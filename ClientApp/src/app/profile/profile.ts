@@ -9,5 +9,5 @@ export class Profile {
     EPS: number;
     unitPrice: number;
     divPayMonths: string;
-
+    divPayDay: number;
   }
