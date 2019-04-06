@@ -1,4 +1,4 @@
-#divRate, #divYield, #tickerSymbol, #peRatio, #eps, #divPayMonths, #divPayDate, #unitPrice, #divFreq, #tickerDesc {
+#divRate, #divYield, #tickerSymbol, #peRatio, #eps, #divPayMonths, #divPayDate, #unitPrice, #divFreq, #tickerDesc, #divPayDay {
     background-color: lightgoldenrodyellow;
 }
 
@@ -13,8 +13,8 @@
     width: 90px;
 }
 
-#ExDivDate,  {
-    width: 70%;
+#divPayDay  {
+    width: 70px;
 }
 
 #divFreq, #unitPrice {
@@ -71,4 +71,7 @@ ul {
 #lastUpdate {
     float: right;
     font-weight: bold;
+}
+#btnUpdateProfile{
+    margin-left: 10px;
 }
