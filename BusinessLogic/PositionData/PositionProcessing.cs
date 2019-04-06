@@ -18,9 +18,9 @@ namespace PIMS3.BusinessLogic.PositionData
         public IQueryable<IncomeReceivablesVm> GetPositionsWithIncomeDue(string investor)
         {
             var positionDataAccessComponent = new PositionDataProcessing(_ctx);
-            var filteredJoinedPositionProfileData = positionDataAccessComponent.GetPositionsForIncomeReceivables(investor);
-                       
-            var currentMonth = DateTime.Now.Month;
+            IQueryable<IncomeReceivablesVm> filteredJoinedPositionProfileData = positionDataAccessComponent.GetPositionsForIncomeReceivables(investor);
+
+            int currentMonth = DateTime.Now.Month;
             List<IncomeReceivablesVm> tickersWithIncomeDue = new List<IncomeReceivablesVm>();
 
             if (!filteredJoinedPositionProfileData.Any())
