@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PIMS3.BusinessLogic.ProfileData;
 using PIMS3.Data;
+using PIMS3.DataAccess.Profile;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using PIMS3.ViewModels;
 
 namespace PIMS3.Controllers
 {
@@ -29,12 +32,31 @@ namespace PIMS3.Controllers
 
             try
             {
-                var initializedProfile = profileBusLogicComponent.BuildProfileForProjections(profileModel, _dbCtx);
+                Data.Entities.Profile initializedProfile = profileBusLogicComponent.BuildProfileForProjections(profileModel, _dbCtx);
                 return Ok(initializedProfile);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BadRequest(new { errorMsg = "Unable to fetch Profile data for " + tickerProfileToFetch + " due to: " + ex.Message}); 
+                // TODO: Log error.
+                return BadRequest(new { errorMsg = "No web Profile data found."}); 
+            }
+        }
+
+
+
+        [HttpGet("{ticker}/{useDb}")]
+        public ActionResult<bool> GetProfile(string ticker, bool useDb)
+        {
+
+            ProfileDataProcessing profileDataAccessComponent = new ProfileDataProcessing(_dbCtx);
+            try
+            {
+                IQueryable<Data.Entities.Profile> dBProfile = profileDataAccessComponent.FetchDbProfile(ticker);
+                return Ok(dBProfile == null ? false : true);
+            }
+            catch 
+            {
+                return Ok(false);
             }
         }
 
@@ -46,6 +68,27 @@ namespace PIMS3.Controllers
             Dictionary<string, string> divSpecs = profileBusLogicComponent.CalculateDivFreqAndDivMonths(ticker, _dbCtx); 
                        
             return Ok(divSpecs);
+        }
+
+
+        [HttpPut("")]
+        public ActionResult<bool> UpdateProfile([FromBody] dynamic editedProfile)
+        {
+            var profileDataAccessComponent = new ProfileDataProcessing(_dbCtx);
+            bool isOkUpdate = profileDataAccessComponent.UpdateProfile(MapToProfileVm(editedProfile));
+
+            return Ok(isOkUpdate);
+        }
+
+        private ProfileVm MapToProfileVm(dynamic edits)
+        {
+            return new ProfileVm
+            {
+                DividendMonths = edits.divPayMonths,
+                DividendPayDay = edits.divPayDay,
+                TickerSymbol = edits.tickerSymbol,
+                LastUpdate = DateTime.Now
+            };
         }
 
     }
