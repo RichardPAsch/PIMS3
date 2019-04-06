@@ -2,10 +2,11 @@
     - Profile for Asset -
 </header>
 <ul>
-    <li>Displays fetched profile information for any ticker symbol entered.</li>
-    <li>Profile information may either be retreived via web, OR created manually if profile data is unavailable.</li>
-    <li>All fields are read-only (excluding 'ticker'), except when a customized Profile is created manually.</li>
-    <li>'Div.Pay Months' may be <em>approximations</em>.</li>
+    <li>'Get Profile' - Fetch profile via web, for entered ticker symbol.</li>
+    <li>'Get Saved Profile' - Fetch saved profile for entered ticker symbol.</li>
+    <li>'Update Profile' - Update saved profile with current web-based 'Get Profile' data.</li>
+    <li>Displayed 'Div.pay months' may be <em>approximations</em> & can be edited/updated via 'Update Profile'.</li>
+    <li>'Create Profile' - Manually create a custom Profile for which no Profile data is available. </li>
     <li>Customized Profiles are accessible only to the investor who created them. </li>
 </ul>
 
@@ -67,19 +68,22 @@
                     </div>
                     <label class="col-sm-2 control-label" for="divPayMonths">Div. pay months:</label>
                     <div class="col-sm-2">
-                        <input class="form-control" formControlName="divPayMonths" id="divPayMonths" [readonly]="isReadOnly" placeholder="3,6">
+                        <input class="form-control" formControlName="divPayMonths" id="divPayMonths" [readonly]="isReadOnlyPayMonthsAndDay" placeholder="3,6">
                     </div>
-                    <!--<label class="col-sm-2 control-label" for="ExDivDate">Ex-dividend date:</label>
+                    <label class="col-sm-2 control-label" for="divPayDay">Dividend pay day:</label>
                     <div class="col-sm-2">
-                        <input class="form-control" id="ExDivDate" [readonly]="isReadOnly">
-                    </div>-->
+                        <input class="form-control" id="divPayDay" formControlName="divPayDay" [readonly]="isReadOnlyPayMonthsAndDay">
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <div class="col-md-4 col-md-offset-2">
+                    <div class="col-md-6 col-md-offset-2">
                         <span>
                             <button id="btnProfile" style="width: 130px;" (click)="getProfile()">
-                                Get Profile data
+                                Get Profile
+                            </button>
+                            <button id="btnUpdateProfile" style="width: 130px;" (click)="updateProfile()" [disabled]="btnUpdateProfileIsDisabled">
+                                Update Profile
                             </button>
                             <button id="btnNewProfile" (click)="createProfile()" [disabled]="btnNewProfileIsDisabled">
                                 Create Profile
