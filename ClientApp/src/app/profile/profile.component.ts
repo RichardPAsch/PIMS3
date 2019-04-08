@@ -3,7 +3,7 @@ import { ProfileService } from '../shared/profile.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Profile } from '../profile/profile';
 import { FormGroup, FormControl } from '@angular/forms';
-import { mergeMap, map } from 'rxjs/operators';
+import { tap, switchMap } from 'rxjs/operators';
 import { Observable } from 'rxjs/Observable';
 import { forkJoin } from 'rxjs';
 
@@ -44,6 +44,7 @@ export class ProfileComponent implements OnInit {
     ngOnInit() {
         let idx = this.date1.toString().indexOf("GMT");
         this.currentDateTime = this.date1.toString().substr(0, idx);
+        const ctx = this;
     }
 
     getProfile(): void {
@@ -75,6 +76,7 @@ export class ProfileComponent implements OnInit {
             
             this.initializeView(model, false);
             this.btnUpdateProfileIsDisabled = false;
+            this.isReadOnlyPayMonthsAndDay = false;
         },
         (apiErr: HttpErrorResponse) => {
             alert("No Profile found via web for: \n" + this.assetProfileForm.controls["ticker"].value + "\nCheck ticker symbol alternatives.");
@@ -83,44 +85,33 @@ export class ProfileComponent implements OnInit {
                
     }
 
-    // ** for reference only **
-    //getProfile(): void {
-    //    this.profileSvc.getProfileData(this.assetProfileForm.controls["ticker"].value)
-    //        .retry(2)
-    //        .subscribe(profileResponse => {
-    //            //merge()
-    //            // this.profileDataCache goes out of scope once control is returned here !!
-    //            // Consider using Rxjs map/pipe fxs .
-    //            this.profileDataCache = profileResponse;
-    //           //this.getProfileFreqAndMonths(this.assetProfileForm.controls["ticker"].value); // testing 4.1.19
-    //            //profileResponse.dividendFreq = this.assetProfileFreqAndMonths.DF;  // testing 4.1
-    //            //profileResponse.dividendPayMonths = this.assetProfileFreqAndMonths.DM;  // testing 4.1
 
-    //            //this.initializeView(this.mapResponseToModel(profileResponse), false);
-    //            this.btnUpdateProfileIsDisabled = false;
-    //        },
-    //        (apiErr: HttpErrorResponse) => {
-    //            if (apiErr.error instanceof Error) {
-    //                alert("Error retreiving profile: \network or application error. Please try later.");
-    //            }
-    //            else {
-    //                let truncatedMsgLength = apiErr.error.errorMsg.indexOf(":") - 7;
-    //                let isCustom = confirm(apiErr.error.errorMsg.substring(0, truncatedMsgLength) + "\nCreate custom Profile?");
-    //                if (isCustom) {
-    //                    alert("custom it is"); // enable fields for editing..
-    //                }
-    //                else
-    //                    this.initializeView(null, true);
-    //            }
-    //        }
-    //    ).unsubscribe;
-    //    //this.getProfileFreqAndMonths(this.assetProfileForm.controls["ticker"].value);
-    //    this.isReadOnlyPayMonthsAndDay = false;
-        
-    //}
+    getDbProfile(): void {
 
-
-    
+        this.profileSvc.getProfileDataViaDb(this.assetProfileForm.controls["ticker"].value)
+            .retry(2)
+            .subscribe(profileResponse => {
+                this.initializeView(this.mapResponseToModel(profileResponse[0]), false);
+                this.btnUpdateProfileIsDisabled = true;
+            },
+            (apiErr: HttpErrorResponse) => {
+                if (apiErr.error instanceof Error) {
+                    alert("Error retreiving existing profile: \network or application error. Please try later.");
+                }
+                else {
+                    // to be completed...
+                    //let truncatedMsgLength = apiErr.error.errorMsg.indexOf(":") - 7;
+                    //let isCustom = confirm(apiErr.error.errorMsg.substring(0, truncatedMsgLength) + "\nCreate custom Profile?");
+                    //if (isCustom) {
+                    //    alert("custom it is"); // enable fields for editing..
+                    //}
+                    //else
+                    //    this.initializeView(null, true);
+                }
+            }
+        ).unsubscribe;
+        this.isReadOnlyPayMonthsAndDay = false;
+    }
 
 
     createProfile(): void {
@@ -181,50 +172,43 @@ export class ProfileComponent implements OnInit {
     }
 
 
-    updateProfile(): void {
+    updateProfile(): void { 
 
         let profileToUpdate = new Profile();
+        let dbProfileGet$;
+        let dbProfilePut$
+
         profileToUpdate.tickerSymbol = this.assetProfileForm.controls["ticker"].value;
         profileToUpdate.divPayMonths = this.assetProfileForm.controls["divPayMonths"].value;
         profileToUpdate.divPayDay = this.assetProfileForm.controls["divPayDay"].value;
 
-        this.profileSvc.getProfileDataViaDb(profileToUpdate.tickerSymbol)
-            .retry(2)
-            .subscribe(profileDbResponse => {
-                if (!profileDbResponse) {
-                    alert("Update unsuccessful due to no existing Profile found for : \n" + profileToUpdate.tickerSymbol);
-                    this.initializeView(null, true);
-                    this.btnUpdateProfileIsDisabled = true;
-                    return;
-                }
-            },
-            (err) => {
-                // TODO: log results.
-                alert("error due to : " + err);
-            }).unsubscribe;
+        try {
+            dbProfileGet$ = this.profileSvc.getProfileDataViaDb(profileToUpdate.tickerSymbol);
+            dbProfilePut$ = this.profileSvc.updateProfile(profileToUpdate);
+        } catch (e) {
+            alert("Error obtaining existing Profile for : " + profileToUpdate.tickerSymbol);
+        }
 
+        // RxJS : tap() - returned value(s) untouchable, as opposed to edit/transform capability via map().
+        let combined = dbProfileGet$.pipe(
+            switchMap(profileInfo => {
+                return dbProfilePut$.pipe(
+                        tap(profileUpdate => {
+                            if (profileUpdate) {
+                                alert("Existing Profile for : \n" + profileInfo[0].tickerSymbol + "\n successfully updated!");
+                            }
+                            else {
+                                // TODO: Logging ?
+                                alert("No existing Profile found for update; check portfolio for ticker validity.");
+                            }
+                            this.initializeView(null, true);
+                            this.btnUpdateProfileIsDisabled = true;
+                        })
+                   );
+            })
+        );
 
-        this.profileSvc.updateProfile(profileToUpdate)
-            .retry(2)
-            .subscribe(profileUpdatedResponse => {
-                if (profileUpdatedResponse) 
-                    alert("Existing Profile for : " + this.assetProfileForm.controls["ticker"].value + " successfully updated!");
-                else
-                    alert("Error updating Profile for : " + this.assetProfileForm.controls["ticker"].value + " successfully updated!");
-            },
-            (apiErr: HttpErrorResponse) => {
-                if (apiErr.error instanceof Error) {
-                    alert("Error processing Profile update due to network or application error. Please try later.");
-                }
-                else {
-                    let truncatedMsgLength = apiErr.error.errorMsg.indexOf(":") - 7;
-                    alert("Error processing Profile update due to : \n" + apiErr.error.errorMsg.substring(0, truncatedMsgLength)
-                        + "."
-                        + "\nCheck ticker validity.");
-                }
-            }).unsubscribe;
-
-        this.initializeView(null, true);
+        combined.subscribe();
     }
 
 
