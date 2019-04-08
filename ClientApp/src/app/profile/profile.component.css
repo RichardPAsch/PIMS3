@@ -72,6 +72,13 @@ ul {
     float: right;
     font-weight: bold;
 }
-#btnUpdateProfile{
+#btnUpdateProfile {
     margin-left: 10px;
+    margin-right: 20px;
+}
+#btnProfile {
+    margin-right: 10px;
+}
+#btnSavedProfile {
+    margin-right: 25px;
 }
