@@ -77,10 +77,13 @@
                 </div>
 
                 <div class="form-group">
-                    <div class="col-md-6 col-md-offset-2">
+                    <div class="col-md-8 col-md-offset-2">
                         <span>
                             <button id="btnProfile" style="width: 130px;" (click)="getProfile()">
                                 Get Profile
+                            </button>
+                            <button id="btnSavedProfile" style="width: 130px;" (click)="getDbProfile()">
+                                Get Saved Profile
                             </button>
                             <button id="btnUpdateProfile" style="width: 130px;" (click)="updateProfile()" [disabled]="btnUpdateProfileIsDisabled">
                                 Update Profile
