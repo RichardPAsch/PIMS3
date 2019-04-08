@@ -45,18 +45,18 @@ namespace PIMS3.Controllers
 
 
         [HttpGet("{ticker}/{useDb}")]
-        public ActionResult<bool> GetProfile(string ticker, bool useDb)
+        public ActionResult<Data.Entities.Profile> GetProfile(string ticker, bool useDb)
         {
 
             ProfileDataProcessing profileDataAccessComponent = new ProfileDataProcessing(_dbCtx);
             try
             {
                 IQueryable<Data.Entities.Profile> dBProfile = profileDataAccessComponent.FetchDbProfile(ticker);
-                return Ok(dBProfile == null ? false : true);
+                return Ok(dBProfile);
             }
             catch 
             {
-                return Ok(false);
+                return BadRequest(new { errorMsg = "Error fetching Profile." });
             }
         }
 
