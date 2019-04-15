@@ -40,7 +40,7 @@
 }
 
 #btnNewProfile {
-    margin-left: 10px;
+    margin-left: 74px;
     width: 150px;
 }
 
@@ -63,22 +63,33 @@ ul {
     margin-bottom: 12px;
     font-size: 15px;
 }
+
 #btnNewProfile, #btnProfile {
     background-color: #DDDDDD;
     color:#333333;
-
 }
+
 #lastUpdate {
     float: right;
     font-weight: bold;
 }
+
 #btnUpdateProfile {
-    margin-left: 10px;
+    margin-left: 62px;
     margin-right: 20px;
 }
+
 #btnProfile {
     margin-right: 10px;
 }
+
 #btnSavedProfile {
     margin-right: 25px;
+}
+
+/*Override default validation msgs.*/
+.alert{
+    width:295px;
+    padding:10px;
+    margin-bottom: 1px;
 }
