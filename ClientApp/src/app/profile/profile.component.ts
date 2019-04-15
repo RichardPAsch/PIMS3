@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ProfileService } from '../shared/profile.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Profile } from '../profile/profile';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { tap, switchMap } from 'rxjs/operators';
-import { Observable } from 'rxjs/Observable';
+//import { Observable } from 'rxjs/Observable';
 import { forkJoin } from 'rxjs';
-
+import { Pims3Validations } from '../shared/pims3-validations';
 
 
 @Component({
@@ -18,33 +18,35 @@ import { forkJoin } from 'rxjs';
 export class ProfileComponent implements OnInit {
 
     constructor(private profileSvc: ProfileService) { }
-
     date1 = new Date();
     currentDateTime: string;
-    isReadOnly: boolean = true;
+    isReadOnly: boolean = false;
     isReadOnlyPayMonthsAndDay: boolean = true;
     enteredTicker: string;
     assetProfile: Profile = new Profile();
     assetProfileForm = new FormGroup({
-        ticker: new FormControl(''),
-        divRate: new FormControl(0),
-        divYield: new FormControl(0),
-        tickerDesc: new FormControl(''),
-        divFreq: new FormControl(''),
+        ticker: new FormControl('', [Validators.required, Validators.minLength(1), Validators.maxLength(6)]),
+        divRate: new FormControl(0, [Validators.required, Validators.min(0.001)]),
+        divYield: new FormControl(0, [Validators.required, Validators.min(0.5)]),
+        tickerDesc: new FormControl('', [Validators.required, Validators.maxLength(50)]),
+        divFreq: new FormControl('', [Validators.required, Validators.maxLength(1), Pims3Validations.divFreqValidator()]),
         peRatio: new FormControl(0),
-        eps: new FormControl(0),
-        unitPrice: new FormControl(0),
+        eps: new FormControl(0, [Validators.min(0.25)]),
+        unitPrice: new FormControl(0, [Validators.required]),
         divPayMonths: new FormControl(''),
-        divPayDay: new FormControl(0)
+        divPayDay: new FormControl(0, [Validators.min(1), Validators.max(31)])
     });
     assetProfileFreqAndMonths: any;
-    btnNewProfileIsDisabled: boolean = true;
+    btnNewProfileIsDisabled: boolean = false;
+    btnNewProfileSubmitted: boolean = false;
     btnUpdateProfileIsDisabled: boolean = true;
+
+    // convenience getter for easy access to form fields
+    get formFields() { return this.assetProfileForm.controls; }
 
     ngOnInit() {
         let idx = this.date1.toString().indexOf("GMT");
         this.currentDateTime = this.date1.toString().substr(0, idx);
-        const ctx = this;
     }
 
     getProfile(): void {
@@ -79,10 +81,17 @@ export class ProfileComponent implements OnInit {
             this.isReadOnlyPayMonthsAndDay = false;
         },
         (apiErr: HttpErrorResponse) => {
-            alert("No Profile found via web for: \n" + this.assetProfileForm.controls["ticker"].value + "\nCheck ticker symbol alternatives.");
-            this.initializeView(null, true);
+            //alert("No Profile found via web for: \n" + this.assetProfileForm.controls["ticker"].value + "\nCheck ticker symbol alternatives.");
+            let isNewProfile = confirm("No data found via web for: \n" + this.assetProfileForm.controls["ticker"].value + "\nCreate new Profile?");
+            if (isNewProfile) {
+                this.isReadOnly = false;
+                this.isReadOnlyPayMonthsAndDay = false;
+                this.btnNewProfileIsDisabled = false;
+            } else {
+                this.initializeView(null, true);
+            }
+            
         });
-               
     }
 
 
@@ -115,7 +124,30 @@ export class ProfileComponent implements OnInit {
 
 
     createProfile(): void {
-        alert("is disabled");
+
+        this.btnNewProfileSubmitted = true;
+
+        // Stop if form is invalid.
+        if (this.assetProfileForm.invalid) {
+            return;
+        }
+
+        let profileToCreate = new Profile();
+        profileToCreate.tickerSymbol = this.assetProfileForm.controls["ticker"].value;
+        profileToCreate.tickerDesc = this.assetProfileForm.controls["tickerDesc"].value;
+        profileToCreate.divPayMonths = this.assetProfileForm.controls["divPayMonths"].value;
+        profileToCreate.divPayDay = this.assetProfileForm.controls["divPayDay"].value;
+        profileToCreate.divRate = this.assetProfileForm.controls["divRate"].value;
+        profileToCreate.divYield = this.assetProfileForm.controls["divYield"].value;
+        profileToCreate.divFreq = this.assetProfileForm.controls["divFreq"].value;
+        profileToCreate.PE_ratio = this.assetProfileForm.controls["peRatio"].value;
+        profileToCreate.EPS = this.assetProfileForm.controls["eps"].value;
+        profileToCreate.unitPrice = this.assetProfileForm.controls["unitPrice"].value;
+
+        // TODO: Provide login info once security is implemented.
+        profileToCreate.investor = "rpasch@rpclassics.net";
+
+        //let x = 2;
     }
 
        
