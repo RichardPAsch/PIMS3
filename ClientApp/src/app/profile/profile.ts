@@ -10,4 +10,5 @@ export class Profile {
     unitPrice: number;
     divPayMonths: string;
     divPayDay: number;
+    investor: string;
   }
