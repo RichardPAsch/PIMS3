@@ -22,12 +22,12 @@
         </div>
         <div class="panel-body">
 
-            <form class="form-horizontal ng-pristine ng-valid" role="form" [formGroup]="assetProfileForm">
+            <form class="form-horizontal ng-pristine ng-valid" role="form" [formGroup]="assetProfileForm" (ngSubmit)="createProfile()">
 
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="tickerSymbol">Ticker symbol:</label>
                     <div class="col-sm-2">
-                        <input class="form-control" oninput="this.value = this.value.toUpperCase()" id="tickerSymbol" formControlName="ticker" placeholder="Enter ticker"  /><!--upperCase ?-->
+                        <input class="form-control" oninput="this.value = this.value.toUpperCase()" id="tickerSymbol" formControlName="ticker" placeholder="Enter ticker"  />
                     </div>
                     <label class="col-sm-2 control-label" for="divRate">Dividend rate ($):</label>
                     <div class="col-sm-2">
@@ -50,6 +50,13 @@
                     <label class="col-sm-2 control-label" for="divFreq">Dividend frequency:</label>
                     <div class="col-sm-2">
                         <input class="form-control" id="divFreq" formControlName="divFreq" placeholder="A,S,Q,M" data-ng-model="vm.assetDivFreq" [readonly]="isReadOnly">
+                        <div *ngIf="btnNewProfileSubmitted && formFields.divFreq.invalid && (formFields.divFreq.dirty || formFields.divFreq.touched)" class="alert alert-danger">
+                            <div *ngIf="formFields.divFreq.errors.maxlength"> Frequency can't exceed 1 character.</div>
+                            <div *ngIf="formFields.divFreq.errors.required"> Frequency required.</div>
+                            <div *ngIf="formFields.divFreq.errors.divFreq"> Allowed frequency values: (A)nnual/(S)emi-annual/(Q)uarterly/(M)onthly.</div>
+                        </div>
+                        <!--<p>Form Status: {{ assetProfileForm.status }}</p>-->
+                        <!--<p>Field value: {{ formFields.divFreq.value }}</p>-->
                     </div>
                     <label class="col-sm-2 control-label" for="peRatio">Price/Earnings:</label>
                     <div class="col-sm-2">
@@ -77,7 +84,7 @@
                 </div>
 
                 <div class="form-group">
-                    <div class="col-md-8 col-md-offset-2">
+                    <div class="col-md-10 col-md-offset-2">
                         <span>
                             <button id="btnProfile" style="width: 130px;" (click)="getProfile()">
                                 Get Profile
