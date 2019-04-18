@@ -27,33 +27,60 @@
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="tickerSymbol">Ticker symbol:</label>
                     <div class="col-sm-2">
-                        <input class="form-control" oninput="this.value = this.value.toUpperCase()" id="tickerSymbol" formControlName="ticker" placeholder="Enter ticker"  />
+                        <input class="form-control" oninput="this.value = this.value.toUpperCase()" id="tickerSymbol" formControlName="ticker" placeholder="Enter ticker" />
+                        <div *ngIf="btnNewProfileSubmitted && formFields.ticker.invalid && (formFields.ticker.dirty || formFields.ticker.touched)" class="alert alert-danger">
+                            <div *ngIf="formFields.ticker.errors.maxlength"> Ticker can't exceed 6 characters.</div>
+                            <div *ngIf="formFields.ticker.errors.required"> Ticker required.</div>
+                        </div>
                     </div>
                     <label class="col-sm-2 control-label" for="divRate">Dividend rate ($):</label>
                     <div class="col-sm-2">
                         <input class="form-control" formControlName="divRate" id="divRate" [readonly]="isReadOnly">
+                        <div *ngIf="btnNewProfileSubmitted && formFields.divRate.invalid && (formFields.divRate.dirty || formFields.divRate.touched)" class="alert alert-danger">
+                            <div *ngIf="formFields.divRate.errors.max"> Maximum allowed rate: 30.</div>
+                            <div *ngIf="formFields.divRate.errors.min"> Minimum allowed rate: 0.001.</div>
+                            <div *ngIf="formFields.divRate.errors.required"> Rate required.</div>
+                            <div *ngIf="formFields.divRate.errors.isNumber"> Invalid entry.</div>
+                        </div>
                     </div>
                     <label class="col-sm-2 control-label" for="divYield">Dividend yield (%):</label>
                     <div class="col-sm-2">
                         <input class="form-control" formControlName="divYield" id="divYield" [readonly]="isReadOnly">
+                        <div *ngIf="btnNewProfileSubmitted && formFields.divYield.invalid && (formFields.divYield.dirty || formFields.divYield.touched)" class="alert alert-danger">
+                            <div *ngIf="formFields.divYield.errors.max"> Maximum allowed yield: 50.</div>
+                            <div *ngIf="formFields.divYield.errors.min"> Minimum allowed yield: 0.5.</div>
+                            <div *ngIf="formFields.divYield.errors.required"> Yield required.</div>
+                            <div *ngIf="formFields.divRate.errors.isNumber"> Invalid entry.</div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="tickerDesc">Ticker description:</label>
                     <div class="col-sm-2">
-                        <input class="form-control" id="tickerDesc" formControlName="tickerDesc"  [readonly]="isReadOnly" maxlength="50" placeholder="NYSE description - 50 characters max.">
+                        <input class="form-control" id="tickerDesc" formControlName="tickerDesc" [readonly]="isReadOnly" maxlength="50" placeholder="NYSE description - 50 characters max.">
+                        <div *ngIf="btnNewProfileSubmitted && formFields.tickerDesc.invalid && (formFields.tickerDesc.dirty || formFields.tickerDesc.touched)" class="alert alert-danger">
+                            <div *ngIf="formFields.tickerDesc.errors.maxlength"> Maximum length for symbol: 50 characters.</div>
+                            <div *ngIf="formFields.tickerDesc.errors.required"> Ticker description required.</div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="divFreq">Dividend frequency:</label>
                     <div class="col-sm-2">
-                        <input class="form-control" id="divFreq" formControlName="divFreq" placeholder="A,S,Q,M" data-ng-model="vm.assetDivFreq" [readonly]="isReadOnly">
+                        <input class="form-control" oninput="this.value = this.value.toUpperCase()" id="divFreq" formControlName="divFreq" placeholder="A,S,Q,M" data-ng-model="vm.assetDivFreq" [readonly]="isReadOnly">
                         <div *ngIf="btnNewProfileSubmitted && formFields.divFreq.invalid && (formFields.divFreq.dirty || formFields.divFreq.touched)" class="alert alert-danger">
-                            <div *ngIf="formFields.divFreq.errors.maxlength"> Frequency can't exceed 1 character.</div>
+                            <div *ngIf="formFields.divFreq.errors.maxlength"> Maximum allowed length for frequency: 1 character.</div>
                             <div *ngIf="formFields.divFreq.errors.required"> Frequency required.</div>
-                            <div *ngIf="formFields.divFreq.errors.divFreq"> Allowed frequency values: (A)nnual/(S)emi-annual/(Q)uarterly/(M)onthly.</div>
+                            <div *ngIf="formFields.divFreq.errors.divFreq"> <hr />Allowed entries:
+                                 <ul>
+                                    <li>(A)nnual</li>
+                                    <li>(S)emi-annual</li>
+                                    <li>(Q)uarterly</li>
+                                    <li>(M)onthly</li>
+                                </ul>
+                            </div>
                         </div>
                         <!--<p>Form Status: {{ assetProfileForm.status }}</p>-->
                         <!--<p>Field value: {{ formFields.divFreq.value }}</p>-->
@@ -61,10 +88,18 @@
                     <label class="col-sm-2 control-label" for="peRatio">Price/Earnings:</label>
                     <div class="col-sm-2">
                         <input class="form-control" formControlName="peRatio" id="peRatio" [readonly]="isReadOnly">
+                        <div *ngIf="btnNewProfileSubmitted && formFields.peRatio.invalid && (formFields.peRatio.dirty || formFields.peRatio.touched)" class="alert alert-danger">
+                            <div *ngIf="formFields.peRatio.errors.min"> Minimum allowed P/E: 1.00.</div>
+                            <div *ngIf="formFields.peRatio.errors.isNumber"> Invalid entry.</div>
+                        </div>
                     </div>
                     <label class="col-sm-2 control-label" for="eps">Earnings/Share ($):</label>
                     <div class="col-sm-2">
                         <input class="form-control" formControlName="eps" id="eps" [readonly]="isReadOnly">
+                        <div *ngIf="btnNewProfileSubmitted && formFields.eps.invalid && (formFields.eps.dirty || formFields.eps.touched)" class="alert alert-danger">
+                            <div *ngIf="formFields.eps.errors.min"> Minimum allowed EPS: 0.25.</div>
+                            <div *ngIf="formFields.eps.errors.isNumber"> Invalid entry.</div>
+                        </div>
                     </div>
                 </div>
 
@@ -72,14 +107,27 @@
                     <label class="col-sm-2 control-label" for="unitPrice">Unit Price ($):</label>
                     <div class="col-sm-2">
                         <input class="form-control" formControlName="unitPrice" id="unitPrice" [readonly]="isReadOnly">
+                        <div *ngIf="btnNewProfileSubmitted && formFields.unitPrice.invalid && (formFields.unitPrice.dirty || formFields.unitPrice.touched)" class="alert alert-danger">
+                            <div *ngIf="formFields.unitPrice.errors.min"> Minimum allowed price: 0.50.</div>
+                            <div *ngIf="formFields.unitPrice.errors.isNumber"> Invalid entry.</div>
+                        </div>
                     </div>
                     <label class="col-sm-2 control-label" for="divPayMonths">Div. pay months:</label>
                     <div class="col-sm-2">
                         <input class="form-control" formControlName="divPayMonths" id="divPayMonths" [readonly]="isReadOnlyPayMonthsAndDay" placeholder="3,6">
+                        <div *ngIf="btnNewProfileSubmitted && formFields.divPayMonths.invalid && (formFields.divPayMonths.dirty || formFields.divPayMonths.touched)" class="alert alert-danger">
+                            <div *ngIf="formFields.divPayMonths.errors.divPayMonths"> Invalid month(s).</div>
+                            <div *ngIf="formFields.divPayMonths.errors.maxlength"> Maximum allowed length for months: 8 characters.</div>
+                        </div>
                     </div>
                     <label class="col-sm-2 control-label" for="divPayDay">Dividend pay day:</label>
                     <div class="col-sm-2">
                         <input class="form-control" id="divPayDay" formControlName="divPayDay" [readonly]="isReadOnlyPayMonthsAndDay">
+                        <div *ngIf="btnNewProfileSubmitted && formFields.divPayDay.invalid && (formFields.divPayDay.dirty || formFields.divPayDay.touched)" class="alert alert-danger">
+                            <div *ngIf="formFields.divPayDay.errors.max"> Maximum allowed day: 31.</div>
+                            <div *ngIf="formFields.divPayDay.errors.min"> Minimum allowed day: 1.</div>
+                            <div *ngIf="formFields.divPayDay.errors.required"> Day of month required.</div>
+                        </div>
                     </div>
                 </div>
 
