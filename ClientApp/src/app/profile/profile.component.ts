@@ -21,20 +21,20 @@ export class ProfileComponent implements OnInit {
     date1 = new Date();
     currentDateTime: string;
     isReadOnly: boolean = false;
-    isReadOnlyPayMonthsAndDay: boolean = true;
+    isReadOnlyPayMonthsAndDay: boolean = false;
     enteredTicker: string;
     assetProfile: Profile = new Profile();
     assetProfileForm = new FormGroup({
-        ticker: new FormControl('', [Validators.required, Validators.minLength(1), Validators.maxLength(6)]),
-        divRate: new FormControl(0, [Validators.required, Validators.min(0.001)]),
-        divYield: new FormControl(0, [Validators.required, Validators.min(0.5)]),
+        ticker: new FormControl('', [Validators.required, Validators.maxLength(6)]),
+        divRate: new FormControl(0, [Validators.required, Validators.min(0.001), Validators.max(30.00), Pims3Validations.isNumberValidator()]),
+        divYield: new FormControl(0, [Validators.required, Validators.min(0.5), Validators.max(45), Pims3Validations.isNumberValidator()]),
         tickerDesc: new FormControl('', [Validators.required, Validators.maxLength(50)]),
         divFreq: new FormControl('', [Validators.required, Validators.maxLength(1), Pims3Validations.divFreqValidator()]),
-        peRatio: new FormControl(0),
-        eps: new FormControl(0, [Validators.min(0.25)]),
-        unitPrice: new FormControl(0, [Validators.required]),
-        divPayMonths: new FormControl(''),
-        divPayDay: new FormControl(0, [Validators.min(1), Validators.max(31)])
+        peRatio: new FormControl(1, [Validators.min(1), Pims3Validations.isNumberValidator()]),
+        eps: new FormControl(1, [Validators.min(0.25), Pims3Validations.isNumberValidator()]),
+        unitPrice: new FormControl(0, [Validators.required, Validators.min(0.50), Pims3Validations.isNumberValidator()]),
+        divPayMonths: new FormControl('', [Pims3Validations.divPayMonthsValidator(), Validators.maxLength(8)]),
+        divPayDay: new FormControl(0, [Validators.required, Validators.min(1), Validators.max(31)])
     });
     assetProfileFreqAndMonths: any;
     btnNewProfileIsDisabled: boolean = false;
