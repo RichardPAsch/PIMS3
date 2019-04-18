@@ -87,9 +87,11 @@ ul {
     margin-right: 25px;
 }
 
-/*Override default validation msgs.*/
+/*Override default validation alert msgs.*/
 .alert{
-    width:295px;
+    width:135px;
     padding:10px;
     margin-bottom: 1px;
 }
+
+
