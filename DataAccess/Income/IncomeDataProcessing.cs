@@ -17,7 +17,7 @@ namespace PIMS3.DataAccess.IncomeData
         }
 
 
-        public IQueryable<Data.Entities.Income> FindIncomeDuplicates(string positionId, string dateRecvd, string amountRecvd)
+        public IQueryable<Income> FindIncomeDuplicates(string positionId, string dateRecvd, string amountRecvd)
         {
             // No investorId needed, as PositionId will be unique to investor.
             var duplicateRecords = _ctx.Income
