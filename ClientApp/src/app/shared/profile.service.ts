@@ -28,6 +28,7 @@ export class ProfileService {
         return this.http.get<Profile>(webApiUri);
     }
 
+
     getProfileDataViaDb(ticker: string): Observable<boolean> {
 
         let webApiUri = baseUrl + "/api/Profile/" + ticker + "/" + true;
@@ -35,15 +36,23 @@ export class ProfileService {
         return this.http.get<any>(webApiUri);
     }
 
+
     getProfileDividendInfo(searchTicker: string): Observable<any> {
 
         let webApiUri = baseUrl + "/api/DivInfo/" + searchTicker;
         return this.http.get<ProjectionProfile>(webApiUri);
     }
 
+
     updateProfile(partialProfileUpdate: Profile): Observable<boolean> {
 
         let webApiUri = baseUrl + "/api/Profile";
         return this.http.put<boolean>(webApiUri, partialProfileUpdate);
+    }
+
+    saveNewProfile(newProfile: Profile): Observable<boolean> {
+
+        let webApiUri = baseUrl + "/api/Profile";
+        return this.http.post<boolean>(webApiUri, newProfile);
     }
 }
