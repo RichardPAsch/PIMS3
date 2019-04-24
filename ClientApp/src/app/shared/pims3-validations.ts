@@ -8,7 +8,6 @@ export class Pims3Validations {
         // returns object, if applicable which consists of key(type string) & value (type 'any')
         return (control: AbstractControl): { [key: string]: any } | null => {
             if (control != null) {
-                //let x = 2;
                 return (control.value == "A" || control.value == "S" || control.value == "Q" || control.value == "M")
                     ? null                                  // validation Ok. 
                     : { divFreq: { value: control.value } } // validation error
@@ -29,6 +28,29 @@ export class Pims3Validations {
             return null;
         };
     }
+
+
+    static areDivMonthsAndDivFrequencyReconciled(monthsEntered: string, freqEntered: string): boolean {
+
+        // Ensure entered dividend payment months match entered dividend payment frequency.
+        // "M"onthly freq checks via 'divPayMonthsIsDisabled' flag.
+        let monthsArr;
+        let result: boolean = false;
+
+        if (monthsEntered.indexOf(',') > -1) {
+            monthsArr = monthsEntered.split(',');
+            if (freqEntered == "A" && monthsArr.length == 1)
+                result = true;
+            else if (freqEntered == "S" && monthsArr.length == 2)
+                result = true;
+            else if (freqEntered == "Q" && monthsArr.length == 4)
+                result = true;
+        } else {
+            result = (freqEntered != "A" && (parseInt(monthsEntered) >= 1 && parseInt(monthsEntered) <= 12 )) ? false : true;
+        }
+        return result;
+    }
+
 
     private static validateDividendPaymentMonths(pymtMonths: string): boolean {
 
