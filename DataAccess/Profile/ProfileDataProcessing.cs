@@ -306,7 +306,7 @@ namespace PIMS3.DataAccess.Profile
         }
 
 
-        public bool UpdateProfile(ProfileVm editedProfile)
+        public bool UpdateProfile(Data.Entities.Profile editedProfile)
         {
             Data.Entities.Profile profileToUpdate = new Data.Entities.Profile();
             int updateCount = 0;
@@ -328,6 +328,47 @@ namespace PIMS3.DataAccess.Profile
             }
 
             return updateCount == 1 ? true : false;
+
+        }
+
+
+        public bool SaveProfile(Data.Entities.Profile newProfile)
+        {
+            int savedCount = 0;
+            bool profileSaved = false;
+
+            try
+            {
+                _ctx.Add(newProfile);
+                savedCount = _ctx.SaveChanges();
+                profileSaved = savedCount == 1 ? true : false;
+            }
+            catch (Exception ex)
+            {
+                Exception err = ex.InnerException;
+                // TODO: Log error.
+            }
+
+            return profileSaved;
+        }
+
+
+        private Data.Entities.Profile MapVmToEntity(ProfileVm mapSource)
+        {
+            return new Data.Entities.Profile
+            {
+                TickerSymbol = mapSource.TickerSymbol.ToUpper().Trim(),
+                TickerDescription = mapSource.TickerDescription.Trim(),
+                DividendRate = mapSource.DividendRate,
+                DividendYield = mapSource.DividendYield,
+                DividendFreq = mapSource.DividendFreq,
+                PERatio = mapSource.PE_Ratio,
+                EarningsPerShare = mapSource.EarningsPerShare,
+                UnitPrice = mapSource.UnitPrice,
+                DividendMonths = mapSource.DividendMonths,
+                DividendPayDay = mapSource.DividendPayDay,
+                CreatedBy = mapSource.CreatedBy
+            };
 
         }
 
