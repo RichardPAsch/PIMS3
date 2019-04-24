@@ -4,7 +4,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Profile } from '../profile/profile';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { tap, switchMap } from 'rxjs/operators';
-//import { Observable } from 'rxjs/Observable';
 import { forkJoin } from 'rxjs';
 import { Pims3Validations } from '../shared/pims3-validations';
 
@@ -20,7 +19,7 @@ export class ProfileComponent implements OnInit {
     constructor(private profileSvc: ProfileService) { }
     date1 = new Date();
     currentDateTime: string;
-    isReadOnly: boolean = false;
+    isReadOnly: boolean = true;
     isReadOnlyPayMonthsAndDay: boolean = false;
     enteredTicker: string;
     assetProfile: Profile = new Profile();
@@ -33,15 +32,26 @@ export class ProfileComponent implements OnInit {
         peRatio: new FormControl(1, [Validators.min(1), Pims3Validations.isNumberValidator()]),
         eps: new FormControl(1, [Validators.min(0.25), Pims3Validations.isNumberValidator()]),
         unitPrice: new FormControl(0, [Validators.required, Validators.min(0.50), Pims3Validations.isNumberValidator()]),
-        divPayMonths: new FormControl('', [Pims3Validations.divPayMonthsValidator(), Validators.maxLength(8)]),
+        divPayMonths: new FormControl('1', [Pims3Validations.divPayMonthsValidator(), Validators.maxLength(8)]),
         divPayDay: new FormControl(0, [Validators.required, Validators.min(1), Validators.max(31)])
     });
     assetProfileFreqAndMonths: any;
-    btnNewProfileIsDisabled: boolean = false;
-    btnNewProfileSubmitted: boolean = false;
-    btnUpdateProfileIsDisabled: boolean = true;
 
-    // convenience getter for easy access to form fields
+    // General validation flags.
+    btnNewProfileSubmitted: boolean = false;
+    btnUpdateProfileSubmitted: boolean = false;
+    // Flag for user response cancelling confirmation prompt to new Profile creation.
+    cancelledNewProfileCreation: boolean = false;
+    divPayMonthsIsDisabled: boolean = true;
+
+
+    // Button availability based on user events.
+    btnCreateProfileIsDisabled: boolean = true;
+    btnUpdateProfileIsDisabled: boolean = true;
+    btnGetProfileIsDisabled: boolean = true;
+    btnGetDbProfileIsDisabled: boolean = true;
+
+    // Convenience getter for easy access to form fields.
     get formFields() { return this.assetProfileForm.controls; }
 
     ngOnInit() {
@@ -49,11 +59,25 @@ export class ProfileComponent implements OnInit {
         this.currentDateTime = this.date1.toString().substr(0, idx);
     }
 
+    enableDisableDivPayMonths(): void {
+        this.divPayMonthsIsDisabled = this.assetProfileForm.controls["divFreq"].value == "M" ? true : false;
+    }
+
+
+    enableButtonsForTicker() {
+        this.btnGetProfileIsDisabled = false;
+        this.btnGetDbProfileIsDisabled = false;
+        this.btnCreateProfileIsDisabled = true;
+        this.isReadOnly = false;
+    }
+
+
     getProfile(): void {
-        // ** Currently using 'Tiingo' as 3rd party API for Profile data fetches. **
+        // ** Currently using 3rd party API (Tiingo) for Profile data fetches. **
+
         // Obtain Profile basics.
         let profileData: any = this.profileSvc.getProfileData(this.assetProfileForm.controls["ticker"].value);
-        // Obtain dividend 'frequency' & 'months paid' calculations via parsing of 12 month pricing history.
+        // Obtain dividend 'frequency' & 'months paid' calculations via parsing of 12 month pricing/dividend history.
         let dividendData: any = this.profileSvc.getProfileDividendInfo(this.assetProfileForm.controls["ticker"].value);
 
         // Using forkJoin(), rather than subscribing x2, in obtaining a single Observable array for all needed data.
@@ -61,8 +85,9 @@ export class ProfileComponent implements OnInit {
 
         combined.subscribe(profileAndDivInfoArr => {
             let profileElement: any = profileAndDivInfoArr[0];
-            if (profileElement.tickerSymbol == null) {
-                alert("No Profile data found for: \n" + this.assetProfileForm.controls["ticker"].value + "\nPlease check ticker validity.");
+            // Scenario may arise where we have a valid ticker, but with incomplete or non-existent pricing info: (profileAndDivInfoArr[1]).
+            if (profileElement.tickerSymbol == null || profileAndDivInfoArr[1] == null) {
+                alert("Insufficient, or no web Profile data found for: \n" + this.assetProfileForm.controls["ticker"].value + "\nPlease check ticker validity.");
                 this.initializeView(null, true);
                 return;
             }
@@ -79,43 +104,49 @@ export class ProfileComponent implements OnInit {
             this.initializeView(model, false);
             this.btnUpdateProfileIsDisabled = false;
             this.isReadOnlyPayMonthsAndDay = false;
+            //this.btnCreateProfileIsDisabled = true;
         },
-        (apiErr: HttpErrorResponse) => {
-            //alert("No Profile found via web for: \n" + this.assetProfileForm.controls["ticker"].value + "\nCheck ticker symbol alternatives.");
+            (apiErr: HttpErrorResponse) => {
+            if (this.assetProfileForm.controls["ticker"].value == "") {
+                alert("A ticker symbol entry is required.")
+                this.btnGetProfileIsDisabled = true;
+                return;
+            }
+
             let isNewProfile = confirm("No data found via web for: \n" + this.assetProfileForm.controls["ticker"].value + "\nCreate new Profile?");
             if (isNewProfile) {
                 this.isReadOnly = false;
                 this.isReadOnlyPayMonthsAndDay = false;
-                this.btnNewProfileIsDisabled = false;
+                this.btnCreateProfileIsDisabled = false;
+                this.btnUpdateProfileIsDisabled= true;
             } else {
                 this.initializeView(null, true);
+                this.cancelledNewProfileCreation = true;
             }
-            
+            this.btnGetProfileIsDisabled = true;
+            this.btnGetDbProfileIsDisabled = true;
         });
     }
 
 
     getDbProfile(): void {
-
         this.profileSvc.getProfileDataViaDb(this.assetProfileForm.controls["ticker"].value)
             .retry(2)
             .subscribe(profileResponse => {
-                this.initializeView(this.mapResponseToModel(profileResponse[0]), false);
-                this.btnUpdateProfileIsDisabled = true;
+                if (profileResponse == null) {
+                    alert("No saved profile found for: \n" + this.assetProfileForm.controls["ticker"].value);
+                    return;
+                } else {
+                    this.initializeView(this.mapResponseToModel(profileResponse[0]), false);
+                    this.btnUpdateProfileIsDisabled = true;
+                    this.btnCreateProfileIsDisabled = true;
+                }
             },
             (apiErr: HttpErrorResponse) => {
+                this.btnGetProfileIsDisabled = false;
+                this.btnGetDbProfileIsDisabled = false;
                 if (apiErr.error instanceof Error) {
                     alert("Error retreiving existing profile: \network or application error. Please try later.");
-                }
-                else {
-                    // to be completed...
-                    //let truncatedMsgLength = apiErr.error.errorMsg.indexOf(":") - 7;
-                    //let isCustom = confirm(apiErr.error.errorMsg.substring(0, truncatedMsgLength) + "\nCreate custom Profile?");
-                    //if (isCustom) {
-                    //    alert("custom it is"); // enable fields for editing..
-                    //}
-                    //else
-                    //    this.initializeView(null, true);
                 }
             }
         ).unsubscribe;
@@ -124,8 +155,22 @@ export class ProfileComponent implements OnInit {
 
 
     createProfile(): void {
+        let dbProfilePost$;
+        let freqAndMonthsReconcile: boolean;
 
-        this.btnNewProfileSubmitted = true;
+        if (this.assetProfileForm.controls["divFreq"].value != "M") {
+            freqAndMonthsReconcile = Pims3Validations.areDivMonthsAndDivFrequencyReconciled(
+                this.assetProfileForm.controls["divPayMonths"].value,
+                this.assetProfileForm.controls["divFreq"].value);
+        }
+        
+
+        if (!freqAndMonthsReconcile) {
+            alert("Unable to create Profile: \nentered 'div Pay Months' & 'dividend frequency' must reconcile.");
+            this.btnNewProfileSubmitted = true;
+            this.initializeView(null, true);
+            return;
+        }
 
         // Stop if form is invalid.
         if (this.assetProfileForm.invalid) {
@@ -147,7 +192,32 @@ export class ProfileComponent implements OnInit {
         // TODO: Provide login info once security is implemented.
         profileToCreate.investor = "rpasch@rpclassics.net";
 
-        //let x = 2;
+        try {
+            dbProfilePost$ = this.profileSvc.saveNewProfile(profileToCreate);
+        } catch (e) {
+            alert("Error saving new Profile for : " + profileToCreate.tickerSymbol + "/ndue to " + e.message);
+        }
+
+        let posting = dbProfilePost$.pipe(
+            tap(newProfileResponse => {
+                if (newProfileResponse) {
+                    alert("New Profile for : \n" + profileToCreate.tickerSymbol + "\n successfully created!");
+                    this.btnGetProfileIsDisabled = true;
+                    this.btnGetDbProfileIsDisabled = true;
+                    this.btnCreateProfileIsDisabled = true;
+                    this.btnUpdateProfileIsDisabled = true;
+                } else {
+                    this.btnGetProfileIsDisabled = true;
+                    this.btnGetDbProfileIsDisabled = true;
+                    this.btnCreateProfileIsDisabled = false;
+                    this.btnUpdateProfileIsDisabled = true;
+                }
+                this.btnNewProfileSubmitted = true;
+                this.initializeView(null, true);
+            })
+        );
+
+        posting.subscribe();
     }
 
        
@@ -221,17 +291,27 @@ export class ProfileComponent implements OnInit {
             alert("Error obtaining existing Profile for : " + profileToUpdate.tickerSymbol);
         }
 
-        // RxJS : tap() - returned value(s) untouchable, as opposed to edit/transform capability via map().
+        // RxJS : tap() - returned value(s) are untouchable, as opposed to edit/transform capability available via map().
         let combined = dbProfileGet$.pipe(
             switchMap(profileInfo => {
                 return dbProfilePut$.pipe(
                         tap(profileUpdate => {
                             if (profileUpdate) {
                                 alert("Existing Profile for : \n" + profileInfo[0].tickerSymbol + "\n successfully updated!");
+                                this.btnGetProfileIsDisabled = true;
+                                this.btnGetDbProfileIsDisabled = true;
+                                this.btnCreateProfileIsDisabled = true;
+                                this.btnUpdateProfileIsDisabled = true;
+                                this.btnUpdateProfileSubmitted = true;
                             }
                             else {
                                 // TODO: Logging ?
                                 alert("No existing Profile found for update; check portfolio for ticker validity.");
+                                this.btnGetProfileIsDisabled = false;
+                                this.btnGetDbProfileIsDisabled = true;
+                                this.btnCreateProfileIsDisabled = true;
+                                this.btnUpdateProfileIsDisabled = true;
+                                this.btnUpdateProfileSubmitted = false;
                             }
                             this.initializeView(null, true);
                             this.btnUpdateProfileIsDisabled = true;
@@ -242,6 +322,9 @@ export class ProfileComponent implements OnInit {
 
         combined.subscribe();
     }
+
+
+    
 
 
 }
