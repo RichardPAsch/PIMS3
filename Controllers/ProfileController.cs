@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using PIMS3.ViewModels;
+using PIMS3.Data.Entities;
 
 namespace PIMS3.Controllers
 {
@@ -41,8 +42,7 @@ namespace PIMS3.Controllers
                 return BadRequest(new { errorMsg = "No web Profile data found."}); 
             }
         }
-
-
+        
 
         [HttpGet("{ticker}/{useDb}")]
         public ActionResult<Data.Entities.Profile> GetProfile(string ticker, bool useDb)
@@ -75,21 +75,52 @@ namespace PIMS3.Controllers
         public ActionResult<bool> UpdateProfile([FromBody] dynamic editedProfile)
         {
             var profileDataAccessComponent = new ProfileDataProcessing(_dbCtx);
-            bool isOkUpdate = profileDataAccessComponent.UpdateProfile(MapToProfileVm(editedProfile));
+            bool isOkUpdate = profileDataAccessComponent.UpdateProfile(MapToProfile(editedProfile));
 
             return Ok(isOkUpdate);
         }
 
-        private ProfileVm MapToProfileVm(dynamic edits)
+
+        [HttpPost("")]
+        public ActionResult<bool> PersistProfile([FromBody] dynamic createdProfile)
         {
-            return new ProfileVm
-            {
-                DividendMonths = edits.divPayMonths,
-                DividendPayDay = edits.divPayDay,
-                TickerSymbol = edits.tickerSymbol,
-                LastUpdate = DateTime.Now
-            };
+            ProfileDataProcessing profileDataAccessComponent = new ProfileDataProcessing(_dbCtx);
+            bool profileIsCreated = profileDataAccessComponent.SaveProfile(MapToProfile(createdProfile, true));
+
+            return Ok(profileIsCreated);
+        }
+
+
+
+        private Profile MapToProfile(dynamic editsOrNew, bool isNewProfile = false)
+        {
+            DateTime today = DateTime.Now;
+
+            return isNewProfile
+                ? new Profile
+                {
+                    TickerSymbol = editsOrNew.tickerSymbol,
+                    TickerDescription = editsOrNew.tickerDesc,
+                    DividendRate = editsOrNew.divRate,
+                    DividendYield = editsOrNew.divYield,
+                    DividendFreq = editsOrNew.divFreq,
+                    PERatio = editsOrNew.PE_ratio,
+                    EarningsPerShare = editsOrNew.EPS,
+                    UnitPrice = editsOrNew.unitPrice,
+                    DividendMonths = editsOrNew.divPayMonths,
+                    DividendPayDay = editsOrNew.divPayDay,
+                    CreatedBy = "rpasch@rpclassics.net",     // TODO: replace once security implemented.
+                    LastUpdate = today
+                }
+                : new Profile
+                {
+                    DividendMonths = editsOrNew.divPayMonths,
+                    DividendPayDay = editsOrNew.divPayDay,
+                    TickerSymbol = editsOrNew.tickerSymbol,
+                    LastUpdate = DateTime.Now
+                };
         }
 
     }
+
 }
