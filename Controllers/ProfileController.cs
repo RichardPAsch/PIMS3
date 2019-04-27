@@ -5,8 +5,8 @@ using PIMS3.DataAccess.Profile;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using PIMS3.ViewModels;
 using PIMS3.Data.Entities;
+
 
 namespace PIMS3.Controllers
 {
@@ -22,19 +22,22 @@ namespace PIMS3.Controllers
         }
 
         [HttpGet("{tickerProfileToFetch}")]
-        [ProducesResponseType(200, Type = typeof(Data.Entities.Profile))]
-        public ActionResult<Data.Entities.Profile> GetProfile(string tickerProfileToFetch){
+        [ProducesResponseType(200, Type = typeof(Profile))]
+        public ActionResult<Profile> GetProfile(string tickerProfileToFetch){
 
             ProfileProcessing profileBusLogicComponent = new ProfileProcessing();
-            var profileModel = new Data.Entities.Profile
+            var profileModel = new Profile
             {
                 TickerSymbol = tickerProfileToFetch
             };
 
             try
             {
-                Data.Entities.Profile initializedProfile = profileBusLogicComponent.BuildProfileForProjections(profileModel, _dbCtx);
-                return Ok(initializedProfile);
+                Profile initializedProfile = profileBusLogicComponent.BuildProfileForProjections(profileModel, _dbCtx);
+                Dictionary<string, string> dividendFreqAndMonths = profileBusLogicComponent.CalculateDivFreqAndDivMonths(profileModel.TickerSymbol, _dbCtx);
+                initializedProfile.DividendFreq = dividendFreqAndMonths["DF"];
+                
+                return Ok(initializedProfile); 
             }
             catch (Exception)
             {
@@ -45,7 +48,7 @@ namespace PIMS3.Controllers
         
 
         [HttpGet("{ticker}/{useDb}")]
-        public ActionResult<Data.Entities.Profile> GetProfile(string ticker, bool useDb)
+        public ActionResult<Profile> GetProfile(string ticker, bool useDb)
         {
 
             ProfileDataProcessing profileDataAccessComponent = new ProfileDataProcessing(_dbCtx);
