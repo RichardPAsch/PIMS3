@@ -104,7 +104,6 @@ export class ProfileComponent implements OnInit {
             this.initializeView(model, false);
             this.btnUpdateProfileIsDisabled = false;
             this.isReadOnlyPayMonthsAndDay = false;
-            //this.btnCreateProfileIsDisabled = true;
         },
             (apiErr: HttpErrorResponse) => {
             if (this.assetProfileForm.controls["ticker"].value == "") {
