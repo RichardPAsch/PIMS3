@@ -4,7 +4,7 @@ import { ProfileService } from '../shared/profile.service';
 import { ProjectionProfile } from '../income-projections/projection-profile';
 import { HttpErrorResponse } from '@angular/common/http';
 import 'rxjs/add/operator/retry'; 
-//import { map } from 'rxjs/operators';
+
 
 @Component({
   selector: 'app-income-projections',
@@ -60,7 +60,7 @@ export class IncomeProjectionsComponent implements OnInit {
                 // Check for manual entries, bypassing web-based fetched profile data for calculations, e.g., due 
                 // to no, or incomplete data available via web service.
                 if (selectedData[gridRow].unitPrice > 0 && selectedData[gridRow].dividendRate > 0) {
-                    // Calculate projection based on submitted entries.
+                    // Calculate projection based on submitted grid entries.
                     let manualProfile: { [key: string]: any } = {
                         tickerSymbol: selectedData[gridRow].ticker,
                         unitPrice: selectedData[gridRow].unitPrice,
@@ -85,10 +85,11 @@ export class IncomeProjectionsComponent implements OnInit {
                                 }
                                 else {
                                     //API returns unsuccessful response status codes, e.g., 404, 500 etc.
-                                    let truncatedMsgLength = apiErr.error.errorMsg.indexOf(":") - 7;
-                                    alert("Error processing projection(s): due to : \n" + apiErr.error.errorMsg.substring(0, truncatedMsgLength)
+                                    //let truncatedMsgLength = apiErr.error.errorMsg.indexOf(":") - 7;
+                                    alert("Error processing projection(s): due to : \n"
+                                        + apiErr.error.errorMsg
                                         + "."
-                                        + "\nCheck ticker validity.");
+                                        + "\nPlease check ticker validity.");
                                 }
                             }
                         ); // end subscribe
@@ -111,7 +112,8 @@ export class IncomeProjectionsComponent implements OnInit {
 
     initializeGridModel(recvdProfile: any, capitalToInvest: number): ProjectionProfile {
 
-        // Calculating projected income (bus. logic) done here, as projectedIncome is not a 'Profile.cs' attribute.
+        // Using specifically created 'ProjectionProfile' to accommodate projectedIncome for grid purposes, as
+        // income projection is not a 'Profile.cs' attribute.
         let profileRecord = new ProjectionProfile();
         profileRecord.ticker = recvdProfile.tickerSymbol;
         profileRecord.ticker = profileRecord.ticker.toUpperCase();
@@ -119,18 +121,26 @@ export class IncomeProjectionsComponent implements OnInit {
         profileRecord.unitPrice = recvdProfile.unitPrice;
         profileRecord.dividendRate = recvdProfile.dividendRate;
         profileRecord.dividendYield = recvdProfile.dividendYield;
-        profileRecord.projectedMonthlyIncome = this.calculateProjectedMonthlyIncome(profileRecord);
+        profileRecord.dividendFreq = recvdProfile.dividendFreq;
 
+        let calculatedIncome = ((capitalToInvest / profileRecord.unitPrice) * profileRecord.dividendRate);
+
+        switch (profileRecord.dividendFreq) {
+            case "Q":
+                profileRecord.projectedMonthlyIncome = +(calculatedIncome / 3).toFixed(2);
+                break;
+            case "S":
+                profileRecord.projectedMonthlyIncome = +(calculatedIncome / 6).toFixed(2);
+                break;
+            case "A":
+                profileRecord.projectedMonthlyIncome = +(calculatedIncome / 12).toFixed(2);
+                break;
+            case "M":
+                profileRecord.projectedMonthlyIncome = +calculatedIncome.toFixed(2);
+                break;
+        }
+       
         return profileRecord;
     };
-
-    calculateProjectedMonthlyIncome(incompleteProfile: ProjectionProfile): number {
-        // ** Received 'divCash' (aka dividendRate) amount(s), from web service API, is/are always given as MONTHLY rates,
-        //    despite distribution frequencies, and are in accordance/verified with the 'last announced dividend' shown
-        //    via 'Seeking Alpha'. **
-        let calculatedIncome = ((incompleteProfile.capital / incompleteProfile.unitPrice) * incompleteProfile.dividendRate);
-        return (+calculatedIncome.toFixed(2));
-    }
-
-
+    
 }
