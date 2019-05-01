@@ -2,7 +2,8 @@
     - Portfolio Revenue -
 </header>
 <ul>
-    <li>'Date Recvd' & 'Amount' fields may be edited to reflect corrections.</li>
+    <li>'Date Recvd' & 'Amount' columns may be edited to reflect corrections.</li>
+    <li>'Ticker', 'Acccount', & 'Date Recvd' columns may be searched via specific criteria.</li>
     <li>Select [x] ticker(s) to mark for update(s), prior to submitting via "Update Income".</li>
     <li>Income record <em>count</em> : &nbsp;<strong>{{incomeRecordCount}}</strong></li>
     <li>Income record <em>total</em> : &nbsp;<strong>{{incomeRecordTotal | currency : 'USD'}}</strong></li>
@@ -23,6 +24,7 @@
                      class="ag-theme-blue"
                      [rowData]="rowData"
                      [columnDefs]="columnDefs"
+                     (filterChanged)="onFilterChanged($event)"
                      rowSelection="multiple">
     </ag-grid-angular>
 </p>
