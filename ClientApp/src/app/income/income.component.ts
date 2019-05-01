@@ -35,7 +35,13 @@ export class IncomeComponent implements OnInit {
                 apply: true
             }
         },
-        { headerName: "Div.Freq.", field: "dividendFreq", width: 97, resizable: true, filter: true, sortable: true },
+        { headerName: "Div.Freq.", field: "dividendFreq", width: 97, resizable: true, filter: true, sortable: true,
+            filterParams: {
+                applyButton: true,
+                clearButton: true,
+                apply: true
+            }
+        },
         { headerName: "Account", field: "accountTypeDesc", width: 92, resizable: true, sortable: true, filter: "agTextColumnFilter",
             filterParams: {
                 applyButton: true,
@@ -82,9 +88,12 @@ export class IncomeComponent implements OnInit {
         let filterInstanceTicker = this.agGridRevenue.api.getFilterInstance("tickerSymbol");
         let filterInstanceAccount = this.agGridRevenue.api.getFilterInstance("accountTypeDesc");
         let filterInstanceDate = this.agGridRevenue.api.getFilterInstance("dateRecvd");
+        let filterInstanceFreq = this.agGridRevenue.api.getFilterInstance("dividendFreq");
 
         // Trap for entered filtering.
-        if (filterInstanceTicker.isFilterActive() || filterInstanceAccount.isFilterActive() || filterInstanceDate.isFilterActive()) {
+        if (filterInstanceTicker.isFilterActive() || filterInstanceAccount.isFilterActive() || filterInstanceDate.isFilterActive()
+                                                  || filterInstanceFreq.isFilterActive())
+        {
             let filteredRowTotal = 0;
             let filteredRowCount = 0;
             this.agGridRevenue.api.forEachNodeAfterFilter((node) => {
