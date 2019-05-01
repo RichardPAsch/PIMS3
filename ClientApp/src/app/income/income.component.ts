@@ -4,7 +4,6 @@ import { IncomeService } from '../income/income.service';
 import { Income } from '../income/income';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CurrencyPipe } from '@angular/common';
-//import { map, reduce } from 'rxjs/operators';
 
 @Component({
   selector: 'app-income',
@@ -19,22 +18,36 @@ export class IncomeComponent implements OnInit {
     agGridRevenue: AgGridNg2;
 
     yearsOfIncomeToDisplay: number = 0;
-    incomeRecordCount: number;
+    incomeRecordCount: number;       // tally after possible filtering.
     incomeRecordTotal: number | CurrencyPipe;
+    initialRecordCount: number = 0;  // initial tally w/o filtering, e.g., page load.
 
     ngOnInit() {
         this.fetchRevenue();
     }
 
     columnDefs = [
-        { headerName: "Ticker", field: "tickerSymbol", sortable: true, filter: true, checkboxSelection: true, width: 100, resizable: true },
+        { headerName: "Ticker", field: "tickerSymbol", sortable: true, checkboxSelection: true, width: 100, resizable: true,
+            filter: "agTextColumnFilter",
+            filterParams: {
+                applyButton: true,
+                clearButton: true,
+                apply: true
+            }
+        },
         { headerName: "Div.Freq.", field: "dividendFreq", width: 97, resizable: true, filter: true, sortable: true },
-        { headerName: "Account", field: "accountTypeDesc", width: 92, resizable: true, filter: true, sortable: true },
+        { headerName: "Account", field: "accountTypeDesc", width: 92, resizable: true, sortable: true, filter: "agTextColumnFilter",
+            filterParams: {
+                applyButton: true,
+                clearButton: true,
+                apply: true
+            }
+        },
         { headerName: "Date Recvd", field: "dateRecvd", width: 120, resizable: true, editable: true, sortable: true,
             filter: "agDateColumnFilter",
             filterParams: {
                 comparator: function (filterLocalDateAtMidnight, cellValue) {
-                    // Dates are stored as mm/dd/yyyy - we create a Date object for comparison against the filter date.
+                    // Dates stored as mm/dd/yyyy - we create a Date object for comparison against the filter date.
                     var dateParts = cellValue.split("-");
                     var month = Number(dateParts[1]);
                     var day = Number(dateParts[2].substring(0, 2));
@@ -52,6 +65,8 @@ export class IncomeComponent implements OnInit {
                 },
                 browserDatePicker: true,
                 applyButton: true,
+                clearButton: true,
+                apply: true
             },
             cellStyle: { textAlign: "right" },
             cellRenderer: (data) => { return data.value ? (new Date(data.value)).toLocaleDateString() : ''; }
@@ -61,15 +76,41 @@ export class IncomeComponent implements OnInit {
     ];
 
     rowData: any;
+    
+    onFilterChanged() {
+
+        let filterInstanceTicker = this.agGridRevenue.api.getFilterInstance("tickerSymbol");
+        let filterInstanceAccount = this.agGridRevenue.api.getFilterInstance("accountTypeDesc");
+        let filterInstanceDate = this.agGridRevenue.api.getFilterInstance("dateRecvd");
+
+        // Trap for entered filtering.
+        if (filterInstanceTicker.isFilterActive() || filterInstanceAccount.isFilterActive() || filterInstanceDate.isFilterActive()) {
+            let filteredRowTotal = 0;
+            let filteredRowCount = 0;
+            this.agGridRevenue.api.forEachNodeAfterFilter((node) => {
+                filteredRowCount++;
+                filteredRowTotal = filteredRowTotal + parseFloat(node.data.amountRecvd);
+            });
+
+            this.incomeRecordCount = filteredRowCount;
+            this.incomeRecordTotal = filteredRowTotal;
+        } else {
+            // Trap for 'Clear filter' applied.
+            if (this.initialRecordCount != this.incomeRecordCount)
+                this.fetchRevenue();
+        }
+    }
+
 
     fetchRevenue(): any {
-        this.incomeSvc.GetRevenue(this.yearsOfIncomeToDisplay)  
+        this.incomeSvc.GetRevenue(this.yearsOfIncomeToDisplay)
             .retry(2)
             .subscribe(incomeResponse => {
                 this.incomeRecordCount = incomeResponse.length;
                 // Can't use 'reduce' on type string ?? / incomeResponse.reduce((sum, current) => sum + current.total, 0);
-                this.incomeRecordTotal = this.calculateRecordSum(incomeResponse); 
+                this.incomeRecordTotal = this.calculateRecordSum(incomeResponse);
                 this.agGridRevenue.api.setRowData(this.mapRevenueForGrid(incomeResponse));
+                this.initialRecordCount = incomeResponse.length;
             },
             (apiError: HttpErrorResponse) => {
                 if (apiError.error instanceof Error) {
