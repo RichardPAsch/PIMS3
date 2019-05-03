@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Linq;
+
 
 namespace PIMS3.BusinessLogic.ProfileData
 {
@@ -14,13 +14,14 @@ namespace PIMS3.BusinessLogic.ProfileData
 
         public Profile BuildProfileForProjections(Profile profile, Data.PIMS3Context ctx)
         {
-            profileToBeInitialized = profile;
+            profileToBeInitialized = profile; // should now have DF :Yes!
             var profileDataAccessComponent = new ProfileDataProcessing(ctx);
 
-            // try-catch here ? 
+            // try-catch here, or done in data access component? 
             profileToBeInitialized = profileDataAccessComponent.BuildProfile(profile.TickerSymbol.Trim());
-            if(profileToBeInitialized.DividendYield == 0M)
-                CalculateDividendYield();
+
+            // Fetched dividend rate via 3rd party service is unreliable.
+            CalculateDividendYield();
 
             return profileToBeInitialized;
         }
@@ -28,12 +29,31 @@ namespace PIMS3.BusinessLogic.ProfileData
         private void CalculateDividendYield()
         {
             // TODO: ** duplicate of ImportFileProcessing.CalculateDividendYield(). **
-            // Assumes dividend rates are on an MONTHLY basis.
-            if(profileToBeInitialized.DividendRate > 0 && profileToBeInitialized.UnitPrice > 0)
-                profileToBeInitialized.DividendYield = (profileToBeInitialized.DividendRate / profileToBeInitialized.UnitPrice) * 100;
+            decimal calculatedAnuualizedDividendRate = 0M;
+            if (profileToBeInitialized.DividendRate > 0 && profileToBeInitialized.UnitPrice > 0)
+            {
+                switch (profileToBeInitialized.DividendFreq)
+                {
+                    case "Q":
+                        calculatedAnuualizedDividendRate = profileToBeInitialized.DividendRate * 4;
+                        break;
+                    case "M":
+                        calculatedAnuualizedDividendRate = profileToBeInitialized.DividendRate * 12;
+                        break;
+                    case "S":
+                        calculatedAnuualizedDividendRate = profileToBeInitialized.DividendRate * 2;
+                        break;
+                    case "A":
+                        calculatedAnuualizedDividendRate = profileToBeInitialized.DividendRate;
+                        break;
+                }
+
+                profileToBeInitialized.DividendYield = decimal.Round(calculatedAnuualizedDividendRate / profileToBeInitialized.UnitPrice * 100, 2);
+            }
             else
                 profileToBeInitialized.DividendYield = 0M;
         }
+
 
         public Dictionary<string,string> CalculateDivFreqAndDivMonths(string tickerSymbol, Data.PIMS3Context ctx) 
         {
