@@ -33,8 +33,10 @@ namespace PIMS3.Controllers
 
             try
             {
-                Profile initializedProfile = profileBusLogicComponent.BuildProfileForProjections(profileModel, _dbCtx);
                 Dictionary<string, string> dividendFreqAndMonths = profileBusLogicComponent.CalculateDivFreqAndDivMonths(profileModel.TickerSymbol, _dbCtx);
+                profileModel.DividendFreq = dividendFreqAndMonths["DF"];
+
+                Profile initializedProfile = profileBusLogicComponent.BuildProfileForProjections(profileModel, _dbCtx);
                 initializedProfile.DividendFreq = dividendFreqAndMonths["DF"];
                 
                 return Ok(initializedProfile); 
