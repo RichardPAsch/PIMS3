@@ -1,37 +1,15 @@
-<style>
-    h4 {
-        background-color: lightgray;
-        color: darkblue;
-    }
-    .container {
-        background-color: aliceblue;
-        width: 600px;
-        float: left;
-    }
-    tbody tr td {
-        text-align: right;
-    }
-    td:first-child {
-        text-align: center;
-    }
-    header {
-        background-color: #222;
-        padding: 5px;
-        text-align: center;
-        font-size: 17px;
-        color: white;
-        width: 598px;
-        height: 34px;
-        margin-bottom: 24px;
-    }
-</style>
-
 
 <header>
     YTD income summary for:&nbsp;<em>{{currentYearHeading}}</em>
 </header>
 
-<p *ngIf="!ytdIncomeSummary"><em>Loading YTD data...</em></p>
+<ul>
+    <li>All summary data is presented as read-only for viewing.</li>
+    <li>'Amount recvd' - column data may be filtered as needed. </li>
+    <li>YTD Income Summary Total:&nbsp;<strong>{{incomeSummaryTotal | currency}}</strong></li>
+</ul>
+
+<br/>
 
 <p>
     <span><label>Display income summary for:&nbsp;&nbsp;</label></span>
@@ -48,32 +26,17 @@
     </select>
 </p>
 
-<div class="container" style="background-color:aliceblue">
-    <p></p>
-    <div class="table-responsive-sm">
-        <table *ngIf="ytdIncomeSummary" id="incomeSummary" class="table table-bordered table-striped">
-            <thead class="thead-light">
-                <tr>
-                    <th>Month recv'd</th>
-                    <th>Amount recv'd</th>
-                    <th>YTD average</th>
-                    <th>Rolling 3 Mo. Avg.</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let data of ytdIncomeSummary">
-                    <td style="text-align: center;">{{data.monthRecvd}}</td>
-                    <td>{{data.amountRecvd}}</td>
-                    <td>{{data.ytdAverage}}</td>
-                    <td>{{data.rolling3MonthAverage}}</td>
-                </tr>
-                <tr>
-                    <td style="color:#222">Total:</td>
-                    <td><font color="blue">{{incomeSummaryTotal | currency}}</font></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+<p>
+    <ag-grid-angular #agGridIncomeSummary
+                     id="gridIncomeSummary"
+                     class="ag-theme-blue"
+                     [rowData]="rowData"
+                     [columnDefs]="columnDefs"
+                     rowSelection="multiple">
+    </ag-grid-angular>
+</p>
+
+
+
+
+
