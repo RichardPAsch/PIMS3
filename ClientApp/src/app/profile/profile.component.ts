@@ -65,10 +65,13 @@ export class ProfileComponent implements OnInit {
 
 
     enableButtonsForTicker() {
-        this.btnGetProfileIsDisabled = false;
-        this.btnGetDbProfileIsDisabled = false;
-        this.btnCreateProfileIsDisabled = true;
-        this.isReadOnly = false;
+        if (this.assetProfileForm.controls["ticker"].value.length > 0) {
+            this.btnGetProfileIsDisabled = false;
+            this.btnGetDbProfileIsDisabled = false;
+            this.btnCreateProfileIsDisabled = true;
+            this.isReadOnly = false;
+        }
+        
     }
 
 
@@ -102,7 +105,7 @@ export class ProfileComponent implements OnInit {
                 model.divFreq = dividendElement.DF;
             
             this.initializeView(model, false);
-            this.btnUpdateProfileIsDisabled = false;
+            this.btnUpdateProfileIsDisabled = true;
             this.isReadOnlyPayMonthsAndDay = false;
         },
             (apiErr: HttpErrorResponse) => {
@@ -137,8 +140,10 @@ export class ProfileComponent implements OnInit {
                     return;
                 } else {
                     this.initializeView(this.mapResponseToModel(profileResponse[0]), false);
-                    this.btnUpdateProfileIsDisabled = true;
+                    this.btnUpdateProfileIsDisabled = false;
                     this.btnCreateProfileIsDisabled = true;
+                    this.btnGetProfileIsDisabled = true;
+                    this.btnGetDbProfileIsDisabled = true;
                 }
             },
             (apiErr: HttpErrorResponse) => {
@@ -305,7 +310,7 @@ export class ProfileComponent implements OnInit {
                             }
                             else {
                                 // TODO: Logging ?
-                                alert("No existing Profile found for update; check portfolio for ticker validity.");
+                                alert("Error updating existing local Profile for \n" + profileInfo[0].tickerSymbol + "\nRetry later?");
                                 this.btnGetProfileIsDisabled = false;
                                 this.btnGetDbProfileIsDisabled = true;
                                 this.btnCreateProfileIsDisabled = true;

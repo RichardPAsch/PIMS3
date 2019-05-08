@@ -4,7 +4,7 @@
 <ul>
     <li>'Get Profile' - Fetch profile via web, for entered ticker symbol.</li>
     <li>'Get Saved Profile' - Fetch saved profile for entered ticker symbol.</li>
-    <li>'Update Profile' - Update saved profile with current web-based data.</li>
+    <li>'Update Profile' - Update saved profile with current dividend frequency & months paid.</li>
     <li>Displayed 'Div.pay months' may be <em>approximations</em> & can be edited/updated via 'Update Profile'.</li>
     <li>'Create Profile' - Manually create a custom Profile <em>if</em> no web Profile data is available. </li>
     <li>Customized Profiles are accessible only to the investor who created them. </li>
@@ -32,7 +32,7 @@
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="tickerSymbol">Ticker symbol:</label>
                     <div class="col-sm-2">
-                        <input class="form-control" (focus)="enableButtonsForTicker()" oninput="this.value = this.value.toUpperCase()" id="tickerSymbol" formControlName="ticker" placeholder="Enter ticker" [readonly]="false" />
+                        <input class="form-control" (blur)="enableButtonsForTicker()" oninput="this.value = this.value.toUpperCase()" id="tickerSymbol" formControlName="ticker" placeholder="Enter ticker" [readonly]="false" />
                         <div *ngIf="(!btnUpdateProfileSubmitted && !btnNewProfileSubmitted) && !cancelledNewProfileCreation && formFields.ticker.invalid && (formFields.ticker.dirty)" class="alert alert-danger">
                             <div *ngIf="formFields.ticker.errors.maxlength"> Ticker can't exceed 6 characters.</div>
                             <div *ngIf="formFields.ticker.errors.required"> Ticker required.</div>
@@ -140,16 +140,16 @@
                 <div class="form-group">
                     <div class="col-md-10 col-md-offset-2">
                         <span>
-                            <button id="btnProfile" style="width: 130px;" (click)="getProfile()" [disabled]="btnGetProfileIsDisabled">
+                            <button id="btnProfile" style="width: 130px;" (click)="getProfile()" [disabled]="btnGetProfileIsDisabled" disabled class="btn">
                                 Get Profile
                             </button>
-                            <button id="btnSavedProfile" style="width: 130px;" (click)="getDbProfile()" [disabled]="btnGetDbProfileIsDisabled">
+                            <button id="btnSavedProfile" style="width: 130px;" (click)="getDbProfile()" [disabled]="btnGetDbProfileIsDisabled" class="btn">
                                 Get Saved Profile
                             </button>
-                            <button id="btnUpdateProfile" style="width: 130px;" (click)="updateProfile()" [disabled]="btnUpdateProfileIsDisabled">
+                            <button id="btnUpdateProfile" style="width: 130px;" (click)="updateProfile()" [disabled]="btnUpdateProfileIsDisabled" class="btn">
                                 Update Profile
                             </button>
-                            <button id="btnNewProfile" (click)="createProfile()" [disabled]="btnCreateProfileIsDisabled">
+                            <button id="btnNewProfile" (click)="createProfile()" [disabled]="btnCreateProfileIsDisabled" class="btn">
                                 Create Profile
                             </button>
                         </span>
