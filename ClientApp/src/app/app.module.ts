@@ -6,8 +6,6 @@ import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
 import { NavMenuComponent } from './nav-menu/nav-menu.component';
 import { HomeComponent } from './home/home.component';
-import { CounterComponent } from './counter/counter.component';
-import { FetchDataComponent } from './fetch-data/fetch-data.component';
 import { IncomeSummaryComponent } from './income-summary/income-summary.component';
 import { DataImportService } from './data-import/data-import.service';
 import { DataImportComponent } from './data-import/data-import.component';
@@ -32,8 +30,6 @@ import { ProfileComponent } from './profile/profile.component';
     AppComponent,
     NavMenuComponent,
     HomeComponent,
-    CounterComponent,
-    FetchDataComponent,
     IncomeSummaryComponent,
     DataImportComponent,
     IncomeProjectionsComponent,
@@ -50,8 +46,6 @@ import { ProfileComponent } from './profile/profile.component';
     ReactiveFormsModule,
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
-      { path: 'counter', component: CounterComponent },
-      { path: 'fetch-data', component: FetchDataComponent },
       { path: 'income-projections', component: IncomeProjectionsComponent },
       { path: 'income-summary', component: IncomeSummaryComponent },
       { path: 'income-receivables', component: IncomeReceivablesComponent },
