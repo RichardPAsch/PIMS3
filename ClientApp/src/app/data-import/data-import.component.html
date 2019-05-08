@@ -1,73 +1,80 @@
+<header>
+    - Data Import for portfolio -
+</header>
+
+<ul>
+    <li>Allows for populating the system with Revenue and/or Asset (Position) information.</li>
+    <li>Both Revenue & Asset data imports must follow required XLSX spreadsheet templated formats. </li>
+    <li>Revenue imports require the prior existence of a Asset/Position for each income record being processed.</li>
+    <li>Asset/Position imports via 'Asset [new]', require the existence of a Profile for each Asset/Position added.</li>
+    <li>Asset/Position importing via 'Asset [new]' will automatically create any necessary Profile(s) as needed. </li>
+    <li>Any ticker to be added, may first be tested for automatic Profile creation via 'Asset Profile' lookup.</li>
+    <li id="lastLi">Any ticker to be added, NOT found to have a Profile, may be manually added via 'Asset Profile'.</li>
+</ul>
 
 <div class="col-md-12">
-  <section id="panelSection" class="panel panel-default">
-    <div class="panel-heading">
-      <strong>
-        <span class="glyphicon glyphicon-th"></span>&nbsp; Import new / existing portfolio data
-      </strong>
-    </div>
-
-    <div class="panel-body">
-      <form [formGroup]="dataImportForm" class="form-horizontal ng-valid" role="form">
-
-        <div class="form-group">
-          <div id="notation" class="col-md-12 col-md-offset-0">
-            <ul>
-              <li>Enter the file location of an XLSX spreadsheet containing either revenue, or asset data.</li>
-              <li> * Revenue imports require the existence of a Asset/Position affiliated with an existing Account, for each income record to be processed.</li>
-              <li> * If necessary, any missing Asset information unavailable via Profile lookup must <em>first</em> be added via the 'Asset [new]' option.</li>
-            </ul>
-          </div>
+    <section id="panelSection" class="panel panel-default">
+        <div class="panel-heading">
+            <strong>
+                <span class="glyphicon glyphicon-th"></span>&nbsp; Import new / existing portfolio data
+            </strong>
         </div>
 
- 
-          <div class="form-group" (ngSubmit)="processImportFile()" formGroupName="importDataType">
-            <label id="lblDataType" class="col-sm-2 control-label">Import data type:</label>
-            <div id="divDataTypes" class="col-md-5">
-              <input type="radio" formControlName="importType" value="revenue" />&nbsp;Revenue&nbsp;&nbsp;
-              <input type="radio" formControlName="importType" value="asset" />&nbsp;Asset [ new ]&nbsp;&nbsp;
-            </div>
-          </div>
+        <div class="panel-body">
+            <form [formGroup]="dataImportForm" class="form-horizontal ng-valid" role="form">
+
+                <div class="form-group">
+                    <div id="notation" class="col-md-12 col-md-offset-0">
+                        <h5>Select the type of data to be added, and enter its' corresponding XLSX file location, prior to selecting 'Import'.</h5>
+                    </div>
+                </div>
+
+                <div class="form-group" (ngSubmit)="processImportFile()" formGroupName="importDataType">
+                    <label id="lblDataType" class="col-sm-2 control-label">Import data type:</label>
+                    <div id="divDataTypes" class="col-md-5">
+                        <input type="radio" formControlName="importType" value="revenue" />&nbsp;Revenue&nbsp;&nbsp;
+                        <input type="radio" formControlName="importType" value="asset" />&nbsp;Asset [ new ]&nbsp;&nbsp;
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label id="lblFilePath" class="col-sm-2 control-label">File location:</label>
+                    <div class="col-md-7">
+                        <input type="text"
+                               formControlName="importFilePath"
+                               id="inputFilePath"
+                               class="form-control" s
+                               data-ng-model="vm.importFilePath" />
+                    </div>
+                </div>
+
+                <!--TODO: 1. needed formControlName ?, 2. [disabled] handling-->
+                <div class="form-group" formGroupName="importActions">
+                    <div id="divBtns" class="col-md-10 col-md-offset-2">
+                        <span>
+                            <button id="btnImport" type="submit" [disabled]="!dataImportForm.valid" class="btn btn-w-md btn-gap-v btn-info col-md-2" (click)="processImportFile()">
+                                Import
+                            </button>
+                        </span>
+                        <span>
+                            <button id="btnCancel" type="submit" [disabled]="!dataImportForm.valid" class="btn btn-w-md btn-gap-v btn-info col-md-4" (click)="cancelImportFile()">
+                                Cancel
+                            </button>
+                        </span>
+                        <span id="msgs">{{testMsg}}</span>
+                    </div>
+                </div>
 
 
-        <div class="form-group">
-          <label id="lblFilePath" class="col-sm-2 control-label">File location:</label>
-          <div class="col-md-7">
-            <input type="text"
-                   formControlName="importFilePath"
-                   id="inputFilePath"
-                   class="form-control"s
-                   data-ng-model="vm.importFilePath" />
-          </div>
+            </form>
         </div>
 
-        <!--TODO: 1. needed formControlName ?, 2. [disabled] handling-->
-        <div class="form-group" formGroupName="importActions">
-          <div id="divBtns" class="col-md-10 col-md-offset-2">
-            <span>
-              <button id="btnImport" type="submit" [disabled]="!dataImportForm.valid" class="btn btn-w-md btn-gap-v btn-info col-md-2" (click)="processImportFile()">
-                Import
-              </button>
-            </span>
-            <span>
-              <button id="btnCancel" type="submit" [disabled]="!dataImportForm.valid" class="btn btn-w-md btn-gap-v btn-info col-md-4" (click)="cancelImportFile()">
-                Cancel
-              </button>
-            </span>
-            <span id="msgs">{{testMsg}}</span>
-          </div>
-        </div>
-
-
-      </form>
-    </div>
-
-  </section>
+    </section>
 </div>
 
 
 
-  
+
 
 
 
