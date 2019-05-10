@@ -77,7 +77,7 @@ export class IncomeComponent implements OnInit {
             cellStyle: { textAlign: "right" },
             cellRenderer: (data) => { return data.value ? (new Date(data.value)).toLocaleDateString() : ''; }
         },
-        { headerName: "Amount", field: "amountRecvd", width: 92, editable: true, resizable: true, cellStyle: { textAlign: "right" } },
+        { headerName: "Amount", field: "amountRecvd", width: 92, editable: true, sortable: true, resizable: true, cellStyle: { textAlign: "right" } },
         { headerName: "IncomeId", field: "incomeId", width: 50, hide: true }
     ];
 
