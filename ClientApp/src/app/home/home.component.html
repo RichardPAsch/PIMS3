@@ -23,7 +23,7 @@
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-user"></span>
                     </span>
-                    <input type="text" class="form-control" placeholder="Email (aka Investor name)" formControlName="investorName" [ngClass]="{'isInValid': submitted && formFields.investorName.errors}">
+                    <input type="text" class="form-control" placeholder="Email" formControlName="investorName" [ngClass]="{'isInValid': submitted && formFields.investorName.errors}">
                     <div *ngIf="submitted && formFields.investorName.errors" class="invalid-feedback">
                         <div *ngIf="formFields.investorName.required">Name is required</div>
                     </div>
