@@ -24,7 +24,7 @@ import { RegistrationComponent } from './registration/registration.component';
 /* Notes:
  *  Medium to large apps should have one or more FEATURE modules. ngModule may have one
  *  or more child modules. Do create an NgModule for each feature area.
- * */
+ */
 
 @NgModule({
   declarations: [
