@@ -18,6 +18,7 @@ import { IncomeReceivablesComponent } from './income-receivables/income-receivab
 import { PositionsComponent } from './positions/positions.component';
 import { IncomeComponent } from './income/income.component';
 import { ProfileComponent } from './profile/profile.component';
+import { RegistrationComponent } from './registration/registration.component';
 
 
 /* Notes:
@@ -36,7 +37,8 @@ import { ProfileComponent } from './profile/profile.component';
     IncomeReceivablesComponent,
     PositionsComponent,
     IncomeComponent,
-    ProfileComponent
+    ProfileComponent,
+    RegistrationComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -47,6 +49,7 @@ import { ProfileComponent } from './profile/profile.component';
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'income-projections', component: IncomeProjectionsComponent },
+      { path: 'registration', component: RegistrationComponent },
       { path: 'income-summary', component: IncomeSummaryComponent },
       { path: 'income-receivables', component: IncomeReceivablesComponent },
       { path: 'income', component: IncomeComponent },

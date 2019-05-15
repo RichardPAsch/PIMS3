@@ -15,11 +15,15 @@
                 <!--routerLinkActive : Angular directive allowing for addition of a CSS class to an element when the link's route becomes active.-->
                 <li [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
                     <a [routerLink]='["/"]' (click)='collapse()'>
-                        <span class='glyphicon glyphicon-home'></span> Home
+                        <span class='glyphicon glyphicon-home'></span> Home - Login
+                    </a>
+                </li>
+                <li [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
+                    <a [routerLink]='["/registration"]' (click)='collapse()'>
+                        <span class='glyphicon glyphicon-envelope'></span> Registration
                     </a>
                 </li>
                 <li [routerLinkActive]='["link-active"]'>
-                    <!-- [routerLink] points to route/path -->
                     <a [routerLink]='["/income-summary"]' (click)='collapse()'>
                         <span class='glyphicon glyphicon-usd'></span> Income summary
                     </a>
