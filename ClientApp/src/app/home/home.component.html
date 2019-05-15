@@ -1,36 +1,66 @@
-<!--<h1>Hello, world!</h1>
-<p>Welcome to your new single-page application, built with:</p>
-<ul>
-  <li><a href='https://get.asp.net/'>ASP.NET Core</a> and <a href='https://msdn.microsoft.com/en-us/library/67ef8sbd.aspx'>C#</a> for cross-platform server-side code</li>
-  <li><a href='https://angular.io/'>Angular</a> and <a href='http://www.typescriptlang.org/'>TypeScript</a> for client-side code</li>
-  <li><a href='http://getbootstrap.com/'>Bootstrap</a> for layout and styling</li>
-</ul>
-<p>To help you get started, we've also set up:</p>
-<ul>
-  <li><strong>Client-side navigation</strong>. For example, click <em>Counter</em> then <em>Back</em> to return here.</li>
-  <li><strong>Angular CLI integration</strong>. In development mode, there's no need to run <code>ng serve</code>. It runs in the background automatically, so your client-side resources are dynamically built on demand and the page refreshes when you modify any file.</li>
-  <li><strong>Efficient production builds</strong>. In production mode, development-time features are disabled, and your <code>dotnet publish</code> configuration automatically invokes <code>ng build</code> to produce minified, ahead-of-time compiled JavaScript files.</li>
-</ul>
-<p>The <code>ClientApp</code> subdirectory is a standard Angular CLI application. If you open a command prompt in that directory, you can run any <code>ng</code> command (e.g., <code>ng test</code>), or use <code>npm</code> to install extra packages into it.</p>-->
 
-<!--<style>
-  #mainHeading{
-    text-align:center;
-    background-color:lightgray;
-  }
-  #divDescription{
-    margin: 40px 50px 40px 50px;
-    width: 900px;
-  }
-</style>-->
+<div class="jumbotron" style="margin-bottom:0; width:800px;">
+    <h2>* Portfolio Income Management System *</h2>
+    <h3 style="margin-left: 297px;">WELCOME</h3>
+    <ul>
+        <li>With this application, you may manage income derived from an existing investment portfolio.</li>
+        <li>The application is <em>not</em> intended to replace, nor mimic an asset management system that may currently be commerically available.</li>
+    </ul>
 
-<div id="divDescription"> 
-  <h3 id="mainHeading">* Portfolio Income Management System *</h3>
-  <div>
-    <h4>
-      With this system, you may manage income derived from an existing investment portfolio, and as such, is <em>not</em> intended to replace nor mimic an asset management system
-      that may currently be available via any brokerage firm.
-    </h4>
-  </div>
+    <!--URL for sample: https://jasonwatmore.com/post/2018/10/29/angular-7-user-registration-and-login-example-tutorial  -->
+
+    <hr />
+    <div class="container">
+        <div id="row1" class="row">
+            <div class="col text-center"><h3 id="loginHdr">Login</h3></div>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+            <label class="col-sm-2 control-label" for="investorName">Name:</label>
+            <div class="col-sm-8">
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-user"></span>
+                    </span>
+                    <input type="text" class="form-control" placeholder="Email (aka Investor name)" formControlName="investorName" [ngClass]="{'isInValid': submitted && formFields.investorName.errors}">
+                    <div *ngIf="submitted && formFields.investorName.errors" class="invalid-feedback">
+                        <div *ngIf="formFields.investorName.required">Name is required</div>
+                    </div>
+                </div>
+            </div>
+            <br/><br/>
+
+            <label class="col-sm-2 control-label" for="password">Password:</label>
+            <div class="col-sm-8">
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-lock"></span>
+                    </span>
+                    <input type="password" class="form-control" formControlName="password" [ngClass]="{'isInValid': submitted && formFields.password.errors}">
+                    <div *ngIf="submitted && formFields.password.errors" class="invalid-feedback">
+                        <div *ngIf="formFields.password.required">Password is required</div>
+                        <div *ngIf="formFields.password.errors.minLength">Password requires at least 6 characters</div>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+
+            <section>
+                <div class="col-sm-4">
+                    <button style="width:205px;" [disabled]="loading" class="btn">Login</button>
+                </div>
+                <div class="col-sm-2">
+                    <a routerLink="/register" class="btn btn-link">Register</a>
+                </div>
+            </section>
+
+        </form>
+
+    </div>
 </div>
+
+
+
+
 
