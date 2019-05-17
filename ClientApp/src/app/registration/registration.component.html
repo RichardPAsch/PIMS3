@@ -17,7 +17,7 @@
                 <span class="input-group-addon">
                     <span class="glyphicon glyphicon-user"></span>
                 </span>
-                <input type="text" class="form-control" formControlName="firstName" [ngClass]="{'isInValid': submitted && formFields.firstName.errors}">
+                <input type="text" class="form-control" placeholder="account first name" formControlName="firstName" [ngClass]="{'isInValid': submitted && formFields.firstName.errors}">
                 <div *ngIf="submitted && formFields.firstName.errors" class="invalid-feedback">
                     <div *ngIf="formFields.firstName.required">First Name is required</div>
                 </div>
@@ -31,7 +31,7 @@
                 <span class="input-group-addon">
                     <span class="glyphicon glyphicon-user"></span>
                 </span>
-                <input type="text" class="form-control" formControlName="lastName" [ngClass]="{'isInValid': submitted && formFields.lastName.errors}">
+                <input type="text" class="form-control" placeholder="account last name" formControlName="lastName" [ngClass]="{'isInValid': submitted && formFields.lastName.errors}">
                 <div *ngIf="submitted && formFields.lastName.errors" class="invalid-feedback">
                     <div *ngIf="formFields.lastName.required">Last Name is required</div>
                 </div>
@@ -45,7 +45,7 @@
                 <span class="input-group-addon">
                     <span class="glyphicon glyphicon-user"></span>
                 </span>
-                <input type="text" class="form-control" placeholder="Email / Username" formControlName="investorName" [ngClass]="{'isInValid': submitted && formFields.investorName.errors}">
+                <input type="text" class="form-control" placeholder="Email / login name" formControlName="investorName" [ngClass]="{'isInValid': submitted && formFields.investorName.errors}">
                 <div *ngIf="submitted && formFields.investorName.errors" class="invalid-feedback">
                     <div *ngIf="formFields.investorName.required">Name is required</div>
                 </div>
@@ -59,7 +59,7 @@
                 <span class="input-group-addon">
                     <span class="glyphicon glyphicon-lock"></span>
                 </span>
-                <input type="password" class="form-control" formControlName="password" [ngClass]="{'isInValid': submitted && formFields.password.errors}">
+                <input type="password" placeholder="Minimum - 6 characters" class="form-control" formControlName="password" [ngClass]="{'isInValid': submitted && formFields.password.errors}">
                 <div *ngIf="submitted && formFields.password.errors" class="invalid-feedback">
                     <div *ngIf="formFields.password.required">Password is required</div>
                     <div *ngIf="formFields.password.errors.minLength">Password requires at least 6 characters</div>
