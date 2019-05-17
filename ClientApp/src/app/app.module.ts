@@ -47,7 +47,7 @@ import { RegistrationComponent } from './registration/registration.component';
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forRoot([
-      { path: '', component: HomeComponent, pathMatch: 'full' },
+      { path: '', component: HomeComponent, pathMatch: 'full' }, // Login - Home page.
       { path: 'income-projections', component: IncomeProjectionsComponent },
       { path: 'registration', component: RegistrationComponent },
       { path: 'income-summary', component: IncomeSummaryComponent },
@@ -56,6 +56,9 @@ import { RegistrationComponent } from './registration/registration.component';
       { path: 'data-import', component: DataImportComponent },
       { path: 'positions', component: PositionsComponent },
       { path: 'profile', component: ProfileComponent },
+
+      // Otherwise redirect to home
+      { path: '**', redirectTo: '' }
     ])
     ],
    // Creators of services that NgModule contributes to the global collection of services;
