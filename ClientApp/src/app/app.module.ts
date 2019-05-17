@@ -19,6 +19,7 @@ import { PositionsComponent } from './positions/positions.component';
 import { IncomeComponent } from './income/income.component';
 import { ProfileComponent } from './profile/profile.component';
 import { RegistrationComponent } from './registration/registration.component';
+import { AuthenticationService } from '../app/shared/authentication.service';
 
 
 /* Notes:
@@ -64,7 +65,7 @@ import { RegistrationComponent } from './registration/registration.component';
    // Creators of services that NgModule contributes to the global collection of services;
    // they become accessible in all parts of the app. (You can also specify providers at the component level,
    // which is often preferred.)
-  providers: [DataImportService, MessageService, ProfileService], //, IncomeReceivablesService], 
+  providers: [DataImportService, MessageService, ProfileService, AuthenticationService], //, IncomeReceivablesService], 
 
   bootstrap: [AppComponent] // The main application view, called the root component, which HOSTS all other app views.
                             // Only NgModule should set the bootstrap property.
