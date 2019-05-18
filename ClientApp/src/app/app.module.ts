@@ -48,19 +48,19 @@ import { AuthenticationService } from '../app/shared/authentication.service';
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forRoot([
-      { path: '', component: HomeComponent, pathMatch: 'full' }, // Login - Home page.
-      { path: 'income-projections', component: IncomeProjectionsComponent },
-      { path: 'registration', component: RegistrationComponent },
-      { path: 'income-summary', component: IncomeSummaryComponent },
-      { path: 'income-receivables', component: IncomeReceivablesComponent },
-      { path: 'income', component: IncomeComponent },
-      { path: 'data-import', component: DataImportComponent },
-      { path: 'positions', component: PositionsComponent },
-      { path: 'profile', component: ProfileComponent },
+          { path: '', component: HomeComponent, pathMatch: 'full' }, // Login - Home page.
+          { path: 'income-projections', component: IncomeProjectionsComponent },
+          { path: 'registration', component: RegistrationComponent },
+          { path: 'income-summary', component: IncomeSummaryComponent },
+          { path: 'income-receivables', component: IncomeReceivablesComponent },
+          { path: 'income', component: IncomeComponent },
+          { path: 'data-import', component: DataImportComponent },
+          { path: 'positions', component: PositionsComponent },
+          { path: 'profile', component: ProfileComponent },
 
-      // Otherwise redirect to home
-      { path: '**', redirectTo: '' }
-    ])
+          // Otherwise redirect to home
+          { path: '**', redirectTo: '' }
+        ])
     ],
    // Creators of services that NgModule contributes to the global collection of services;
    // they become accessible in all parts of the app. (You can also specify providers at the component level,
