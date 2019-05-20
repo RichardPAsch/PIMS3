@@ -17,19 +17,19 @@
 
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
-            <label class="col-sm-2 control-label" for="investorName">Name:</label>
+            <label class="col-sm-2 control-label" for="investorName">Username:</label>
             <div class="col-sm-8">
                 <div class="input-group input-group-md">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-user"></span>
                     </span>
-                    <input type="text" class="form-control" placeholder="Email" formControlName="investorName" [ngClass]="{'isInValid': submitted && formFields.investorName.errors}">
+                    <input type="text" class="form-control" placeholder="Email / Username" formControlName="investorName" [ngClass]="{'isInValid': submitted && formFields.investorName.errors}">
                     <div *ngIf="submitted && formFields.investorName.errors" class="invalid-feedback">
                         <div *ngIf="formFields.investorName.required">Name is required</div>
                     </div>
                 </div>
             </div>
-            <br/><br/>
+            <br/><br/><br/>
 
             <label class="col-sm-2 control-label" for="password">Password:</label>
             <div class="col-sm-8">
@@ -51,7 +51,7 @@
                     <button style="width:205px;" [disabled]="loading" class="btn">Login</button>
                 </div>
                 <div class="col-sm-2">
-                    <a routerLink="/register" class="btn btn-link">Register</a>
+                    <a routerLink="/registration" class="btn btn-link">Register</a>
                 </div>
             </section>
 
