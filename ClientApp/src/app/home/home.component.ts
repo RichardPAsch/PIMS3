@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormGroup, Validators, FormControl } from '@angular/forms';
 import { first } from 'rxjs/operators';
+import { AuthenticationService } from '../shared/authentication.service';
 
 // TODO:
-//import { AlertService, AuthenticationService } from '@/_services';
+//import { AlertService } from '@/_services';
 
 @Component({
   selector: 'app-home',
