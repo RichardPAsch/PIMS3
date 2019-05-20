@@ -22,3 +22,6 @@ section {
 a {
     font-size: 16px;
 }
+label {
+    padding-top: 8px;
+}
