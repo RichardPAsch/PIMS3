@@ -18,7 +18,16 @@ export class RegistrationComponent implements OnInit {
     loading = false;
     submitted = false;
 
-    constructor() {
+    constructor(private router: Router) {
+        // TODO: params
+        //private authenticationService: AuthenticationService,
+        //private userService: UserService,
+        //private alertService: AlertService
+
+        // redirect to home if already logged in
+        //if (this.authenticationService.currentUserValue) {
+        //    this.router.navigate(['/']);
+        //}
     }
 
     ngOnInit() {
