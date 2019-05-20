@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { Router } from '@angular/router';
+import { FormGroup, Validators, FormControl } from '@angular/forms';
 import { first } from 'rxjs/operators';
 
 // TODO:
@@ -14,11 +14,10 @@ import { first } from 'rxjs/operators';
     
 export class HomeComponent implements OnInit {
 
-    constructor() {
+    constructor(private router: Router) {
         // TODO: Add as params:
         //  private authenticationSvc AuthenticationService,
         //  private alertSvc: AlertService
-        //  private router: Router,
 
         // TODO: redirect to home if already logged in; for PIMS3 -> to this same page?
         //if (this.authenticationService.currentUserValue) {
