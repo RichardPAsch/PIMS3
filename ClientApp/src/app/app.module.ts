@@ -20,6 +20,7 @@ import { IncomeComponent } from './income/income.component';
 import { ProfileComponent } from './profile/profile.component';
 import { RegistrationComponent } from './registration/registration.component';
 import { AuthenticationService } from '../app/shared/authentication.service';
+import { InvestorService } from '../app/shared/investor.service';
 
 
 /* Notes:
@@ -48,7 +49,7 @@ import { AuthenticationService } from '../app/shared/authentication.service';
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forRoot([
-          { path: '', component: HomeComponent, pathMatch: 'full' }, // Login - Home page.
+          { path: '', component: HomeComponent, pathMatch: 'full' }, // default Login - Home page.
           { path: 'income-projections', component: IncomeProjectionsComponent },
           { path: 'registration', component: RegistrationComponent },
           { path: 'income-summary', component: IncomeSummaryComponent },
@@ -65,9 +66,9 @@ import { AuthenticationService } from '../app/shared/authentication.service';
    // Creators of services that NgModule contributes to the global collection of services;
    // they become accessible in all parts of the app. (You can also specify providers at the component level,
    // which is often preferred.)
-  providers: [DataImportService, MessageService, ProfileService, AuthenticationService], //, IncomeReceivablesService], 
+    providers: [DataImportService, MessageService, ProfileService, AuthenticationService, InvestorService], //, IncomeReceivablesService], 
 
-  bootstrap: [AppComponent] // The main application view, called the root component, which HOSTS all other app views.
-                            // Only NgModule should set the bootstrap property.
+    bootstrap: [AppComponent] // The main application view, called the root component, which HOSTS all other app views.
+                              // Only NgModule should set the bootstrap property.
 })
 export class AppModule { }
