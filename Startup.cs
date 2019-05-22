@@ -1,13 +1,16 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using PIMS3.Data;
-using PIMS3.Data.Repositories;
 using PIMS3.Data.Repositories.IncomeSummary;
+using PIMS3.DataAccess.Investor;
+using PIMS3.Helpers;
 using PIMS3.Services;
 
 
@@ -33,15 +36,44 @@ namespace PIMS3
 
             services.AddTransient<ICommonSvc, CommonSvc>();
 
-            // Service, interface & implementation(s), available for the lifetime of a request (scoped).
-            services.AddScoped<IIncomeRepository, IncomeRepository>();
-            services.AddScoped<InvestorRepository>();
+            // Configure DI for application services, e.g.,Service, interface & implementation(s), available 
+            // for the lifetime of a request (scoped).
+            services.AddScoped<IIncomeRepository, IncomeRepository>(); // TODO: no longer needed ?
+            services.AddScoped<InvestorDataProcessing>();
+            services.AddScoped<IInvestorSvc, InvestorSvc>();
 
-
+            services.AddCors();
             services.AddMvc()
                     .AddJsonOptions(opt => opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore)
                     // Required compatability for [ApiController] annotation.
                     .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+
+            // Configure strongly-typed settings objects.
+            var appSettingsSection = Configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+
+
+            // Configure JWT authentication.
+            var appSettings = appSettingsSection.Get<AppSettings>();
+            var key = System.Text.Encoding.ASCII.GetBytes(appSettings.Secret);
+            services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
 
 
             services.Configure<ApiBehaviorOptions>(options =>
@@ -86,6 +118,14 @@ namespace PIMS3
             //        template: "{controller}/{action=Index}/{id?}");
             //});
 
+            // Set global CORS policy.
+            app.UseCors(x => x
+               .AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader());
+
+            app.UseAuthentication();
+
             // Convenience method replaces above "app.UseMvc(routes => ..."
             app.UseMvcWithDefaultRoute();
             
@@ -104,6 +144,7 @@ namespace PIMS3
                     //spa.UseProxyToSpaDevelopmentServer("http://localhost:44328");
                 }
             });
+
         }
     }
 }
