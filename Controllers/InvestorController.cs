@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,17 +11,21 @@ using PIMS3.DataAccess.Investor;
 using PIMS3.Services;
 using PIMS3.ViewModels;
 
+
 namespace PIMS3.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    //[Authorize] // 5.22.19 - to be implemented
     public class InvestorController : ControllerBase
     {
         private readonly PIMS3Context _context;
+        private readonly InvestorSvc _investorSvc;
 
-        public InvestorController(PIMS3Context context)
+        public InvestorController(PIMS3Context context, InvestorSvc investorSvc)
         {
             _context = context;
+            _investorSvc = investorSvc;
         }
 
 
@@ -35,35 +40,46 @@ namespace PIMS3.Controllers
 
 
         // POST: api/Investor
-        [HttpPost]
-        public async Task<IActionResult> RegisterInvestor([FromBody] Investor newInvestor)
+        [AllowAnonymous]
+        [HttpPost("AuthenticateInvestor")]
+        public IActionResult AuthenticateInvestor([FromBody] Investor newInvestor)
         {
-            
+            var loggedInvestor = _investorSvc.Authenticate(newInvestor.LoginName, newInvestor.Password);
+
+            // TODO: log results ?
+            if (loggedInvestor == null)
+                return BadRequest(new { message = "Unable to validate login credentials, check name and/or password." });
+
+            return Ok(loggedInvestor);
+
+
             // 5.20.19 - Ok to here.
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            // 5.22.19 - not needed here anymore.
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest(ModelState);
+            //}
 
-           // newInvestor.InvestorId = CommonSvc.GenerateGuid();
-            _context.Investor.Add(newInvestor);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException DbExec)
-            {
-                if (DbExec.InnerException != null)
-                {
-                    return new StatusCodeResult(StatusCodes.Status409Conflict);
-                }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return CreatedAtAction("RegisterInvestor", new { id = newInvestor.InvestorId }, newInvestor);
+            //_context.Investor.Add(newInvestor);
+            //try
+            //{
+            //    await _context.SaveChangesAsync();
+            //}
+            //catch (DbUpdateException DbExec)
+            //{
+            //    if (DbExec.InnerException != null)
+            //    {
+            //        return new StatusCodeResult(StatusCodes.Status409Conflict);
+            //    }
+            //    else
+            //    {
+            //        throw;
+            //    }
+            //}
+
+            //return CreatedAtAction("RegisterInvestor", new { id = newInvestor.InvestorId }, newInvestor);
+      
         }
 
 
