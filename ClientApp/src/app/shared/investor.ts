@@ -1,10 +1,10 @@
 export class Investor {
 
-    id: number;
-    investorname: string; // login name
+    investorId: string;
+    loginname: string; 
     password: string;
-    firstName: string;    // account name
-    lastName: string;
+    firstName: string;  // per Investor account
+    lastName: string;   
     token: string;
 
 }
