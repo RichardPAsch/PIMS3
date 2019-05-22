@@ -15,6 +15,11 @@ namespace PIMS3.Data.Entities
         public IList<AssetInvestor> AssetInvestors { get; set; }
 
 
+        // ** NOTE TODO ** 
+        // 5.20.19 - Commented '[Required]' annotated fields should be considered for elimination, as they may no  
+        //           longer be necessary for new security implementation! Check for current usage.
+        //           Exception: InvestorId.
+
         [Required]
         public  string LastName { get; set; }
 
@@ -29,21 +34,21 @@ namespace PIMS3.Data.Entities
         public string BirthDay { get; set; }
 
 
-        [Required]
+        //[Required]
         public string Address1 { get; set; }
 
 
         public string Address2 { get; set; }
 
-        [Required]
+        //[Required]
         public  string City { get; set; }
 
 
-        [Required]
+        //[Required]
         public string State { get; set; }
 
 
-        [Required]
+        //[Required]
         public string ZipCode { get; set; }
 
 
@@ -53,8 +58,12 @@ namespace PIMS3.Data.Entities
         public string Mobile { get; set; }
         
         [Required]
-        public  string EMailAddr { get; set; }
+        public  string LoginName { get; set; }
 
-                
+
+        //[Required]
+        public string Password { get; set; }
+
+
     }
 }
