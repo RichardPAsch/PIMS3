@@ -67,6 +67,7 @@ namespace PIMS3.Data
             modelBuilder.Entity<AssetClass>()
               .HasIndex(ac => ac.AssetId)
               .IsUnique(false);
+           
 
 
             // Define necessary mappings for unconventional Db types, to avoid EF Core model validation errors.
@@ -91,11 +92,15 @@ namespace PIMS3.Data
 
 
 
-            // Necessary fluent API configuration to establish dependent entity in 1:1 setup.
+            // Necessary fluent API configurations to establish dependent entity in 1:1 setup.
             modelBuilder.Entity<Asset>()
                 .HasOne(p => p.AssetClass)
                 .WithOne(ac => ac.Asset)
                 .HasForeignKey<AssetClass>(ac => ac.AssetId);
+            modelBuilder.Entity<Profile>()
+                       .HasOne(p => p.Asset)
+                       .WithOne(x => x.Profile)
+                       .HasForeignKey<Asset>(a => a.ProfileId);
 
 
             // Required fluent API configuration for M:M Asset-Investor setup.
@@ -110,14 +115,14 @@ namespace PIMS3.Data
                         .WithMany(a => a.AssetInvestors)
                         .HasForeignKey(ai => ai.InvestorId);
 
-
-            // Necessary fluent API configuration to establish dependent entity in 1:1 setup.
-            modelBuilder.Entity<Profile>()
-                        .HasOne(p => p.Asset)
-                        .WithOne(x => x.Profile)
-                        .HasForeignKey<Asset>(a => a.ProfileId);
-
         }
+
+
+        // Note: May not need to include child DbSets (of parent-child relations) if we're not DIRECTLY
+        //       quering against the child table(s). Otherwise, using parent entity for DbSet should suffice.
+
+
+        public DbSet<PIMS3.Data.Entities.AssetInvestor> AssetInvestor { get; set; }
 
 
     }
