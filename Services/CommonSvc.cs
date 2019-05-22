@@ -18,7 +18,6 @@ namespace PIMS3.Services
 
         public string GetInvestorIdFromInvestor(string login)
         {
-            // investorEMail aka login name.
             return _ctx.Investor
                        .Where(investor => investor.LoginName.Trim() == login.Trim())
                        .FirstOrDefault().InvestorId
