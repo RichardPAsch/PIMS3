@@ -2,9 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { first } from 'rxjs/operators';
+import { AuthenticationService } from '../shared/authentication.service';
+import { InvestorService } from '../shared/investor.service';
 
 // TODO:
-//import { AlertService, UserService, AuthenticationService } from '../_services';
+//import { AlertService } from '../_services';
+
+
+/*  Creates a new investor via the investor service when the registration is submitted. If the investor is already logged in,
+    they are automatically redirected to their 'income summary' page.
+ */
 
 
 @Component({
@@ -18,16 +25,14 @@ export class RegistrationComponent implements OnInit {
     loading = false;
     submitted = false;
 
-    constructor(private router: Router) {
+    constructor(private router: Router, private authenticationSvc: AuthenticationService, private investorSvc: InvestorService) {
         // TODO: params
-        //private authenticationService: AuthenticationService,
-        //private userService: UserService,
         //private alertService: AlertService
 
-        // redirect to home if already logged in
-        //if (this.authenticationService.currentUserValue) {
-        //    this.router.navigate(['/']);
-        //}
+        // Redirect if already logged in.
+        if (this.authenticationSvc.currentInvestorValue) {
+            this.router.navigate(['/income-summary']);
+        }
     }
 
     ngOnInit() {
@@ -37,7 +42,7 @@ export class RegistrationComponent implements OnInit {
     registrationForm = new FormGroup({
         firstName: new FormControl('', [Validators.required]),
         lastName: new FormControl('', [Validators.required]),
-        investorName: new FormControl('', [Validators.required]),
+        loginName: new FormControl('', [Validators.required]),
         password: new FormControl('', [Validators.required, Validators.minLength(6)]),
     });
 
@@ -52,18 +57,21 @@ export class RegistrationComponent implements OnInit {
         }
 
         this.loading = true;
-        // TODO:
-        //this.userService.register(this.registrationForm.value)
-        //    .pipe(first())
-        //    .subscribe(
-        //        data => {
-        //            this.alertService.success('Registration successful', true);
-        //            this.router.navigate(['/login']);
-        //        },
-        //        error => {
-        //            this.alertService.error(error);
-        //            this.loading = false;
-        //        });
+
+        // 'this.registrationForm.value' - For a formGroup, the values of all enabled form controls are encapsulated
+        //  into an object and submitted via key:value pairs.
+        this.investorSvc.register(this.registrationForm.value)
+            .pipe(first())
+            .subscribe(registeredInvestor => {
+                alert('Registration successful for login : \n' + registeredInvestor.loginName );
+                //this.alertService.success('Registration successful', true);  // TODO.
+                this.router.navigate(['/']);
+            },
+            error => {
+                alert('Error registering for investor: \n' + this.registrationForm.value.investorName + "\ndue to " + error.error);
+                //this.alertService.error(error);  // TODO.
+                this.loading = false;
+            });
 
     }
 
