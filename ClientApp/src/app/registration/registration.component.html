@@ -2,83 +2,88 @@
 <div class="jumbotron" style="margin-bottom:0; width:800px;">
 
 
-<!--URL for sample: https://jasonwatmore.com/post/2018/10/29/angular-7-user-registration-and-login-example-tutorial  -->
+    <!-- Reference URL samples 
+        fromt-end:
+        https://jasonwatmore.com/post/2018/10/29/angular-7-user-registration-and-login-example-tutorial
+        back-end:
+        https://jasonwatmore.com/post/2018/06/26/aspnet-core-21-simple-api-for-authentication-registration-and-user-management#users-controller-cs
+     -->
 
-<div class="container">
-    <div id="row1" class="row">
-        <div class="col text-center"><h3 id="registrationHdr">Registration</h3></div>
+    <div class="container">
+        <div id="row1" class="row">
+            <div class="col text-center"><h3 id="registrationHdr">Registration</h3></div>
+        </div>
+
+        <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" style="margin-top:27px;">
+
+            <label class="col-sm-2 control-label" for="firstName">First Name:</label>
+            <div class="col-sm-8">
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-user"></span>
+                    </span>
+                    <input type="text" class="form-control" placeholder="account first name" formControlName="firstName" [ngClass]="{'isInValid': submitted && formFields.firstName.errors}">
+                    <div *ngIf="submitted && formFields.firstName.errors" class="invalid-feedback">
+                        <div *ngIf="formFields.firstName.required">First Name is required</div>
+                    </div>
+                </div>
+            </div>
+            <br /><br /><br />
+
+            <label class="col-sm-2 control-label" for="lastName">Last Name:</label>
+            <div class="col-sm-8">
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-user"></span>
+                    </span>
+                    <input type="text" class="form-control" placeholder="account last name" formControlName="lastName" [ngClass]="{'isInValid': submitted && formFields.lastName.errors}">
+                    <div *ngIf="submitted && formFields.lastName.errors" class="invalid-feedback">
+                        <div *ngIf="formFields.lastName.required">Last Name is required</div>
+                    </div>
+                </div>
+            </div>
+            <br /><br /><br />
+
+            <label class="col-sm-2 control-label" for="investorName">Username:</label>
+            <div class="col-sm-8">
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-user"></span>
+                    </span>
+                    <input type="text" class="form-control" placeholder="Email / login name" formControlName="loginName" [ngClass]="{'isInValid': submitted && formFields.loginName.errors}">
+                    <div *ngIf="submitted && formFields.loginName.errors" class="invalid-feedback">
+                        <div *ngIf="formFields.loginName.required">Login name is required</div>
+                    </div>
+                </div>
+            </div>
+            <br /><br /><br />
+
+            <label class="col-sm-2 control-label" for="password">Password:</label>
+            <div class="col-sm-8">
+                <div class="input-group input-group-md">
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-lock"></span>
+                    </span>
+                    <input type="password" placeholder="Minimum - 6 characters" class="form-control" formControlName="password" [ngClass]="{'isInValid': submitted && formFields.password.errors}">
+                    <div *ngIf="submitted && formFields.password.errors" class="invalid-feedback">
+                        <div *ngIf="formFields.password.required">Password is required</div>
+                        <div *ngIf="formFields.password.errors.minLength">Password requires at least 6 characters</div>
+                    </div>
+                </div>
+            </div>
+            <br><br><br />
+
+            <section>
+                <div class="col-sm-4">
+                    <button style="width:205px;" [disabled]="loading" class="btn">Register</button>
+                </div>
+                <div class="col-sm-2">
+                    <a routerLink='/' class="btn btn-link">Cancel</a>
+                </div>
+            </section>
+
+        </form>
+
     </div>
-
-    <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" style="margin-top:27px;">
-
-        <label class="col-sm-2 control-label" for="firstName">First Name:</label>
-        <div class="col-sm-8">
-            <div class="input-group input-group-md">
-                <span class="input-group-addon">
-                    <span class="glyphicon glyphicon-user"></span>
-                </span>
-                <input type="text" class="form-control" placeholder="account first name" formControlName="firstName" [ngClass]="{'isInValid': submitted && formFields.firstName.errors}">
-                <div *ngIf="submitted && formFields.firstName.errors" class="invalid-feedback">
-                    <div *ngIf="formFields.firstName.required">First Name is required</div>
-                </div>
-            </div>
-        </div>
-        <br /><br /><br/>
-
-        <label class="col-sm-2 control-label" for="lastName">Last Name:</label>
-        <div class="col-sm-8">
-            <div class="input-group input-group-md">
-                <span class="input-group-addon">
-                    <span class="glyphicon glyphicon-user"></span>
-                </span>
-                <input type="text" class="form-control" placeholder="account last name" formControlName="lastName" [ngClass]="{'isInValid': submitted && formFields.lastName.errors}">
-                <div *ngIf="submitted && formFields.lastName.errors" class="invalid-feedback">
-                    <div *ngIf="formFields.lastName.required">Last Name is required</div>
-                </div>
-            </div>
-        </div>
-        <br /><br /><br />
-
-        <label class="col-sm-2 control-label" for="investorName">Username:</label>
-        <div class="col-sm-8">
-            <div class="input-group input-group-md">
-                <span class="input-group-addon">
-                    <span class="glyphicon glyphicon-user"></span>
-                </span>
-                <input type="text" class="form-control" placeholder="Email / login name" formControlName="investorName" [ngClass]="{'isInValid': submitted && formFields.investorName.errors}">
-                <div *ngIf="submitted && formFields.investorName.errors" class="invalid-feedback">
-                    <div *ngIf="formFields.investorName.required">Name is required</div>
-                </div>
-            </div>
-        </div>
-        <br /><br /><br />
-
-        <label class="col-sm-2 control-label" for="password">Password:</label>
-        <div class="col-sm-8">
-            <div class="input-group input-group-md">
-                <span class="input-group-addon">
-                    <span class="glyphicon glyphicon-lock"></span>
-                </span>
-                <input type="password" placeholder="Minimum - 6 characters" class="form-control" formControlName="password" [ngClass]="{'isInValid': submitted && formFields.password.errors}">
-                <div *ngIf="submitted && formFields.password.errors" class="invalid-feedback">
-                    <div *ngIf="formFields.password.required">Password is required</div>
-                    <div *ngIf="formFields.password.errors.minLength">Password requires at least 6 characters</div>
-                </div>
-            </div>
-        </div>
-        <br><br><br />
-
-        <section>
-            <div class="col-sm-4">
-                <button style="width:205px;" [disabled]="loading" class="btn">Register</button>
-            </div>
-            <div class="col-sm-2">
-                <a routerLink='/' class="btn btn-link">Cancel</a>
-            </div>
-        </section>
-
-    </form>
 
 </div>
-
-    </div>
