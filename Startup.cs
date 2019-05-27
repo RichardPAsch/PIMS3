@@ -41,6 +41,7 @@ namespace PIMS3
             services.AddScoped<IIncomeRepository, IncomeRepository>(); // TODO: no longer needed ?
             services.AddScoped<InvestorDataProcessing>();
             services.AddScoped<IInvestorSvc, InvestorSvc>();
+            services.AddScoped<AppSettings>();
 
             services.AddCors();
             services.AddMvc()
