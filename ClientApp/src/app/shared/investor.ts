@@ -1,7 +1,7 @@
 export class Investor {
 
     investorId: string;
-    loginname: string; 
+    loginName: string; 
     password: string;
     firstName: string;  // per Investor account
     lastName: string;   
