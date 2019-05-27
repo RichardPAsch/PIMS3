@@ -1,69 +1,77 @@
 ﻿using System;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using Microsoft.Extensions.Options;
 using PIMS3.Data;
 using PIMS3.Data.Entities;
 using PIMS3.DataAccess.Investor;
 using PIMS3.Helpers;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
+
+
 
 namespace PIMS3.Services
 {
     /*  ====== Notes: =========
         Provides application-wide necessary security-related functionality, and is 
-        therefore seperately encapsulated from general data processing functionality 
+        therefore separately encapsulated from general data processing functionality 
         available via 'InvestorDataProcessing'.
     */
 
     public class InvestorSvc : IInvestorSvc
     {
-        private readonly AppSettings _appSettings;
-        private readonly PIMS3Context _ctx;
 
-        public InvestorSvc(IOptions<AppSettings> appSettings, PIMS3Context ctx)
+        private readonly PIMS3Context _ctx;
+        const string NULL_OR_WS_MSG = "Password may not be empty, nor contain only whitespace.";
+
+
+        public InvestorSvc( PIMS3Context ctx)
         {
-            _appSettings = appSettings.Value;
             _ctx = ctx;
         }
 
 
         public Investor Authenticate(string investorLogin, string password)
         {
-            /*
-                Upon successful authentication, a JSON Web Token is generated via JwtSecurityTokenHandler();  the generated
-                token is digitally signed using a secret key stored in appsettings.json. The JWT is returned to the client,
-                which then must include it in the HTTP Authorization header of any subsequent web api requests for authentication.
-            */
-
-            // Authenticate investor.
-            var currentInvestor = GetAll().SingleOrDefault(i => i.LoginName == investorLogin && i.Password == password);
-            if (currentInvestor == null)
+            if (string.IsNullOrEmpty(investorLogin) || string.IsNullOrEmpty(password))
                 return null;
 
-            // Generate jwt token.
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            byte[] key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-            SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+            Investor currentInvestor = GetAll().SingleOrDefault(i => i.LoginName == investorLogin);
+            if (currentInvestor == null)
             {
-                Subject = new ClaimsIdentity(new Claim[] {
-                     new Claim(ClaimTypes.Name,  currentInvestor.InvestorId.ToString())
-                }),
-                Expires = DateTime.Now.AddDays(3),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
+                return null;
+            }
 
-            var generatedToken = tokenHandler.CreateToken(tokenDescriptor);
-            currentInvestor.Token = tokenHandler.WriteToken(generatedToken);
+            // Verify password.
+            if (!VerifyPasswordHash(password, currentInvestor.PasswordHash, currentInvestor.PasswordSalt))
+                return null;
 
-            // Clear password before returning.
-            currentInvestor.Password = null;
-
+            // Return authenticated investor.
             return currentInvestor;
         }
 
+
+        public Investor Create(Investor investor, string password)
+        {
+            if (string.IsNullOrWhiteSpace(password))
+                throw new AppException("Unable to register:: a password is required.");
+
+            if(_ctx.Investor.Any(i => i.LoginName == investor.LoginName))
+                throw new AppException("Unable to register: login name \"" + investor.LoginName + "\" already exists.");
+
+            CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
+            investor.PasswordHash = passwordHash;
+            investor.PasswordSalt = passwordSalt;
+
+            _ctx.Investor.Add(investor);
+            _ctx.SaveChanges();
+
+            return investor;
+        }
+
+
+        public void Delete(int id)
+        {
+            throw new NotImplementedException();
+        }
 
         public IQueryable<Investor> GetAll()
         {
@@ -71,6 +79,48 @@ namespace PIMS3.Services
             return investorDataAccessComponent.RetreiveAll();
         }
 
-       
+        public void Update(Investor investor, string password = null)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+        #region Helpers
+
+            private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+            {
+                if (password == null) throw new ArgumentNullException("password");
+                if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException(NULL_OR_WS_MSG, "password");
+
+                using (var hmac = new System.Security.Cryptography.HMACSHA512())
+                {
+                    passwordSalt = hmac.Key;
+                    passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+                }
+            }
+
+            private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
+            {
+                if (password == null) throw new ArgumentNullException("password");
+                if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException(NULL_OR_WS_MSG, "password");
+                if (storedHash.Length != 64) throw new ArgumentException("Invalid length of password hash (64 bytes expected).", "passwordHash");
+                if (storedSalt.Length != 128) throw new ArgumentException("Invalid length of password salt/key (128 bytes expected).", "passwordHash");
+
+                using (var hmac = new System.Security.Cryptography.HMACSHA512(storedSalt))
+                {
+                    var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                    for (int i = 0; i < computedHash.Length; i++)
+                    {
+                        if (computedHash[i] != storedHash[i]) return false;
+                    }
+                }
+
+                return true;
+            }
+
+        #endregion
+
+
     }
 }
