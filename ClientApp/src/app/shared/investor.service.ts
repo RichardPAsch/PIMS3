@@ -29,9 +29,23 @@ export class InvestorService {
 
     register(investor: Investor) {
         investor.investorId = Guid.create().toString();
-        let webApiUri = baseUrl + "/api/Investor";
-        return this.http.post(webApiUri, investor);
+        let webApiUri = baseUrl + "/api/Investor/Register";
+        return this.http.post<Investor>(webApiUri, investor);
     }
+
+    /* ====== Fiddler test url & data: ======
+     
+        https://localhost:44328/api/Investor/Register
+        {
+          "investorId": "34022871-763f-49da-a72a-c2689ddb63ce",
+          "loginname": "js@yahoo.com",
+          "password": "password5",
+          "firstName": "joe",
+          "lastName": "smith",
+          "token": ""
+        }
+
+    */ 
 
 
 }
