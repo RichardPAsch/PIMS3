@@ -13,7 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using PIMS3.Helpers;
 using System.Text;
-
+using Microsoft.Extensions.Options;
 
 namespace PIMS3.Controllers
 {
@@ -25,13 +25,13 @@ namespace PIMS3.Controllers
         private readonly PIMS3Context _context;
         private IInvestorSvc _investorSvc;
         private readonly AppSettings _appSettings;
+        
 
-
-        public InvestorController(PIMS3Context context, IInvestorSvc investorSvc, AppSettings appSettings)
+        public InvestorController(PIMS3Context context, IInvestorSvc investorSvc, IOptions<AppSettings> appSettings)
         {
             _context = context;
             _investorSvc = investorSvc;
-            _appSettings = appSettings;
+            _appSettings = appSettings.Value;
         }
 
         
@@ -49,19 +49,20 @@ namespace PIMS3.Controllers
         // POST: api/Investor
         [AllowAnonymous]
         [HttpPost()]
+        [Route("authenticateInvestor")]
         public IActionResult AuthenticateInvestor([FromBody] InvestorVm newInvestor)
         {
-            /*
+            /*  Description:
                 Upon successful authentication, a JSON Web Token is generated via JwtSecurityTokenHandler();  the generated
                 token is digitally signed using a secret key stored in appsettings.json. The JWT is returned to the client,
-                which then must include it in the HTTP Authorization header of any subsequent web api requests for authentication.
+                who then must include it in the HTTP Authorization header of any subsequent web api request(s) for authentication.
             */
 
             Investor registeredInvestor = _investorSvc.Authenticate(newInvestor.LoginName, newInvestor.Password);
 
             // TODO: log results ?
             if (registeredInvestor == null)
-                return BadRequest(new { message = "Unable to validate login credentials, check name and/or password." });
+                return BadRequest(new { message = "Unable to validate registration; please check login name and/or password." });
 
             // Generate jwt.
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
@@ -71,7 +72,7 @@ namespace PIMS3.Controllers
                 Subject = new ClaimsIdentity(new Claim[] {
                      new Claim(ClaimTypes.Name,  registeredInvestor.InvestorId.ToString())
                 }),
-                Expires = DateTime.Now.AddDays(3),
+                Expires = DateTime.Now.AddHours(8), // modified for testing - DateTime.Now.AddMinutes(20),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
