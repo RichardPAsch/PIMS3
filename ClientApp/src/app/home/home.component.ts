@@ -3,9 +3,7 @@ import { Router } from '@angular/router';
 import { FormGroup, Validators, FormControl } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { AuthenticationService } from '../shared/authentication.service';
-
-// TODO:
-//import { AlertService } from '@/_services';
+// TODO: import { AlertService } from '@/_services';
 
 @Component({
   selector: 'app-home',
@@ -15,23 +13,22 @@ import { AuthenticationService } from '../shared/authentication.service';
     
 export class HomeComponent implements OnInit {
 
-    constructor(private router: Router) {
-        // TODO: Add as params:
-        //  private authenticationSvc AuthenticationService,
-        //  private alertSvc: AlertService
+    constructor(private router: Router, private authenticationSvc : AuthenticationService) {
+        // TODO: Add as params:   private alertSvc: AlertService
 
-        // TODO: redirect to home if already logged in; for PIMS3 -> to this same page?
-        //if (this.authenticationService.currentUserValue) {
-        //    this.router.navigate(['/']);
-        //}
+        if (this.authenticationSvc.currentInvestorValue) {
+            alert("Login unnecessary, login already exist for: \n" + this.authenticationSvc.currentInvestorValue.loginName);
+            this.router.navigate(['/income-summary']);
+        }
     }
-
+ 
+    // Original investorId for rpasch@rpclassics.net: CF256A53-6DCD-431D-BC0B-A810010F5B88
     loading = false;
     submitted = false;
     returnUrl: string;
     loginForm = new FormGroup({
-        investorName: new FormControl('', [Validators.required]),
-        password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+        investorName: new FormControl('js@yahoo.com', [Validators.required]),  // ** temporary TEST investor values ONLY! **
+        password: new FormControl('password10', [Validators.required, Validators.minLength(6)]),
     });
 
     get formFields() { return this.loginForm.controls; }
@@ -49,19 +46,17 @@ export class HomeComponent implements OnInit {
         if (this.loginForm.invalid)
             return;
 
-
-        // TODO:
-        //this.authenticationSvc.login(this.formFields.username.value, this.formFields.password.value)
-        //    .pipe(first())
-        //    .subscribe(
-        //        data => {
-        //            this.router.navigate([this.returnUrl]);
-        //        },
-        //        error => {
-        //            this.alertService.error(error);
-        //            this.loading = false;
-        //        });
-
+        this.authenticationSvc.login(this.formFields.investorName.value, this.formFields.password.value)
+            .pipe(first())
+            .subscribe(data =>
+            {
+                this.router.navigate(['/income-summary']);
+            },
+            error => {
+                alert("Error with login, due to: " + error(error));
+                //this.alertService.error(error);
+                this.loading = false;
+            });
     }
 
 }
