@@ -12,7 +12,7 @@ namespace PIMS3.Controllers
     public class PositionController : ControllerBase
     {
         private readonly PIMS3Context _ctx;
-        private readonly string investorId = "CF256A53-6DCD-431D-BC0B-A810010F5B88";  // RPA
+        private readonly string investorId = "511e12f1-5b3a-dfff-876a-e094bd47c677";  // RPA
 
         public PositionController(PIMS3Context ctx)
         {

@@ -27,7 +27,7 @@ namespace PIMS3.BusinessLogic.ImportData
         private string assetIdForPosition = string.Empty;
 
         // 12.27.18 - Temporary assignment until security implemented.
-        const string INVESTORID = "CF256A53-6DCD-431D-BC0B-A810010F5B88"; // RPA
+        const string INVESTORID = "511e12f1-5b3a-dfff-876a-e094bd47c677"; // RPA
 
 
         public ImportFileProcessing(DataImportVm viewModel, PIMS3Context ctx)

@@ -30,7 +30,7 @@ namespace PIMS3.Controllers
         private IList<YtdRevenueSummaryVm> _tempListing = new List<YtdRevenueSummaryVm>();
         private readonly PIMS3Context _ctx;
         // TODO: temporary until security implemented.
-        private readonly string investorId = "CF256A53-6DCD-431D-BC0B-A810010F5B88";  // RPA
+        private readonly string investorId = "511e12f1-5b3a-dfff-876a-e094bd47c677";  // RPA
 
         public IncomeController(IIncomeRepository repo, ILogger<IncomeController> logger, PIMS3Context ctx)//, IMapper mapper)
         {
