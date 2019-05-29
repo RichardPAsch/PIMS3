@@ -32,15 +32,17 @@ export class AuthenticationService {
         return this.currentInvestorSubject.value;
     }
 
-    login(submittedName: string, submittedPwrd: string ): any {
+    login(loginName: string, Password: string): any {
 
-        // TODO: replace `users/authenticate` with actual API url.
-        return this.http.post<any>(`users/authenticate`, { submittedName, submittedPwrd })
+        const baseUrl = "https://localhost:44328";
+
+        return this.http.post<any>(baseUrl + "/api/investor/authenticateInvestor", { loginName, Password })
             .pipe(map(investor => {
                 // login successful if there's a jwt in the response.
                 if (investor && investor.token) {
-                    // store investor user details and jwt in local storage.
-                    localStorage.setItem('currentInvestor', JSON.stringify(investor));
+                    // ** Store investor user details and jwt in SESSION storage for now, ONLY while in development/testing mode. **
+                    //localStorage.setItem('currentInvestor', JSON.stringify(investor));
+                    sessionStorage.setItem('currentInvestor', JSON.stringify(investor));
                     this.currentInvestorSubject.next(investor);
                 }
                 return investor;
