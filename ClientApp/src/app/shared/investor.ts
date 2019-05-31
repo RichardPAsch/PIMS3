@@ -5,6 +5,6 @@ export class Investor {
     password: string;
     firstName: string;  // per Investor account
     lastName: string;   
-    token: string;
-
+    token?: string;
+    role: string;
 }
