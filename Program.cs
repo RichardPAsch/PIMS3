@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+
 
 namespace PIMS3
 {
@@ -14,11 +8,17 @@ namespace PIMS3
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            CreateWebHostBuilder(args).Build()
+                                      .Run();
         }
+
+        // ** TODO: **
+        // 'Kestrel' is the default cross-platform web development server for ASP.NET Core used in PIMS; however, for PRODUCTION public-facing
+        // functionality, we'll need to place the server behind a more robust reverse proxy server, e.g., "IIS", that will receive public 
+        // HTTP requests, forwarding them to 'Kestrel' after initial handling and security checks.
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
+                   .UseStartup<Startup>();
     }
 }
