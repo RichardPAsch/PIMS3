@@ -75,6 +75,14 @@ namespace PIMS3
                     ValidateAudience = false
                 };
             });
+            //.AddJwtBearer(x =>
+            //{
+            //    OnTokenValidated = ctx =>
+            //    {
+
+            //    }
+
+            //});
 
 
             services.Configure<ApiBehaviorOptions>(options =>
