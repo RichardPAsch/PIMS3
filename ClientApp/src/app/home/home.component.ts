@@ -17,7 +17,7 @@ export class HomeComponent implements OnInit {
         // TODO: Add as params:   private alertSvc: AlertService
 
         if (this.authenticationSvc.currentInvestorValue) {
-            alert("Login unnecessary, login already exist for: \n" + this.authenticationSvc.currentInvestorValue.loginName);
+            alert("Login already exist for: \n" + this.authenticationSvc.currentInvestorValue.loginName);
             this.router.navigate(['/income-summary']);
         }
     }
@@ -27,15 +27,14 @@ export class HomeComponent implements OnInit {
     submitted = false;
     returnUrl: string;
     loginForm = new FormGroup({
-        investorName: new FormControl('rpasch@rpclassics.net', [Validators.required]),  // ** temporary TEST investor values ONLY! **
+        investorName: new FormControl('rpasch@rpclassics.net', [Validators.required]),  // ** temporary TEST investor value ONLY! **
         password: new FormControl('', [Validators.required, Validators.minLength(6)]),
     });
 
     get formFields() { return this.loginForm.controls; }
 
-    ngOnInit() {
-        
-    }
+
+    ngOnInit() { }
 
 
     onSubmit() {
@@ -48,8 +47,9 @@ export class HomeComponent implements OnInit {
 
         this.authenticationSvc.login(this.formFields.investorName.value, this.formFields.password.value)
             .pipe(first())
-            .subscribe(data =>
+            .subscribe(investorModel =>
             {
+                alert("Login successful for: \n" + investorModel.username);
                 this.router.navigate(['/income-summary']);
             },
             error => {
