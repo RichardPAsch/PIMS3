@@ -12,7 +12,8 @@ using PIMS3.Data.Repositories.IncomeSummary;
 using PIMS3.DataAccess.Investor;
 using PIMS3.Helpers;
 using PIMS3.Services;
-
+using System.Threading.Tasks;
+using PIMS3.Data.Entities;
 
 namespace PIMS3
 {
@@ -63,8 +64,24 @@ namespace PIMS3
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
+            // see: https://jasonwatmore.com/post/2018/06/26/aspnet-core-21-simple-api-for-authentication-registration-and-user-management#startup-cs
             .AddJwtBearer(x =>
             {
+                x.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = ctx =>
+                    {
+                        var investorService = ctx.HttpContext.RequestServices.GetRequiredService<IInvestorSvc>();
+                        string investorId = ctx.Principal.Identity.Name;
+                        Investor investor = investorService.GetById(investorId);
+                        if (investor == null)
+                        {
+                            // Investor no longer exists.
+                            ctx.Fail("Unauthorized");
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
                 x.RequireHttpsMetadata = false;
                 x.SaveToken = true;
                 x.TokenValidationParameters = new TokenValidationParameters
@@ -75,14 +92,6 @@ namespace PIMS3
                     ValidateAudience = false
                 };
             });
-            //.AddJwtBearer(x =>
-            //{
-            //    OnTokenValidated = ctx =>
-            //    {
-
-            //    }
-
-            //});
 
 
             services.Configure<ApiBehaviorOptions>(options =>
