@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PIMS3.Data;
 using PIMS3.DataAccess.Position;
 using PIMS3.ViewModels;
@@ -9,6 +10,7 @@ namespace PIMS3.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PositionController : ControllerBase
     {
         private readonly PIMS3Context _ctx;
