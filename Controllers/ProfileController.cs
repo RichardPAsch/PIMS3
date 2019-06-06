@@ -6,12 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using PIMS3.Data.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace PIMS3.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize] 
     public class ProfileController : ControllerBase
     {
         private readonly PIMS3Context _dbCtx;
