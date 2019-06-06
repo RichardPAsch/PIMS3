@@ -6,11 +6,11 @@ using Microsoft.Extensions.Logging;
 using PIMS3.Data.Entities;
 using PIMS3.Data.Repositories.IncomeSummary;
 using PIMS3.ViewModels;
-//using AutoMapper; // deferred use.
 using System.Globalization;
 using PIMS3.Data;
 using PIMS3.BusinessLogic.PositionData;
 using PIMS3.DataAccess.IncomeData;
+using Microsoft.AspNetCore.Authorization;
 
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -19,11 +19,11 @@ namespace PIMS3.Controllers
 {
     // Using token replacement in route templates ([controller], [action], [area]).
     [Route("api/[controller]")]
+    //[Authorize] // ** Uncomment to enforce authorization; fix resulting alert message to reflect security issue. **
     public class IncomeController : Controller
     {
         public readonly IIncomeRepository _repo;
         private readonly ILogger<IncomeController> _logger;
-        //private readonly IMapper _mapper;
         private int _counter = 1;
         private decimal _runningYtdTotal;
         private decimal[] _incomeCount;
@@ -32,12 +32,11 @@ namespace PIMS3.Controllers
         // TODO: temporary until security implemented.
         private readonly string investorId = "511e12f1-5b3a-dfff-876a-e094bd47c677";  // RPA
 
-        public IncomeController(IIncomeRepository repo, ILogger<IncomeController> logger, PIMS3Context ctx)//, IMapper mapper)
+        public IncomeController(IIncomeRepository repo, ILogger<IncomeController> logger, PIMS3Context ctx)
         {
             _repo = repo;
             _logger = logger;
             _ctx = ctx;
-            //_mapper = mapper;
         }
 
 
