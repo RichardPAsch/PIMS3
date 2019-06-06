@@ -16,9 +16,11 @@ export class AuthorizationGuard implements CanActivate {
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
 
+        // True if investor currently logged in.
         let currentInvestor = this.authSvc.currentInvestorValue;
+
         if (currentInvestor) {
-            // Check if route is restricted by role.
+            // Route restricted by role?
             if (route.data.roles && route.data.roles.indexOf(currentInvestor.role) == -1) {
                  // Role unauthorized.
                 this.router.navigate(['/']);
@@ -27,7 +29,7 @@ export class AuthorizationGuard implements CanActivate {
             return true;
         }
 
-        // Not logged in.
+        alert("No login credentials found, please login for access.");
         this.router.navigate(['/']);
         return false;
     }
