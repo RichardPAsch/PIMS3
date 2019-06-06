@@ -19,7 +19,7 @@ namespace PIMS3.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize] // 5.22.19 - to be implemented
+   // [Authorize] 
     public class InvestorController : ControllerBase
     {
         private readonly PIMS3Context _context;
@@ -86,7 +86,8 @@ namespace PIMS3.Controllers
                 Username = registeredInvestor.LoginName,
                 registeredInvestor.FirstName,
                 registeredInvestor.LastName,
-                Token = tokenString
+                Token = tokenString,
+                registeredInvestor.Role
             });
         }
 
