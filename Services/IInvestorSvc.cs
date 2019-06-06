@@ -10,5 +10,6 @@ namespace PIMS3.Services
         Investor Create(Investor investor, string password);
         void Update(Investor investor, string password = null);
         void Delete(int id);
+        Investor GetById(string id);
     }
 }

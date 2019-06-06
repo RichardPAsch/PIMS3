@@ -29,6 +29,12 @@ namespace PIMS3.Services
         }
 
 
+        public Investor GetById(string id)
+        {
+            return _ctx.Investor.Find(id);
+        }
+
+
         public Investor Authenticate(string investorLogin, string password)
         {
             if (string.IsNullOrEmpty(investorLogin) || string.IsNullOrEmpty(password))
@@ -73,11 +79,13 @@ namespace PIMS3.Services
             throw new NotImplementedException();
         }
 
+
         public IQueryable<Investor> GetAll()
         {
             InvestorDataProcessing investorDataAccessComponent = new InvestorDataProcessing(_ctx);
             return investorDataAccessComponent.RetreiveAll();
         }
+
 
         public void Update(Investor investor, string password = null)
         {
@@ -121,6 +129,11 @@ namespace PIMS3.Services
 
                 return true;
             }
+
+        public Investor GetById()
+        {
+            throw new NotImplementedException();
+        }
 
         #endregion
 
