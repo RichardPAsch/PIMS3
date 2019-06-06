@@ -2,6 +2,7 @@
 using PIMS3.ViewModels;
 using PIMS3.DataAccess.ImportData;
 using PIMS3.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PIMS3.Controllers
 {
@@ -25,6 +26,7 @@ namespace PIMS3.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ImportFileController : ControllerBase
     {
         private static DataImportVm processedVm;
@@ -75,16 +77,12 @@ namespace PIMS3.Controllers
 
                 return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, savedTickers = processedVm.MiscMessage }, processedVm);
             }
-            
-            
-            
-                
 
-            
-            //string dataPersistenceResults;
-            //var importFileUrl = importFile.ImportFilePath;
 
-            /*  -------- OLD PIMS code ------------
+
+            #region Old PIMS code
+
+            /*  
            var requestUri = Request.RequestUri.AbsoluteUri;
 
                       _serverBaseUri = Utilities.GetWebServerBaseUri(requestUri);
@@ -132,7 +130,7 @@ namespace PIMS3.Controllers
                   }
              */
             //return Ok();
-
+            #endregion
         }
 
 
