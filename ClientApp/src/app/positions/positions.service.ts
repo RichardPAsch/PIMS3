@@ -10,12 +10,17 @@ const baseUrl = "https://localhost:44328";
 })
 export class PositionsService {
 
-    constructor(private http: HttpClient) { }
+    currentInvestorId: string;
+
+    constructor(private http: HttpClient) {
+        let investor = JSON.parse(sessionStorage.getItem('currentInvestor')); // parse string to object
+        this.currentInvestorId = investor.id;
+    }
 
 
     BuildPositions(includeInactiveStatus: boolean): Observable<string> {
 
-        let webApi = baseUrl + "/api/Position/" + includeInactiveStatus;
+        let webApi = baseUrl + "/api/Position/" + includeInactiveStatus + "/" + this.currentInvestorId;
         return this.http.get<string>(webApi);
     }
 
