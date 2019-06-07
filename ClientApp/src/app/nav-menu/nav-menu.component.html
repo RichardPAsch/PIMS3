@@ -14,12 +14,12 @@
             <ul class='nav navbar-nav'>
                 <!--routerLinkActive :  Angular directive allowing for addition of a CSS class to an element when the link's route becomes active.-->
                 <li [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
-                    <a [routerLink]='["/"]' (click)='collapse()'>
+                    <a [routerLink]='["/"]' (click)='collapse(true)'>
                         <span class='glyphicon glyphicon-home'></span> Home - Login
                     </a>
                 </li>
                 <li [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
-                    <a [routerLink]='["/registration"]' (click)='collapse()'>
+                    <a [routerLink]='["/registration"]' (click)='collapse(true)'>
                         <span class='glyphicon glyphicon-envelope'></span> Registration
                     </a>
                 </li>
