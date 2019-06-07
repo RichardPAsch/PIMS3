@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
 import { NavMenuComponent } from './nav-menu/nav-menu.component';
@@ -21,11 +21,20 @@ import { ProfileComponent } from './profile/profile.component';
 import { RegistrationComponent } from './registration/registration.component';
 import { AuthenticationService } from '../app/shared/authentication.service';
 import { InvestorService } from '../app/shared/investor.service';
+//import { Role } from '../app/authorization/role.enum';
+import { AuthorizationGuard } from '../app/authorization/authorization.guard';
+import { JwtInterceptor } from '../app/shared/jwt.interceptor';
+import { HttpErrorInterceptor } from '../app/shared/http.error.interceptor';
 
 
 /* Notes:
  *  Medium to large apps should have one or more FEATURE modules. ngModule may have one
  *  or more child modules. Do create an NgModule for each feature area.
+ *  Routing: each route contains a path and associated component.
+ *  == Routes are secured by: == 
+ *  1) passing the 'AuthorizationGuard' to the canActivate property of the route, and
+ *  2) annotating controllers with '[Authorize]'. **
+ *  see: https://jasonwatmore.com/post/2018/11/22/angular-7-role-based-authorization-tutorial-with-example#app-routing-ts
  */
 
 @NgModule({
@@ -48,25 +57,39 @@ import { InvestorService } from '../app/shared/investor.service';
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterModule.forRoot([
-          { path: '', component: HomeComponent, pathMatch: 'full' }, // default Login - Home page.
-          { path: 'income-projections', component: IncomeProjectionsComponent },
-          { path: 'registration', component: RegistrationComponent },
-          { path: 'income-summary', component: IncomeSummaryComponent },
-          { path: 'income-receivables', component: IncomeReceivablesComponent },
-          { path: 'income', component: IncomeComponent },
-          { path: 'data-import', component: DataImportComponent },
-          { path: 'positions', component: PositionsComponent },
-          { path: 'profile', component: ProfileComponent },
+      RouterModule.forRoot([
+        // Access to a route is controlled via adding 'AuthorizationGuard' to canActivate property array. The route guards
+        // in the array are run by Angular to decide if the route can be "activated". If all of the route
+        // guards return true, then navigation is allowed to continue, otherwise, navigation is cancelled.
+        { path: '', component: HomeComponent, pathMatch: 'full' }, // default Login - Home page.
+        { path: 'income-projections', component: IncomeProjectionsComponent/*, canActivate: [AuthorizationGuard]*/ },
+        { path: 'registration', component: RegistrationComponent },
+        { path: 'income-summary', component: IncomeSummaryComponent, canActivate: [AuthorizationGuard] },
+        { path: 'income-receivables', component: IncomeReceivablesComponent, canActivate: [AuthorizationGuard] },  // 'income due'
+        { path: 'income', component: IncomeComponent, canActivate: [AuthorizationGuard] },                         // 'income recorded'
+        { path: 'data-import', component: DataImportComponent, canActivate: [AuthorizationGuard] },
+        { path: 'positions', component: PositionsComponent, canActivate: [AuthorizationGuard] },
+        { path: 'profile', component: ProfileComponent, canActivate: [AuthorizationGuard] },
 
           // Otherwise redirect to home
           { path: '**', redirectTo: '' }
         ])
     ],
-   // Creators of services that NgModule contributes to the global collection of services;
-   // they become accessible in all parts of the app. (You can also specify providers at the component level,
-   // which is often preferred.)
-    providers: [DataImportService, MessageService, ProfileService, AuthenticationService, InvestorService], //, IncomeReceivablesService], 
+
+    /* ===== Notes:
+     Creators of services that NgModule contributes to the global collection of services, and are accessible to
+     all parts of an app. (You can also specify providers at the component level, which is often preferred.)
+     'Providers' enable Angular Dependency Injection (DI) to get value(s) for dependency(ies).
+     The JWT and Error interceptors hook into the HTTP request pipeline via the Angular built-in injection token HTTP_INTERCEPTORS.
+     Angular has several built in injection tokens that enable hooking into different parts of the framework and application lifecycle
+     events. The 'multi: true' argument option tells Angular to ADD the provider to the collection of HTTP_INTERCEPTORS, rather than
+     replacing the collection with a single provider. This allows adding multiple HTTP interceptors to the request pipeline for handling different tasks.
+    */
+    providers: [ DataImportService, MessageService, ProfileService,
+                 AuthenticationService, InvestorService,
+               { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+               { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true }
+    ], 
 
     bootstrap: [AppComponent] // The main application view, called the root component, which HOSTS all other app views.
                               // Only NgModule should set the bootstrap property.
