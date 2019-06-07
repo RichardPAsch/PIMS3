@@ -17,7 +17,9 @@ export class HomeComponent implements OnInit {
         // TODO: Add as params:   private alertSvc: AlertService
 
         if (this.authenticationSvc.currentInvestorValue) {
-            alert("Login already exist for: \n" + this.authenticationSvc.currentInvestorValue.loginName);
+            alert("Login already exist for: \n" + this.authenticationSvc.currentInvestorValue.firstName
+                                                + " "
+                                                + this.authenticationSvc.currentInvestorValue.lastName);
             this.router.navigate(['/income-summary']);
         }
     }
