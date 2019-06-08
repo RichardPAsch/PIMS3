@@ -26,9 +26,6 @@ namespace PIMS3.BusinessLogic.ImportData
         private static string _assetsNotAddedListing = string.Empty;
         private string assetIdForPosition = string.Empty;
 
-        // 12.27.18 - Temporary assignment until security implemented.
-        const string INVESTORID = "511e12f1-5b3a-dfff-876a-e094bd47c677"; // RPA
-
 
         public ImportFileProcessing(DataImportVm viewModel, PIMS3Context ctx)
         {
@@ -53,7 +50,7 @@ namespace PIMS3.BusinessLogic.ImportData
         }
 
 
-        public IEnumerable<Data.Entities.Income> ParseRevenueSpreadsheetForIncomeRecords(string filePath, ImportFileDataProcessing dataAccessComponent)
+        public IEnumerable<Data.Entities.Income> ParseRevenueSpreadsheetForIncomeRecords(string filePath, ImportFileDataProcessing dataAccessComponent, string loggedInvestorId)
         {
             var newIncomeListing = new List<Data.Entities.Income>();
             var incomeDataAccessComponent = new IncomeDataProcessing(_ctx);
@@ -95,7 +92,7 @@ namespace PIMS3.BusinessLogic.ImportData
                         var xlsTicker = enumerableCells.ElementAt(3).Trim();
                         var xlsAccount = CommonSvc.ParseAccountTypeFromDescription(enumerableCells.ElementAt(1).Trim());
                        
-                        fetchedPositionId = assetDataAccessComponent.FetchPositionId(INVESTORID, xlsTicker, xlsAccount).AsQueryable();
+                        fetchedPositionId = assetDataAccessComponent.FetchPositionId(loggedInvestorId, xlsTicker, xlsAccount).AsQueryable();
 
                         // Checking PositionId rather than asset is sufficient.
                         // Validate either a bad ticker symbol, or no account was found to be affiliated with this position/asset in question.
@@ -217,7 +214,7 @@ namespace PIMS3.BusinessLogic.ImportData
                                     {
                                         AssetId = Guid.NewGuid().ToString(),  
                                         AssetClassId = existingAssetClassId,  
-                                        InvestorId = INVESTORID,  
+                                        InvestorId = id, //INVESTORID,  
                                         ProfileId = existingProfileId,  
                                         LastUpdate = DateTime.Now, 
                                         Positions = positionsToBeSaved  
@@ -262,7 +259,7 @@ namespace PIMS3.BusinessLogic.ImportData
                                         {
                                             AssetId = Guid.NewGuid().ToString(), 
                                             AssetClassId = existingAssetClassId, 
-                                            InvestorId = INVESTORID,
+                                            InvestorId = id, //INVESTORID,
                                             ProfileId = newProfile.ProfileId,
                                             LastUpdate = DateTime.Now,
                                             Positions = positionsToBeSaved == null
