@@ -40,10 +40,10 @@ namespace PIMS3.Controllers
 
 
         // There are multiple return/response types and paths in this action.
-        [HttpPost("[action]")]
+        [HttpPost("[action]/{id}")]
         [ProducesResponseType(400)]
         [ProducesResponseType(200, Type = typeof(DataImportVm))]
-        public ActionResult<DataImportVm> ProcessImportFile([FromBody] DataImportVm importFile, bool isRevenue = true)
+        public ActionResult<DataImportVm> ProcessImportFile([FromBody] DataImportVm importFile, string id, bool isRevenue = true)
         {
             if(!ModelState.IsValid)
                 return BadRequest("Invalid model state: " + ModelState);
@@ -67,7 +67,7 @@ namespace PIMS3.Controllers
             }
             else
             {
-                processedVm = dataAccessComponent.SaveAssets(importFile, _dbCtx);
+                processedVm = dataAccessComponent.SaveAssets(importFile, _dbCtx, id);
                 if (processedVm == null)
                     return BadRequest(new { exceptionMessage = "Error saving new Position(s).", isRevenueData = false });
 
