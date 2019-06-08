@@ -3,7 +3,8 @@ import { AgGridNg2 } from 'ag-grid-angular';
 import { ProfileService } from '../shared/profile.service';
 import { ProjectionProfile } from '../income-projections/projection-profile';
 import { HttpErrorResponse } from '@angular/common/http';
-import 'rxjs/add/operator/retry'; 
+import 'rxjs/add/operator/retry';
+
 
 
 @Component({
@@ -78,20 +79,20 @@ export class IncomeProjectionsComponent implements OnInit {
                             profiles.push(this.initializeGridModel(responseProfile, selectedData[gridRow].capital));
                             this.agGrid.api.setRowData(profiles);
                         },
-                            (apiErr: HttpErrorResponse) => {
-                                if (apiErr.error instanceof Error) {
-                                    // Client-side or network error encountered.
-                                    alert("Error processing projection(s): \network or application error. Please try later.");
-                                }
-                                else {
-                                    //API returns unsuccessful response status codes, e.g., 404, 500 etc.
-                                    //let truncatedMsgLength = apiErr.error.errorMsg.indexOf(":") - 7;
-                                    alert("Error processing projection(s): due to : \n"
-                                        + apiErr.error.errorMsg
-                                        + "."
-                                        + "\nPlease check ticker validity.");
-                                }
+                        (apiErr: HttpErrorResponse) => {
+                            if (apiErr.error instanceof Error) {
+                                // Client-side or network error encountered.
+                                alert("Error processing projection(s): \network or application error. Please try later.");
                             }
+                            else {
+                                //API returns unsuccessful response status codes, e.g., 404, 500 etc.
+                                //let truncatedMsgLength = apiErr.error.errorMsg.indexOf(":") - 7;
+                                alert("Error processing projection(s): due to : \n"
+                                    + apiErr.error.errorMsg
+                                    + "."
+                                    + "\nPlease check ticker validity.");
+                            }
+                        }
                         ); // end subscribe
                 }
             }
