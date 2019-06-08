@@ -25,8 +25,12 @@ const httpOptions = {
 
 export class DataImportService {
 
+    currentInvestorId: string;
+
     constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string, private messageService: MessageService) {
         baseUrl = "https://localhost:44328";  // temp - conflicts with fetch-data's definition of baseUrl ?
+        let investor = JSON.parse(sessionStorage.getItem('currentInvestor')); 
+        this.currentInvestorId = investor.id;
     }
     
     /* All HttpClient methods return an RxJS Observable of something.
@@ -38,7 +42,6 @@ export class DataImportService {
     */
 
     postImportFileData(importFileToProcess: DataImportVm): any {
-        //Send to backend for processing here: WIP -> ImportFileController.cs / ImportFileControllerReference.txt
 
         // Also see: https://stackblitz.com/angular/nqyqljajkrp?file=src%2Fapp%2Fhero.service.ts
         // POST args: (url, body of data [of any type], options [params, headers, etc. & is optional]); returns -> Observable<any>
@@ -48,12 +51,12 @@ export class DataImportService {
         // The catchError() operator intercepts an Observable that failed, & passes the error to an error handler.
         // RxJS 'tap' operator (callback) taps/intercepts into the flow of observable values, LOOKING at their value(s) only & passing them along the chain.
         // Returned 'DataImportVm' - will contain results of processing.
-
-        return this.http.post<DataImportVm>(this.baseUrl + 'api/ImportFile/ProcessImportFile', importFileToProcess, httpOptions)
-                        .pipe(
-                            tap((processedResults: DataImportVm) => this.log("processed count of " + processedResults.recordsSaved + " XLSX recs totaling $" + processedResults.amountSaved + " for tickers: " + processedResults.miscMessage)),
-                            catchError(this.handleError<DataImportVm>('postImportFileData'))
-                        );
+        let fullUrl = this.baseUrl + 'api/ImportFile/ProcessImportFile' + '/' + this.currentInvestorId;
+        return this.http.post<DataImportVm>(fullUrl, importFileToProcess, httpOptions)
+            .pipe(
+                tap((processedResults: DataImportVm) => this.log("processed count of " + processedResults.recordsSaved + " XLSX recs totaling $" + processedResults.amountSaved + " for tickers: " + processedResults.miscMessage)),
+                catchError(this.handleError<DataImportVm>('postImportFileData'))
+        );
     }
 
 
