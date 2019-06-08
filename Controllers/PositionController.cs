@@ -14,7 +14,6 @@ namespace PIMS3.Controllers
     public class PositionController : ControllerBase
     {
         private readonly PIMS3Context _ctx;
-        private readonly string investorId = "511e12f1-5b3a-dfff-876a-e094bd47c677";  // RPA
 
         public PositionController(PIMS3Context ctx)
         {
@@ -34,8 +33,8 @@ namespace PIMS3.Controllers
         }
 
 
-        [HttpGet("{includeInactiveStatus}")]
-        public ActionResult GetPositions(bool includeInactiveStatus)
+        [HttpGet("{includeInactiveStatus}/{investorId}")]
+        public ActionResult GetPositions(bool includeInactiveStatus, string investorId)
         {
             PositionDataProcessing positionDataAccessComponent = new PositionDataProcessing(_ctx);
             IQueryable<PositionsForEditVm> positionInfo = positionDataAccessComponent.GetPositions(investorId, includeInactiveStatus);
