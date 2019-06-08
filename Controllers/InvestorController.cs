@@ -19,7 +19,7 @@ namespace PIMS3.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-   // [Authorize] 
+    [Authorize] 
     public class InvestorController : ControllerBase
     {
         private readonly PIMS3Context _context;
@@ -112,6 +112,8 @@ namespace PIMS3.Controllers
             
         }
          
+
+
 
         private IQueryable<InvestorVm> MapToVm(IQueryable<Investor> investorEntitiesToMap)
         {
