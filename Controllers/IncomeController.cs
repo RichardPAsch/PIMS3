@@ -29,8 +29,7 @@ namespace PIMS3.Controllers
         private decimal[] _incomeCount;
         private IList<YtdRevenueSummaryVm> _tempListing = new List<YtdRevenueSummaryVm>();
         private readonly PIMS3Context _ctx;
-        // TODO: temporary until security implemented.
-        private readonly string investorId = "511e12f1-5b3a-dfff-876a-e094bd47c677";  // RPA
+
 
         public IncomeController(IIncomeRepository repo, ILogger<IncomeController> logger, PIMS3Context ctx)
         {
@@ -65,8 +64,8 @@ namespace PIMS3.Controllers
         }
 
 
-        [HttpGet("GetMissingIncomeSchedule")]
-        public IEnumerable<IncomeReceivablesVm> GetMissingIncomeSchedule()
+        [HttpGet("GetMissingIncomeSchedule/{investorId}")]
+        public IEnumerable<IncomeReceivablesVm> GetMissingIncomeSchedule(string investorId)
         {
             // Creates on a monthly basis, a schedule of due income receipts; to be used for validating received
             // revenue during each month before income is actually imported at months' end. Each ticker acknowledgement
@@ -75,14 +74,14 @@ namespace PIMS3.Controllers
             // Qualifying Positions will drive processing in 'PositionProcessing'.
             var positionBusLogicComponent = new PositionProcessing(_ctx);
 
-            var positionsDuePymt = positionBusLogicComponent.GetPositionsWithIncomeDue(investorId);
+            IQueryable<IncomeReceivablesVm> positionsDuePymt = positionBusLogicComponent.GetPositionsWithIncomeDue(investorId); // Ok.
 
             return positionsDuePymt;
         }
 
 
-        [HttpGet("{backDatedYears:int}")]
-        public IEnumerable<IncomeSavedVm> GetRevenue(int backDatedYears)
+        [HttpGet("{backDatedYears:int}/{investorId}")]
+        public IEnumerable<IncomeSavedVm> GetRevenue(int backDatedYears, string investorId)
         {
             var incomeDataAccessComponent = new IncomeDataProcessing(_ctx);
             return incomeDataAccessComponent.GetRevenueHistory(backDatedYears, investorId);
