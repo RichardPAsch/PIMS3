@@ -19,7 +19,7 @@ namespace PIMS3.Controllers
 {
     // Using token replacement in route templates ([controller], [action], [area]).
     [Route("api/[controller]")]
-    //[Authorize] // ** Uncomment to enforce authorization; fix resulting alert message to reflect security issue. **
+    [Authorize] 
     public class IncomeController : Controller
     {
         public readonly IIncomeRepository _repo;
