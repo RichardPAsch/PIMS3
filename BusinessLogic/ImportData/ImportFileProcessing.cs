@@ -147,7 +147,7 @@ namespace PIMS3.BusinessLogic.ImportData
         }
 
 
-        public IEnumerable<AssetCreationVm> ParsePortfolioSpreadsheetForAssetRecords(string filePath, ImportFileDataProcessing dataAccessComponent)
+        public IEnumerable<AssetCreationVm> ParsePortfolioSpreadsheetForAssetRecords(string filePath, ImportFileDataProcessing dataAccessComponent, string id)
         {
             List<AssetCreationVm> assetsToCreateList = new List<AssetCreationVm>();
             var profileDataAccessComponent = new ProfileDataProcessing(_ctx);
@@ -183,7 +183,7 @@ namespace PIMS3.BusinessLogic.ImportData
                         var positionDataAccessComponent = new PositionDataProcessing(_ctx);
 
                         // Existing Position-Account implies Profile existence.
-                        var positionAccount = positionDataAccessComponent.GetPositionAssetByTickerAndAccount(enumerableCells.ElementAt(1).Trim(), enumerableCells.ElementAt(0).Trim());
+                        IQueryable<Asset> positionAccount = positionDataAccessComponent.GetPositionAssetByTickerAndAccount(enumerableCells.ElementAt(1).Trim(), enumerableCells.ElementAt(0).Trim(), id);
                         if (!positionAccount.Any())  // No Position-Account
                         {
                             IQueryable<Profile> profilePersisted = null;
