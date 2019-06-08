@@ -28,7 +28,7 @@ namespace PIMS3.DataAccess.ImportData
         }
 
 
-        public DataImportVm SaveRevenue(DataImportVm importVmToUpdate, PIMS3Context _ctx)
+        public DataImportVm SaveRevenue(DataImportVm importVmToUpdate, PIMS3Context _ctx, string investorId)
         {
             var busLayerComponent = new ImportFileProcessing(importVmToUpdate, _ctx);
 
@@ -36,7 +36,7 @@ namespace PIMS3.DataAccess.ImportData
 
             if (busLayerComponent.ValidateVm())
             {
-                revenueListingToSave = busLayerComponent.ParseRevenueSpreadsheetForIncomeRecords(importVmToUpdate.ImportFilePath.Trim(), this);
+                revenueListingToSave = busLayerComponent.ParseRevenueSpreadsheetForIncomeRecords(importVmToUpdate.ImportFilePath.Trim(), this, investorId);
                 
 
                 if (revenueListingToSave == null)
