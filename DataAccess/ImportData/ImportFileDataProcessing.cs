@@ -74,13 +74,13 @@ namespace PIMS3.DataAccess.ImportData
         }
 
 
-        public DataImportVm SaveAssets(DataImportVm importVmToSave, PIMS3Context _ctx)
+        public DataImportVm SaveAssets(DataImportVm importVmToSave, PIMS3Context _ctx, string id)
         {
-            var busLogicComponent = new ImportFileProcessing(importVmToSave, _ctx);
+            ImportFileProcessing busLogicComponent = new ImportFileProcessing(importVmToSave, _ctx);
 
             if (busLogicComponent.ValidateVm())
             {
-                assetListingToSave = busLogicComponent.ParsePortfolioSpreadsheetForAssetRecords(importVmToSave.ImportFilePath.Trim(), this);
+                assetListingToSave = busLogicComponent.ParsePortfolioSpreadsheetForAssetRecords(importVmToSave.ImportFilePath.Trim(), this, id);
 
                 if (assetListingToSave == null)
                 {
