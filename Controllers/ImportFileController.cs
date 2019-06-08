@@ -52,7 +52,7 @@ namespace PIMS3.Controllers
 
             if (importFile.IsRevenueData)
             {
-                processedVm = dataAccessComponent.SaveRevenue(importFile, _dbCtx);
+                processedVm = dataAccessComponent.SaveRevenue(importFile, _dbCtx, id);
 
                 // UI to interpret updated Vm attributes.
                 if (processedVm.RecordsSaved == 0)
