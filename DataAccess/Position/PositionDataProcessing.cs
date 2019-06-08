@@ -17,12 +17,9 @@ namespace PIMS3.DataAccess.Position
         }
         
 
-        public IQueryable<Data.Entities.Asset> GetPositionAssetByTickerAndAccount(string tickerSymbol, string assetAccount)
+        public IQueryable<Data.Entities.Asset> GetPositionAssetByTickerAndAccount(string tickerSymbol, string assetAccount, string currentInvestorId)
         {
-            // Temporary until security implemented.
-            var currentInvestorId = "511e12f1-5b3a-dfff-876a-e094bd47c677";
-
-            var assetInfo = _ctx.Position
+            IQueryable<Data.Entities.Asset> assetInfo = _ctx.Position
                                 .Where(p => p.PositionAsset.InvestorId == currentInvestorId &&
                                             p.PositionAsset.Profile.TickerSymbol == tickerSymbol &&
                                             p.AccountType.AccountTypeDesc.ToUpper() == assetAccount.ToUpper())
