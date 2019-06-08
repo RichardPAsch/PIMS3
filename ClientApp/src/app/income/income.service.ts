@@ -7,13 +7,17 @@ const baseUrl = "https://localhost:44328";
 @Injectable({ providedIn: 'root' })
 
 export class IncomeService {
-    
+
+    currentInvestorId: string;
+
     constructor(private http: HttpClient) {
+        let investor = JSON.parse(sessionStorage.getItem('currentInvestor'));
+        this.currentInvestorId = investor.id;
     }
 
     GetRevenue(yearsOfHx: number): Observable<string>
     {
-        let webApi = baseUrl + "/api/Income/" + yearsOfHx;
+        let webApi = baseUrl + "/api/Income/" + yearsOfHx + "/" + this.currentInvestorId;
         return this.http.get<any>(webApi);
     }
 

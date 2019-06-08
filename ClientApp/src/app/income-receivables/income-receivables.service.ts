@@ -17,11 +17,16 @@ const baseUrl = "https://localhost:44328";
 })
 export class IncomeReceivablesService {
 
-    constructor(private http: HttpClient) { }
+    currentInvestorId: string;
+
+    constructor(private http: HttpClient) {
+        let investor = JSON.parse(sessionStorage.getItem('currentInvestor')); 
+        this.currentInvestorId = investor.id;
+    }
 
     BuildIncomeReceivables(): Observable<string> {
 
-        let webApiUri = baseUrl + "/api/Income/GetMissingIncomeSchedule";
+        let webApiUri = baseUrl + "/api/Income/GetMissingIncomeSchedule/" + this.currentInvestorId;
         return this.http.get<string>(webApiUri);
     }
 
