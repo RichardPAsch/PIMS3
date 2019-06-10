@@ -12,10 +12,17 @@
         <div class='clearfix'></div>
         <div class='navbar-collapse collapse' [ngClass]='{ "in": isExpanded }'>
             <ul class='nav navbar-nav'>
-                <!--routerLinkActive :  Angular directive allowing for addition of a CSS class to an element when the link's route becomes active.-->
+                <!--routerLinkActive :  Angular directive allowing for addition of a CSS class to an element when the link's route becomes active.
+                    Note: Changes should also be reflected in 'app.module' - RouterModule.
+                 -->
                 <li [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
                     <a [routerLink]='["/"]' (click)='collapse(true)'>
                         <span class='glyphicon glyphicon-home'></span> Home - Login
+                    </a>
+                </li>
+                <li>
+                    <a [routerLink]='["/"]' (click)='logoutInvestor()'>
+                        <span class='glyphicon glyphicon-user'></span> Log out
                     </a>
                 </li>
                 <li [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
