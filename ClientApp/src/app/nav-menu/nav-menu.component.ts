@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthenticationService } from '../shared/authentication.service';
 
 
 @Component({
@@ -8,9 +9,11 @@ import { Router } from '@angular/router';
   styleUrls: ['./nav-menu.component.css']
 })
 export class NavMenuComponent {
-    constructor(private router: Router) { }
+    constructor(private router: Router, private authenticationSvc: AuthenticationService) {
+    }
 
-  isExpanded = false;
+    isExpanded = false;
+
 
   collapse(isLoginOrRegistrationOption : boolean = false) {
       if (!isLoginOrRegistrationOption && sessionStorage.length == 0) {
@@ -19,7 +22,15 @@ export class NavMenuComponent {
           return;
       } 
     this.isExpanded = false;
-  }
+    }
+
+
+    logoutInvestor() {
+        this.authenticationSvc.logout();
+        this.router.navigate(['/']);
+        return;
+    }
+
 
   toggle() {
     this.isExpanded = !this.isExpanded;
