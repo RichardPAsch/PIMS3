@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { GlobalsService } from '../shared/globals.service';
 
-
-const baseUrl = "https://localhost:44328";
 
 @Injectable({
   providedIn: 'root'
@@ -11,11 +10,15 @@ const baseUrl = "https://localhost:44328";
 
 export class IncomeSummaryService {
 
-    constructor(private http: HttpClient) { }
+    baseUrl: string;
+
+    constructor(private http: HttpClient, globalsSvc: GlobalsService) {
+        this.baseUrl = globalsSvc.pimsBaseUrl;
+    }
 
     BuildIncomeSummary(yearsBackDated: number): Observable<string> {
 
-        let webApi = baseUrl + "/api/Income/" + yearsBackDated + "/" + true;
+        let webApi = this.baseUrl + "/api/Income/" + yearsBackDated + "/" + true;
         return this.http.get<string>(webApi);
     }
 }

@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Investor } from '../shared/investor';
+import { GlobalsService } from '../shared/globals.service';
 
 
 /* ===== NOTES: =========
@@ -22,22 +23,25 @@ export class AuthenticationService {
 
     private currentInvestorSubject: BehaviorSubject<Investor>;
     public currentInvestor$: Observable<Investor>;
+    private baseUrl;
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, globalsSvc: GlobalsService) {
         //this.currentInvestorSubject = new BehaviorSubject<Investor>(JSON.parse(localStorage.getItem('currentInvestor')));
         this.currentInvestorSubject = new BehaviorSubject<Investor>(JSON.parse(sessionStorage.getItem('currentInvestor')));
         this.currentInvestor$ = this.currentInvestorSubject.asObservable();
+        this.baseUrl = globalsSvc.pimsBaseUrl;
     }
 
     public get currentInvestorValue(): Investor {
         return this.currentInvestorSubject.value;
     }
 
+
     login(loginName: string, Password: string): any {
 
-        const baseUrl = "https://localhost:44328";
+        //const baseUrl = "https://localhost:44328";
 
-        return this.http.post<any>(baseUrl + "/api/investor/authenticateInvestor", { loginName, Password })
+        return this.http.post<any>(this.baseUrl + "/api/investor/authenticateInvestor", { loginName, Password })
             .pipe(map(investor => {
                 // login successful if there's a jwt in the response.
                 if (investor && investor.token) {

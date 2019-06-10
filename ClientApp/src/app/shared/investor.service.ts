@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Investor } from '../shared/investor';
 import { Guid } from "guid-typescript";
+import { GlobalsService } from '../shared/globals.service';
 
-const baseUrl = "https://localhost:44328";
 
 /*  Notes:
     This investor service supplies a standard CRUD API for managing investors, and acts as the interface
@@ -15,12 +15,15 @@ const baseUrl = "https://localhost:44328";
 })
 
 export class InvestorService {
+    private baseUrl;
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient, globalsSvc: GlobalsService) {
+        this.baseUrl = globalsSvc.pimsBaseUrl;
+    }
 
     getAll() {
 
-        let webApiUri = baseUrl + "/api/Investor";
+        let webApiUri = this.baseUrl + "/api/Investor";
         return this.http.get<Investor[]>(webApiUri);
 
         // investigate: config.apiUrl ?
@@ -29,7 +32,7 @@ export class InvestorService {
 
     register(investor: Investor) {
         investor.investorId = Guid.create().toString();
-        let webApiUri = baseUrl + "/api/Investor/Register";
+        let webApiUri = this.baseUrl + "/api/Investor/Register";
         return this.http.post<Investor>(webApiUri, investor);
     }
 

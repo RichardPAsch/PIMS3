@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { catchError, map, tap,} from 'rxjs/operators';
 import { of } from 'rxjs/observable/of';
 import { MessageService } from '../message.service';
-
+import { GlobalsService } from '../shared/globals.service';
 
 
 let httpHeaders = new HttpHeaders()
@@ -21,16 +21,19 @@ const httpOptions = {
 // When you add a service provider to the root application injector, it’s available throughout the app.
 // Should always provide your service in the root injector unless there is a case where you want the service to be available
 // only if the consumer imports a particular @NgModule.
-@Injectable({providedIn: "root"})
-
+@Injectable(
+    { providedIn: "root" }
+)
 export class DataImportService {
 
     currentInvestorId: string;
+    baseUrl: string;
 
-    constructor(private http: HttpClient, @Inject('BASE_URL') private baseUrl: string, private messageService: MessageService) {
-        baseUrl = "https://localhost:44328";  // temp - conflicts with fetch-data's definition of baseUrl ?
+    constructor(private http: HttpClient, globalsSvc: GlobalsService, private messageService: MessageService) {
+        this.baseUrl = globalsSvc.pimsBaseUrl;
         let investor = JSON.parse(sessionStorage.getItem('currentInvestor')); 
         this.currentInvestorId = investor.id;
+        
     }
     
     /* All HttpClient methods return an RxJS Observable of something.
