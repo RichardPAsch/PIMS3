@@ -53,8 +53,9 @@ export class AuthenticationService {
 
     logout() {
 
-        // Remove user from session (or from 'localStorage' at a later point ?) storage to log user out.
+        // Remove user, via session storage key, from session (or from 'localStorage' at a later point ?) storage.
         sessionStorage.removeItem('currentInvestor');
+        alert("Log out successful for: \n" + this.currentInvestorSubject.value.firstName + " " + this.currentInvestorSubject.value.lastName);
         this.currentInvestorSubject.next(null);
     }
 
