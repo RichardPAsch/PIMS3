@@ -1,12 +1,13 @@
-import { enableProdMode } from '@angular/core';
+//import { enableProdMode } from '@angular/core';
+//import { environment } from './environments/environment';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-
 import { AppModule } from './app/app.module';
-import { environment } from './environments/environment';
+import { GlobalsService } from '../src/app/shared/globals.service';
+
 
 export function getBaseUrl() {
-    return "https://localhost:44328/";  // temp: port # will change
-    //return document.getElementsByTagName('base')[0].href;
+    let globalsSvc = new GlobalsService();
+    return globalsSvc.pimsBaseUrl;
 }
 
 const providers = [
@@ -16,9 +17,11 @@ const providers = [
     }
 ];
 
-if (environment.production) {
-  enableProdMode();
-}
+// Deferred.
+//if (environment.production) {
+//  enableProdMode();
+//}
 
+// Re-evaluate ?
 platformBrowserDynamic(providers).bootstrapModule(AppModule)
   .catch(err => console.log(err));
