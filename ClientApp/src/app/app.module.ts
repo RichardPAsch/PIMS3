@@ -25,6 +25,7 @@ import { InvestorService } from '../app/shared/investor.service';
 import { AuthorizationGuard } from '../app/authorization/authorization.guard';
 import { JwtInterceptor } from '../app/shared/jwt.interceptor';
 import { HttpErrorInterceptor } from '../app/shared/http.error.interceptor';
+import { GlobalsService } from '../app/shared/globals.service';
 
 
 /* Notes:
@@ -85,9 +86,12 @@ import { HttpErrorInterceptor } from '../app/shared/http.error.interceptor';
      Angular has several built in injection tokens that enable hooking into different parts of the framework and application lifecycle
      events. The 'multi: true' argument option tells Angular to ADD the provider to the collection of HTTP_INTERCEPTORS, rather than
      replacing the collection with a single provider. This allows adding multiple HTTP interceptors to the request pipeline for handling different tasks.
+
+     Providing services on a component level leads to multiple service instances ( one per component ), therefore, we'll declaring
+     at the module level.
     */
     providers: [ DataImportService, MessageService, ProfileService,
-                 AuthenticationService, InvestorService,
+                 AuthenticationService, InvestorService, GlobalsService,
                { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
                { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true }
     ], 
