@@ -62,7 +62,8 @@ import { HttpErrorInterceptor } from '../app/shared/http.error.interceptor';
         // in the array are run by Angular to decide if the route can be "activated". If all of the route
         // guards return true, then navigation is allowed to continue, otherwise, navigation is cancelled.
         { path: '', component: HomeComponent, pathMatch: 'full' }, // default Login - Home page.
-        { path: 'income-projections', component: IncomeProjectionsComponent/*, canActivate: [AuthorizationGuard]*/ },
+        { path: '', component: HomeComponent, pathMatch: 'full' }, // log out
+        { path: 'income-projections', component: IncomeProjectionsComponent, canActivate: [AuthorizationGuard] },
         { path: 'registration', component: RegistrationComponent },
         { path: 'income-summary', component: IncomeSummaryComponent, canActivate: [AuthorizationGuard] },
         { path: 'income-receivables', component: IncomeReceivablesComponent, canActivate: [AuthorizationGuard] },  // 'income due'
