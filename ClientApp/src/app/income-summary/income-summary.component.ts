@@ -18,6 +18,7 @@ export class IncomeSummaryComponent implements OnInit {
     public currentYearHeading: number = this.currentYear;
     public ytdIncomeSummary: IncomeSummary[];
     public incomeSummaryTotal: any;
+    
 
 
     constructor(private incomeSummarySvc: IncomeSummaryService)
