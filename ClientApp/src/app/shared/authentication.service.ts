@@ -6,6 +6,7 @@ import { Investor } from '../shared/investor';
 import { GlobalsService } from '../shared/globals.service';
 
 
+
 /* ===== NOTES: =========
  * This authentication service handles investor login/logout of PIMS; during login, it posts the users' credentials to the api,
  * and checks the response for a JWT token. If there is one, it means authentication was successful, and the investor details,
@@ -25,6 +26,7 @@ export class AuthenticationService {
     public currentInvestor$: Observable<Investor>;
     private baseUrl;
 
+
     constructor(private http: HttpClient, globalsSvc: GlobalsService) {
         //this.currentInvestorSubject = new BehaviorSubject<Investor>(JSON.parse(localStorage.getItem('currentInvestor')));
         this.currentInvestorSubject = new BehaviorSubject<Investor>(JSON.parse(sessionStorage.getItem('currentInvestor')));
@@ -36,10 +38,8 @@ export class AuthenticationService {
         return this.currentInvestorSubject.value;
     }
 
-
+   
     login(loginName: string, Password: string): any {
-
-        //const baseUrl = "https://localhost:44328";
 
         return this.http.post<any>(this.baseUrl + "/api/investor/authenticateInvestor", { loginName, Password })
             .pipe(map(investor => {
@@ -59,7 +59,7 @@ export class AuthenticationService {
 
         // Remove user, via session storage key, from session (or from 'localStorage' at a later point ?) storage.
         sessionStorage.removeItem('currentInvestor');
-        alert("Log out successful for: \n" + this.currentInvestorSubject.value.firstName + " " + this.currentInvestorSubject.value.lastName);
+        //alert("Log out successful for: \n" + this.currentInvestorSubject.value.firstName + " " + this.currentInvestorSubject.value.lastName);
         this.currentInvestorSubject.next(null);
     }
 
