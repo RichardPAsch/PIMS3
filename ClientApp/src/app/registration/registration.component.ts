@@ -67,8 +67,8 @@ export class RegistrationComponent implements OnInit {
                 //this.alertService.success('Registration successful', true);  // TODO.
                 this.router.navigate(['/']);
             },
-            error => {
-                alert('Error registering for investor: \n' + this.registrationForm.value.investorName + "\ndue to " + error.error);
+            error => {  // TODO: error = undefined here.
+                alert('Unable to complete registration. \nPossible duplicate login name or system error, retry using an alternative login.');
                 //this.alertService.error(error);  // TODO.
                 this.loading = false;
             });
