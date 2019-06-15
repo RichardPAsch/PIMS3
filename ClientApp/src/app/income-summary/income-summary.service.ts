@@ -11,14 +11,17 @@ import { GlobalsService } from '../shared/globals.service';
 export class IncomeSummaryService {
 
     baseUrl: string;
+    currentInvestorId: string;
 
     constructor(private http: HttpClient, globalsSvc: GlobalsService) {
         this.baseUrl = globalsSvc.pimsBaseUrl;
+        let investor = JSON.parse(sessionStorage.getItem('currentInvestor')); // parse string to object
+        this.currentInvestorId = investor.id;
     }
 
     BuildIncomeSummary(yearsBackDated: number): Observable<string> {
 
-        let webApi = this.baseUrl + "/api/Income/" + yearsBackDated + "/" + true;
+        let webApi = this.baseUrl + "/api/Income/" + yearsBackDated + "/" + true + "/" + this.currentInvestorId;
         return this.http.get<string>(webApi);
     }
 }
