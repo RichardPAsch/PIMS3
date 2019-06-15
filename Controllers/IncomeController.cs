@@ -13,8 +13,6 @@ using PIMS3.DataAccess.IncomeData;
 using Microsoft.AspNetCore.Authorization;
 
 
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace PIMS3.Controllers
 {
     // Using token replacement in route templates ([controller], [action], [area]).
@@ -40,16 +38,15 @@ namespace PIMS3.Controllers
 
 
         // Using attribute routing with Http[Verb] attributes.
-        [HttpGet("{yearsToBackDate:int}/{isRevenueSummary:bool}")]
-        public IEnumerable<YtdRevenueSummaryVm> GetRevenueSummary(int yearsToBackDate, bool isRevenueSummary)
+        [HttpGet("{yearsToBackDate:int}/{isRevenueSummary:bool}/{Id}")]
+        public IEnumerable<YtdRevenueSummaryVm> GetRevenueSummary(int yearsToBackDate, bool isRevenueSummary, string Id)
         {
             // isRevenueSummary param used only for URL routing here vs. GetRevenue().
-            // AutoMapper not needed; summary data is read-only.
             IEnumerable<Income> incomeData;
             try
             {
                 _logger.LogInformation("Attempting GetRevenueSummary().");
-                incomeData = _repo.GetRevenueSummaryForYear(yearsToBackDate);
+                incomeData = _repo.GetRevenueSummaryForYear(yearsToBackDate, Id);
                 var ytdRevenueSummary = CalculateRevenueTotals(incomeData.AsQueryable());
                 _incomeCount = new decimal[ytdRevenueSummary.Count()];
                 ytdRevenueSummary.ToList().ForEach(CalculateAverages);
