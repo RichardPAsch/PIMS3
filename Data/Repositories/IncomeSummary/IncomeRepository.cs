@@ -26,9 +26,8 @@ namespace PIMS3.Data.Repositories.IncomeSummary
         }
 
 
-        public IEnumerable<Income> GetRevenueSummaryForYear(int yearsBackDated)
+        public IEnumerable<Income> GetRevenueSummaryForYear(int yearsBackDated, string investorId)
         {
-            var tempInvestor = "rpasch@rpclassics.net"; // TODO: use Identity - to be implemented
             var fromDate = new DateTime(DateTime.UtcNow.AddYears(-yearsBackDated).Year, 1, 1);
             var toDate = new DateTime(DateTime.UtcNow.AddYears(-yearsBackDated).Year, 12, 31);
 
@@ -36,7 +35,7 @@ namespace PIMS3.Data.Repositories.IncomeSummary
             {
                 _logger.LogInformation("GetRevenue() called.");
                 var positions = _ctx.Asset
-                               .Where(a => a.InvestorId == _commonSvc.GetInvestorIdFromInvestor(tempInvestor))
+                               .Where(a => a.InvestorId == investorId) 
                                .AsQueryable()
                                .SelectMany(a => a.Positions);
                 var revenue = positions.SelectMany(p => p.Incomes)
