@@ -59,7 +59,7 @@ namespace PIMS3.DataAccess.IncomeData
 
         public int UpdateRevenue(IncomeForEditVm[] editedRevenue)
         {
-            var revenueToUpdateListing = new List<Data.Entities.Income>();
+            var revenueToUpdateListing = new List<Income>();
             int updateCount = 0;
 
             // Get existing Income for pending updates.
