@@ -71,7 +71,7 @@ namespace PIMS3.Controllers
             // Qualifying Positions will drive processing in 'PositionProcessing'.
             var positionBusLogicComponent = new PositionProcessing(_ctx);
 
-            IQueryable<IncomeReceivablesVm> positionsDuePymt = positionBusLogicComponent.GetPositionsWithIncomeDue(investorId); // Ok.
+            IQueryable<IncomeReceivablesVm> positionsDuePymt = positionBusLogicComponent.GetPositionsWithIncomeDue(investorId); 
 
             return positionsDuePymt;
         }
@@ -96,80 +96,81 @@ namespace PIMS3.Controllers
 
 
         #region Helpers
-        // TODO: Move to busLogic compenent !
-        private static IEnumerable<YtdRevenueSummaryVm> CalculateRevenueTotals(IQueryable<Income> recvdIncome)
-            {
-                IList<YtdRevenueSummaryVm> averages = new List<YtdRevenueSummaryVm>();
-                var currentMonth = 0;
-                var total = 0M;
-                var counter = 0;
 
-                foreach (var income in recvdIncome)
+            // TODO: Move to busLogic compenent !
+            private static IEnumerable<YtdRevenueSummaryVm> CalculateRevenueTotals(IQueryable<Income> recvdIncome)
                 {
-                    if (currentMonth != DateTime.Parse(income.DateRecvd.ToString(CultureInfo.InvariantCulture)).Month)
+                    IList<YtdRevenueSummaryVm> averages = new List<YtdRevenueSummaryVm>();
+                    var currentMonth = 0;
+                    var total = 0M;
+                    var counter = 0;
+
+                    foreach (var income in recvdIncome)
                     {
-                        // Last record for currently processed month.
-                        if (total > 0)
+                        if (currentMonth != DateTime.Parse(income.DateRecvd.ToString(CultureInfo.InvariantCulture)).Month)
+                        {
+                            // Last record for currently processed month.
+                            if (total > 0)
+                            {
+                                averages.Add(new YtdRevenueSummaryVm
+                                {
+                                    AmountRecvd = total,
+                                    MonthRecvd = currentMonth
+                                });
+                                total = 0M;
+                            }
+                        }
+
+                        currentMonth = DateTime.Parse(income.DateRecvd.ToString(CultureInfo.InvariantCulture)).Month;
+                        total += income.AmountRecvd;
+                        counter++;
+
+                        // Add last record.
+                        if (counter == recvdIncome.Count())
                         {
                             averages.Add(new YtdRevenueSummaryVm
                             {
                                 AmountRecvd = total,
-                                MonthRecvd = currentMonth
+                                MonthRecvd = DateTime.Parse(income.DateRecvd.ToString(CultureInfo.InvariantCulture)).Month
                             });
-                            total = 0M;
                         }
+
                     }
 
-                    currentMonth = DateTime.Parse(income.DateRecvd.ToString(CultureInfo.InvariantCulture)).Month;
-                    total += income.AmountRecvd;
-                    counter++;
+                    return averages.AsQueryable();
+                }
 
-                    // Add last record.
-                    if (counter == recvdIncome.Count())
+            private void CalculateAverages(YtdRevenueSummaryVm item)
+                {
+                    // YTD & 3Mos rolling averages.
+                    _runningYtdTotal += item.AmountRecvd;
+                    _incomeCount[_counter - 1] = item.AmountRecvd;
+                    item.YtdAverage = Math.Round(_runningYtdTotal / _counter, 2);
+                    if (_counter >= 3)
                     {
-                        averages.Add(new YtdRevenueSummaryVm
-                        {
-                            AmountRecvd = total,
-                            MonthRecvd = DateTime.Parse(income.DateRecvd.ToString(CultureInfo.InvariantCulture)).Month
-                        });
+                        item.Rolling3MonthAverage = Math.Round((item.AmountRecvd + _incomeCount[_counter - 2] + _incomeCount[_counter - 3]) / 3, 2);
                     }
-
+                    _tempListing.Add(item);
+                    _counter += 1;
                 }
 
-                return averages.AsQueryable();
-            }
-
-        private void CalculateAverages(YtdRevenueSummaryVm item)
+            private IncomeForEditVm[] MapToVm(dynamic sourceData)
             {
-                // YTD & 3Mos rolling averages.
-                _runningYtdTotal += item.AmountRecvd;
-                _incomeCount[_counter - 1] = item.AmountRecvd;
-                item.YtdAverage = Math.Round(_runningYtdTotal / _counter, 2);
-                if (_counter >= 3)
+                // Mapping only necessary fields.
+                var listing = new List<IncomeForEditVm>();
+
+                foreach(var item in sourceData)
                 {
-                    item.Rolling3MonthAverage = Math.Round((item.AmountRecvd + _incomeCount[_counter - 2] + _incomeCount[_counter - 3]) / 3, 2);
+                    listing.Add(new IncomeForEditVm
+                    {
+                        IncomeId = item.incomeId,
+                        DateRecvd = item.dateRecvd,
+                        AmountReceived = item.amountRecvd
+                    });
                 }
-                _tempListing.Add(item);
-                _counter += 1;
+
+                return listing.ToArray();
             }
-
-        private IncomeForEditVm[] MapToVm(dynamic sourceData)
-        {
-            // Mapping only necessary fields.
-            var listing = new List<IncomeForEditVm>();
-
-            foreach(var item in sourceData)
-            {
-                listing.Add(new IncomeForEditVm
-                {
-                    IncomeId = item.incomeId,
-                    DateRecvd = item.dateRecvd,
-                    AmountReceived = item.amountRecvd
-                });
-            }
-
-            return listing.ToArray();
-        }
 
         #endregion
 
