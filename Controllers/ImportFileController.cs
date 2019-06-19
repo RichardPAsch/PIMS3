@@ -24,9 +24,10 @@ namespace PIMS3.Controllers
     // Follow: https://docs.microsoft.com/en-us/aspnet/core/web-api/?view=aspnetcore-2.1
     //         https://docs.microsoft.com/en-us/ef/core/
 
+   
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ImportFileController : ControllerBase
     {
         private static DataImportVm processedVm;
@@ -39,20 +40,18 @@ namespace PIMS3.Controllers
         }
 
 
-        // There are multiple return/response types and paths in this action.
-        [HttpPost("[action]/{id}")]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(200, Type = typeof(DataImportVm))]
-        public ActionResult<DataImportVm> ProcessImportFile([FromBody] DataImportVm importFile, string id, bool isRevenue = true)
+        [HttpPost("{Id}")]
+        public ActionResult<DataImportVm> ProcessImportFile([FromBody] DataImportVm importFile, string Id, bool isRevenue = true)
         {
             if(!ModelState.IsValid)
                 return BadRequest("Invalid model state: " + ModelState);
 
             var dataAccessComponent = new ImportFileDataProcessing();
 
+
             if (importFile.IsRevenueData)
             {
-                processedVm = dataAccessComponent.SaveRevenue(importFile, _dbCtx, id);
+                processedVm = dataAccessComponent.SaveRevenue(importFile, _dbCtx, Id);
 
                 // UI to interpret updated Vm attributes.
                 if (processedVm.RecordsSaved == 0)
@@ -65,9 +64,9 @@ namespace PIMS3.Controllers
 
                 return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, amount = processedVm.AmountSaved }, processedVm);
             }
-            else
+            else  // aka 'Positions' processing.
             {
-                processedVm = dataAccessComponent.SaveAssets(importFile, _dbCtx, id);
+                processedVm = dataAccessComponent.SaveAssets(importFile, _dbCtx, Id);
                 if (processedVm == null)
                     return BadRequest(new { exceptionMessage = "Error saving new Position(s).", isRevenueData = false });
 
@@ -78,63 +77,8 @@ namespace PIMS3.Controllers
                 return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, savedTickers = processedVm.MiscMessage }, processedVm);
             }
 
-
-
-            #region Old PIMS code
-
-            /*  
-           var requestUri = Request.RequestUri.AbsoluteUri;
-
-                      _serverBaseUri = Utilities.GetWebServerBaseUri(requestUri);
-
-                      // Verify investor login via email addr.
-                      _currentInvestor = _identityService.CurrentUser;
-                      if (_currentInvestor == null)
-                      {
-                          //return BadRequest("Import aborted; Investor login required."); 
-                          // un-comment during Fiddler testing
-                          // TODO: in Production, exit if not logged in.
-                          _currentInvestor = "rpasch@rpclassics.net";
-                      }
-
-                      if (importFile.IsRevenueData)
-                      {
-                          var assetCtrl = new AssetController(_repositoryAsset, _identityService, _repositoryInvestor);
-                          var investorId = Utilities.GetInvestorId(_repositoryInvestor, _currentInvestor);
-                          _existingInvestorAssets = await assetCtrl.GetByInvestorAllAssets(investorId) as OkNegotiatedContentResult<List<AssetIncomeVm>>;
-                          var portfolioRevenueToBeInserted = ParseRevenueSpreadsheet(importFileUrl);
-                          if (portfolioRevenueToBeInserted == null)
-                              return BadRequest("Invalid XLS data submitted.");
-
-                          var revenueToBeInserted = portfolioRevenueToBeInserted as Income[] ?? portfolioRevenueToBeInserted.ToArray();
-                          if (!revenueToBeInserted.Any())
-                              return BadRequest("No income data saved; please check ticker symbol(s), amount(s), and/or account(s) for validity.");
-
-                          dataPersistenceResults = PersistIncomeData(revenueToBeInserted);
-                      }
-                      else
-                      {
-                          var portfolioListing = ParsePortfolioSpreadsheet(importFileUrl);
-                          if (portfolioListing == null)
-                              return BadRequest("Error processing Position(s) in one or more accounts.");
-
-                          var portfolioAssetsToBeInserted = portfolioListing as AssetCreationVm[] ?? portfolioListing.ToArray();
-                          if (!portfolioAssetsToBeInserted.Any())
-                              return BadRequest("Invalid XLS data, duplicate position-account ?");
-
-                          dataPersistenceResults = PersistPortfolioData(portfolioAssetsToBeInserted);
-                      }
-
-                      var responseVm = new HttpResponseVm { ResponseMsg = dataPersistenceResults };
-                      return Ok(responseVm);
-                  }
-             */
-            //return Ok();
-            #endregion
         }
 
-
-
-
     }
+
 }
