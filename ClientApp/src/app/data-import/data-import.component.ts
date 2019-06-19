@@ -87,13 +87,12 @@ export class DataImportComponent {
                                 alert('Error saving import data (network?) due to: ' + err.error.message);
                             } else {
                                 //Backend returns unsuccessful response codes such as 404, 500 etc.
-                                alert('Error saving Income import data (server?) with status of : ' + err.status);
+                                alert('Error saving Income import data (server?) with status of : ' + err.message);
                             }
                         });
                 } else {
                     // New Position import data.
                     // sample: C:\Development\VS2017\PIMS3_TestData\Asset_Files\Portfolio_Positions_Dec_21_Test1_MissingTicker.xlsx
-                    alert("Processing new Position data...");
                     this.svc.postImportFileData(this.importFileVm)
                         .subscribe(resp => {
                             if (!resp.isRevenueData && resp.recordsSaved > 0) {
@@ -107,7 +106,7 @@ export class DataImportComponent {
                                 alert('Error saving import data (network?) due to: ' + err.error.message);
                             } else {
                                 //Backend returns unsuccessful response codes such as 404, 500 etc.
-                                alert('Error saving Position import data (server?) with status of : ' + err.status);
+                                alert('Error saving Position import data (server?) due to :\n ' + err.error.message);
                             }
                         });
                 }
