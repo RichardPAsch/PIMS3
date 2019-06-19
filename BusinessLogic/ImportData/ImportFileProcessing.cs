@@ -180,8 +180,10 @@ namespace PIMS3.BusinessLogic.ImportData
                         var positionDataAccessComponent = new PositionDataProcessing(_ctx);
 
                         // Existing Position-Account implies Profile existence.
-                        IQueryable<Asset> positionAccount = positionDataAccessComponent.GetPositionAssetByTickerAndAccount(enumerableCells.ElementAt(1).Trim(), enumerableCells.ElementAt(0).Trim(), id);
-                        if (!positionAccount.Any())  // No Position-Account
+                        IQueryable<Asset> positionAccount = positionDataAccessComponent.GetPositionAssetByTickerAndAccount(enumerableCells.ElementAt(1).Trim(), 
+                                                                                                                           enumerableCells.ElementAt(0).Trim(), 
+                                                                                                                           id);
+                        if (!positionAccount.Any())  // No Position-Account found.
                         {
                             IQueryable<Profile> profilePersisted = null;
 
@@ -214,7 +216,7 @@ namespace PIMS3.BusinessLogic.ImportData
                                     {
                                         AssetId = Guid.NewGuid().ToString(),  
                                         AssetClassId = existingAssetClassId,  
-                                        InvestorId = id, //INVESTORID,  
+                                        InvestorId = id,   
                                         ProfileId = existingProfileId,  
                                         LastUpdate = DateTime.Now, 
                                         Positions = positionsToBeSaved  
