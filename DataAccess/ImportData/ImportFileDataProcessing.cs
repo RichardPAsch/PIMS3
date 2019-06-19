@@ -7,6 +7,7 @@ using System.Linq;
 using PIMS3.DataAccess.Profile;
 using PIMS3.DataAccess.Position;
 
+
 namespace PIMS3.DataAccess.ImportData
 {
     // Mimics/replaces Repository/UoW pattern, as EF Core already implements a Repository/UoW pattern internally.
@@ -90,11 +91,11 @@ namespace PIMS3.DataAccess.ImportData
                 }
                 else
                 {
-                    var profilesToSave = new List<Data.Entities.Profile>();
-                    var assetsToSave = new List<Data.Entities.Asset>();
-                    var positionsToSave = new List<Data.Entities.Position>();
+                    List<Data.Entities.Profile> profilesToSave = new List<Data.Entities.Profile>();
+                    List<Data.Entities.Asset> assetsToSave = new List<Data.Entities.Asset>();
+                    List<Data.Entities.Position> positionsToSave = new List<Data.Entities.Position>();
 
-                    for(var vmRecordIdx = 0; vmRecordIdx < assetListingToSave.Count(); vmRecordIdx++)
+                    for(int vmRecordIdx = 0; vmRecordIdx < assetListingToSave.Count(); vmRecordIdx++)
                     {
                         if (assetListingToSave.ElementAt(vmRecordIdx).Profile != null)
                             profilesToSave.Add(MapVmToEntities(assetListingToSave.ElementAt(vmRecordIdx).Profile) as Data.Entities.Profile);
@@ -254,95 +255,6 @@ namespace PIMS3.DataAccess.ImportData
             }
             return idsForUpdating.ToArray();
         }
-
-
-
-
-        /*  Old Code
-            public IQueryable<Investor> RetreiveAll() {
-            var investorQuery = (from investor in _nhSession.Query<Investor>() select investor);
-            return investorQuery.AsQueryable();
-             }
-
-
-            public Investor RetreiveById(Guid idGuid) {
-                return _nhSession.Get<Investor>(idGuid);
-            }
-
-
-            public IQueryable<Investor> Retreive(Expression<Func<Investor, bool>> predicate) {
-                return RetreiveAll().Where(predicate);
-            }
-
-             commented after tfr from PIMS
-            public bool SaveOrUpdateProfile(Profile newEntity)
-            {
-                //using (var trx = _nhSession.BeginTransaction()) {
-                //    try {
-                //        _nhSession.Save(newEntity);
-                //        trx.Commit();
-                //    }
-                //    catch (Exception ex) {
-                //        return false;
-                //    }
-
-                return true;
-                //}
-            }
-
-             commented after tfr from PIMS
-            public bool SavePositions(Position[] newPositions)
-            {
-                //using (var trx = _nhSession.BeginTransaction()) {
-                //    try {
-                //        _nhSession.Save(newEntity);
-                //        trx.Commit();
-                //    }
-                //    catch (Exception ex) {
-                //        return false;
-                //    }
-
-                return true;
-                //}
-            }
-            
-            public bool Update(Investor entity, object id) {
-                using (var trx = _nhSession.BeginTransaction()) {
-                    try {
-                        _nhSession.Merge(entity);
-                        trx.Commit();
-                    }
-                    catch (Exception) {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
-
-            public bool Delete(Guid cGuid) {
-
-                var deleteOk = true;
-                var accountTypeToDelete = RetreiveById(cGuid);
-
-                if (accountTypeToDelete == null)
-                    return false;
-
-
-                using (var trx = _nhSession.BeginTransaction()) {
-                    try {
-                        _nhSession.Delete(accountTypeToDelete);
-                        trx.Commit();
-                    }
-                    catch (Exception) {
-                        deleteOk = false;
-                    }
-                }
-
-                return deleteOk;
-            }
-        */
 
 
     }
