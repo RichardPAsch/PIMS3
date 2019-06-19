@@ -10,6 +10,7 @@ import { GlobalsService } from '../shared/globals.service';
 
 let httpHeaders = new HttpHeaders()
     .set('Content-Type', 'application/json')
+    .set('Authorization', 'this.basic')
     .set('Cache-Control', 'no-cache');
 
 const httpOptions = {
@@ -26,14 +27,13 @@ const httpOptions = {
 )
 export class DataImportService {
 
-    currentInvestorId: string;
+    Id: string;
     baseUrl: string;
 
     constructor(private http: HttpClient, globalsSvc: GlobalsService, private messageService: MessageService) {
         this.baseUrl = globalsSvc.pimsBaseUrl;
-        let investor = JSON.parse(sessionStorage.getItem('currentInvestor')); 
-        this.currentInvestorId = investor.id;
-        
+        let investor = JSON.parse(sessionStorage.getItem('currentInvestor'));
+        this.Id = investor.id;
     }
     
     /* All HttpClient methods return an RxJS Observable of something.
@@ -54,10 +54,16 @@ export class DataImportService {
         // The catchError() operator intercepts an Observable that failed, & passes the error to an error handler.
         // RxJS 'tap' operator (callback) taps/intercepts into the flow of observable values, LOOKING at their value(s) only & passing them along the chain.
         // Returned 'DataImportVm' - will contain results of processing.
-        let fullUrl = this.baseUrl + 'api/ImportFile/ProcessImportFile' + '/' + this.currentInvestorId;
+
+        let fullUrl = this.baseUrl + '/api/ImportFile/' + this.Id; 
         return this.http.post<DataImportVm>(fullUrl, importFileToProcess, httpOptions)
             .pipe(
-                tap((processedResults: DataImportVm) => this.log("processed count of " + processedResults.recordsSaved + " XLSX recs totaling $" + processedResults.amountSaved + " for tickers: " + processedResults.miscMessage)),
+                tap((processedResults: DataImportVm) => this.log("processed count of "
+                                                                    + processedResults.recordsSaved
+                                                                    + " XLSX recs totaling $"
+                                                                    + processedResults.amountSaved
+                                                                    + " for tickers: "
+                                                                    + processedResults.miscMessage)),
                 catchError(this.handleError<DataImportVm>('postImportFileData'))
         );
     }
@@ -72,12 +78,13 @@ export class DataImportService {
      */
     private handleError<T>(operation = 'operation', result?: T) {
 
-        if (operation == "'postImportFileData") {
+        if (operation == "postImportFileData") {
             var debugVar = result;
             
         }
 
         return (error: any): Observable<T> => {
+
             if (error.error.exceptionTickers.length > 0 && error.error.isRevenueData == true) {
                 alert("Unable to save income, due to the following invalid and/or duplicate submitted Position(s) : \n" + error.error.exceptionTickers);
                 this.log("Missing:" + error.error.exceptionTickers + " at: " + error.url);
@@ -88,7 +95,6 @@ export class DataImportService {
                 alert("Unable to fetch Profile data for: \n" + error.error.exceptionTickers + " \nCheck ticker validity, or enter Profile manually.");
                 this.log("Error saving Position data for: " + error.error.exceptionTickers + " at: " + error.url);
             }
-            
 
             // TODO: send the error to remote logging infrastructure
             //console.error(error); // log to console instead
@@ -105,6 +111,22 @@ export class DataImportService {
     private log(message: string) {
         this.messageService.add(`DataImportService: ${message}`);
     }
+
+
+    /* 6.17.19 Test data:
+
+            C:\Development\VS2017\PIMS3_Revenue\2019JUN_Revenue_Brahms_Test.xlsx
+
+            {
+              "amountSaved": 0,
+              "exceptionTickers": "",
+              "importFilePath": ""C:\Development\VS2017\PIMS3_Revenue\2019JUN_Revenue_Brahms_Test.xlsx",
+              "isRevenueData": true,
+              "miscMessage": "",
+              "recordsSaved": 0
+            }
+
+    */
 
    
 
