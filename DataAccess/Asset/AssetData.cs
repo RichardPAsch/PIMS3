@@ -13,18 +13,11 @@ namespace PIMS3.DataAccess.Asset
             _ctx = ctx;
         }
 
-        // Needed ?
-        //public AssetData()
-        //{
-        //}
-
-
+      
         public IQueryable<string> FetchPositionId(string investorId, string tickerSymbol, string account)
         {
             if (_ctx == null)
-            {
                 return null;
-            }
             else
             {
                 return _ctx.Asset.Where(a => a.InvestorId == investorId.Trim() && a.Profile.TickerSymbol == tickerSymbol.Trim())
