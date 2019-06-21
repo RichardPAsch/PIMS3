@@ -31,7 +31,7 @@ namespace PIMS3.DataAccess.ImportData
 
         public DataImportVm SaveRevenue(DataImportVm importVmToUpdate, PIMS3Context _ctx, string investorId)
         {
-            var busLayerComponent = new ImportFileProcessing(importVmToUpdate, _ctx);
+            ImportFileProcessing busLayerComponent = new ImportFileProcessing(importVmToUpdate, _ctx, null);
 
             IEnumerable<Data.Entities.Income> revenueListingToSave;
 
@@ -77,7 +77,7 @@ namespace PIMS3.DataAccess.ImportData
 
         public DataImportVm SaveAssets(DataImportVm importVmToSave, PIMS3Context _ctx, string id)
         {
-            ImportFileProcessing busLogicComponent = new ImportFileProcessing(importVmToSave, _ctx);
+            ImportFileProcessing busLogicComponent = new ImportFileProcessing(importVmToSave, _ctx, null);
 
             if (busLogicComponent.ValidateVm())
             {
