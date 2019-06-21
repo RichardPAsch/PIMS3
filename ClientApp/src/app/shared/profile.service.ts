@@ -31,10 +31,9 @@ export class ProfileService {
     }
 
 
-    getProfileDataViaDb(ticker: string): Observable<boolean> {
+    getProfileDataViaDb(ticker: string, loginName: string): Observable<boolean> {
 
-        let webApiUri = this.baseUrl + "/api/Profile/" + ticker + "/" + true;
-
+        let webApiUri = this.baseUrl + "/api/Profile/" + ticker + "/" + true + "/" + loginName;
         return this.http.get<any>(webApiUri);
     }
 
@@ -51,6 +50,7 @@ export class ProfileService {
         let webApiUri = this.baseUrl + "/api/Profile";
         return this.http.put<boolean>(webApiUri, partialProfileUpdate);
     }
+
 
     saveNewProfile(newProfile: Profile): Observable<boolean> {
 
