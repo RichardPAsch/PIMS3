@@ -30,8 +30,8 @@ export class HomeComponent implements OnInit {
     submitted = false;
     returnUrl: string;
     loginForm = new FormGroup({
-        investorName: new FormControl('rpasch@rpclassics.net', [Validators.required]),  // ** TEMPORARY ONLY! **
-        password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+        investorName: new FormControl('jbrahms@gmail.com', [Validators.required]), 
+        password: new FormControl('classical1', [Validators.required, Validators.minLength(6)]),
     });
     investorName: string;
 

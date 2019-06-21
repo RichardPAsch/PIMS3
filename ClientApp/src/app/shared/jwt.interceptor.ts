@@ -10,12 +10,12 @@ import { AuthenticationService } from '../shared/authentication.service';
 export class JwtInterceptor implements HttpInterceptor {
 
     /*  Jason Web Token interceptor notes:
-        Allows for intercepting HTTP requests before being sent to an API, and can be used to modify requests
-        before they are sent, as well as handling/transforming responses. The interceptor can return a response directly when it's done,
-        or pass control to the next handler in the chain by calling next.handle(request). The last handler in the chain is
+        Intercepts all HTTP requests before being sent to an API, and can be used to modify requests
+        before they are sent, as well as handling/transforming responses. The interceptor can return a response directly when it's finished,
+        or it can pass control to the next handler in the chain by calling next.handle(request). The last handler in the chain is
         the built-in Angular 'HttpBackend', which sends the request via the browser to the API.
 
-        * The Interceptor adds an HTTP Authorization header with a JWT to headers of all requests for authenticated users. *
+        * The Interceptor adds an HTTP Authorization header (with a JWT) to headers of all requests for authenticated users. *
     */
 
     constructor(private AuthenticationSvc: AuthenticationService) { }
