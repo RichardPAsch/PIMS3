@@ -16,7 +16,11 @@ import { Pims3Validations } from '../shared/pims3-validations';
 
 export class ProfileComponent implements OnInit {
 
-    constructor(private profileSvc: ProfileService) { }
+    constructor(private profileSvc: ProfileService) {
+        this.investor = JSON.parse(sessionStorage.getItem('currentInvestor')); 
+    }
+
+    investor: any;
     date1 = new Date();
     currentDateTime: string;
     isReadOnly: boolean = true;
@@ -83,9 +87,11 @@ export class ProfileComponent implements OnInit {
         // Obtain dividend 'frequency' & 'months paid' calculations via parsing of 12 month pricing/dividend history.
         let dividendData: any = this.profileSvc.getProfileDividendInfo(this.assetProfileForm.controls["ticker"].value);
 
-        // Using forkJoin(), rather than subscribing x2, in obtaining a single Observable array for all needed data.
+        // Using forkJoin(), rather than subscribing x2, in obtaining a single Observable array containing all combined needed data.
         let combined = forkJoin(profileData, dividendData);
 
+        // If no Profile info found for entered ticker, an 'error' condition will be generated upon subscribing, thus prompting the investor
+        // for creation of a custom Profile.
         combined.subscribe(profileAndDivInfoArr => {
             let profileElement: any = profileAndDivInfoArr[0];
             // Scenario may arise where we have a valid ticker, but with incomplete or non-existent pricing info: (profileAndDivInfoArr[1]).
@@ -108,31 +114,31 @@ export class ProfileComponent implements OnInit {
             this.btnUpdateProfileIsDisabled = true;
             this.isReadOnlyPayMonthsAndDay = false;
         },
-            (apiErr: HttpErrorResponse) => {
-            if (this.assetProfileForm.controls["ticker"].value == "") {
-                alert("A ticker symbol entry is required.")
-                this.btnGetProfileIsDisabled = true;
-                return;
-            }
-
-            let isNewProfile = confirm("No data found via web for: \n" + this.assetProfileForm.controls["ticker"].value + "\nCreate new Profile?");
-            if (isNewProfile) {
-                this.isReadOnly = false;
-                this.isReadOnlyPayMonthsAndDay = false;
-                this.btnCreateProfileIsDisabled = false;
-                this.btnUpdateProfileIsDisabled= true;
-            } else {
-                this.initializeView(null, true);
-                this.cancelledNewProfileCreation = true;
-            }
+        (apiErr: HttpErrorResponse) => {
+        if (this.assetProfileForm.controls["ticker"].value == "") {
+            alert("A ticker symbol entry is required.")
             this.btnGetProfileIsDisabled = true;
-            this.btnGetDbProfileIsDisabled = true;
+            return;
+        }
+
+        let isNewProfile = confirm("No data found via web for: \n" + this.assetProfileForm.controls["ticker"].value + ".\nCreate new Profile?");
+        if (isNewProfile) {
+            this.isReadOnly = false;
+            this.isReadOnlyPayMonthsAndDay = false;
+            this.btnCreateProfileIsDisabled = false;
+            this.btnUpdateProfileIsDisabled = true;
+        } else {
+            this.initializeView(null, true);
+            this.cancelledNewProfileCreation = true;
+        }
+        this.btnGetProfileIsDisabled = true;
+        this.btnGetDbProfileIsDisabled = true;
         });
     }
 
 
     getDbProfile(): void {
-        this.profileSvc.getProfileDataViaDb(this.assetProfileForm.controls["ticker"].value)
+        this.profileSvc.getProfileDataViaDb(this.assetProfileForm.controls["ticker"].value, this.investor.username)
             .retry(2)
             .subscribe(profileResponse => {
                 if (profileResponse == null) {
@@ -159,25 +165,29 @@ export class ProfileComponent implements OnInit {
 
 
     createProfile(): void {
+
+        // Method applicable to creating a custom Profile.
         let dbProfilePost$;
         let freqAndMonthsReconcile: boolean;
 
-        if (this.assetProfileForm.controls["divFreq"].value != "M") {
+        if (this.assetProfileForm.invalid) {
+            return;
+        }
+
+        // Dividend pay months are irrelevant for "M" frequency.
+        if (this.assetProfileForm.controls["divFreq"].value == "M")  {
+            freqAndMonthsReconcile = true;
+        }
+        else {
             freqAndMonthsReconcile = Pims3Validations.areDivMonthsAndDivFrequencyReconciled(
                 this.assetProfileForm.controls["divPayMonths"].value,
                 this.assetProfileForm.controls["divFreq"].value);
         }
-        
 
         if (!freqAndMonthsReconcile) {
             alert("Unable to create Profile: \nentered 'div Pay Months' & 'dividend frequency' must reconcile.");
             this.btnNewProfileSubmitted = true;
             this.initializeView(null, true);
-            return;
-        }
-
-        // Stop if form is invalid.
-        if (this.assetProfileForm.invalid) {
             return;
         }
 
@@ -192,9 +202,7 @@ export class ProfileComponent implements OnInit {
         profileToCreate.PE_ratio = this.assetProfileForm.controls["peRatio"].value;
         profileToCreate.EPS = this.assetProfileForm.controls["eps"].value;
         profileToCreate.unitPrice = this.assetProfileForm.controls["unitPrice"].value;
-
-        // TODO: Provide login info once security is implemented.
-        profileToCreate.investor = "rpasch@rpclassics.net";
+        profileToCreate.investor = this.investor.username;
 
         try {
             dbProfilePost$ = this.profileSvc.saveNewProfile(profileToCreate);
@@ -289,7 +297,7 @@ export class ProfileComponent implements OnInit {
         profileToUpdate.divPayDay = this.assetProfileForm.controls["divPayDay"].value;
 
         try {
-            dbProfileGet$ = this.profileSvc.getProfileDataViaDb(profileToUpdate.tickerSymbol);
+            dbProfileGet$ = this.profileSvc.getProfileDataViaDb(profileToUpdate.tickerSymbol, this.investor.username);
             dbProfilePut$ = this.profileSvc.updateProfile(profileToUpdate);
         } catch (e) {
             alert("Error obtaining existing Profile for : " + profileToUpdate.tickerSymbol);
