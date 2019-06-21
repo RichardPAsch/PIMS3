@@ -14,18 +14,24 @@ namespace PIMS3.DataAccess.Profile
     {
         private PIMS3Context _ctx;
         private const string TiingoApiService = "https://api.tiingo.com/tiingo/daily/"; // + <ticker>
+        private string investorLoginName = "";
 
         public ProfileDataProcessing(PIMS3Context ctx)
         {
             _ctx = ctx;
         }
 
-        public IQueryable<Data.Entities.Profile> FetchDbProfile(string ticker)
+        public IQueryable<Data.Entities.Profile> FetchDbProfile(string ticker, string currentlyLoggedName)
         {
-            var dbProfile = _ctx.Profile
-                                .Where(p => p.TickerSymbol.ToUpper() == ticker.ToUpper())
-                                .Select(p => p)
-                                .AsQueryable();
+            investorLoginName = currentlyLoggedName;
+            IQueryable<Data.Entities.Profile> dbProfile = currentlyLoggedName == null || currentlyLoggedName == string.Empty
+                ? _ctx.Profile.Where(p => p.TickerSymbol.ToUpper() == ticker.ToUpper())
+                              .Select(p => p)
+                              .AsQueryable()
+                : _ctx.Profile.Where(p => p.TickerSymbol.ToUpper() == ticker.ToUpper() && p.CreatedBy == currentlyLoggedName)
+                              .Select(p => p)
+                              .AsQueryable();
+
 
             // ** Re-examine how we want to use AssetCreationVm.
             if (!dbProfile.Any())
@@ -54,7 +60,7 @@ namespace PIMS3.DataAccess.Profile
             DateTime cutOffDateTimeForProfileUpdate = DateTime.Now.AddHours(-72);
             const string BaseTiingoUrl = "https://api.tiingo.com/tiingo/daily/";
             const string TiingoAccountToken = "95cff258ce493ec51fd10798b3e7f0657ee37740";
-            ImportFileProcessing busLayerComponent = new ImportFileProcessing(null, _ctx);
+            ImportFileProcessing busLayerComponent = new ImportFileProcessing(null, _ctx, null);
 
 
             var updatedOrNewProfile = new Data.Entities.Profile();
@@ -90,9 +96,10 @@ namespace PIMS3.DataAccess.Profile
                 IQueryable<Data.Entities.Profile> existingProfile;
 
                 // Just in case, we'll check again for an existing Profile to update.
+                // TODO: 'investorLoginName' - may be "" in some cases ?
                 try
                 {
-                    existingProfile = FetchDbProfile(ticker);
+                    existingProfile = FetchDbProfile(ticker, investorLoginName);
                 }
                 catch (Exception)
                 {
@@ -334,6 +341,9 @@ namespace PIMS3.DataAccess.Profile
 
         public bool SaveProfile(Data.Entities.Profile newProfile)
         {
+            // 6.21.19
+            // Shouldn't we check for existing Profile first; so therefore:
+            // Run through UI 'Asset Profile' menu option first, utilizing 'Create Profile' button & debug.
             int savedCount = 0;
             bool profileSaved = false;
 
