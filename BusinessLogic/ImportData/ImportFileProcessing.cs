@@ -25,12 +25,14 @@ namespace PIMS3.BusinessLogic.ImportData
         private readonly PIMS3Context _ctx;
         private static string _assetsNotAddedListing = string.Empty;
         private string assetIdForPosition = string.Empty;
+        private readonly InvestorSvc _investorSvc;
 
 
-        public ImportFileProcessing(DataImportVm viewModel, PIMS3Context ctx)
+        public ImportFileProcessing(DataImportVm viewModel, PIMS3Context ctx, InvestorSvc investorSvc)
         {
             _viewModel = viewModel;
             _ctx = ctx;
+            _investorSvc = investorSvc;
         }
 
 
@@ -191,7 +193,15 @@ namespace PIMS3.BusinessLogic.ImportData
                             if (lastTickerProcessed.Trim().ToUpper() != enumerableCells.ElementAt(1).Trim().ToUpper())
                             {
                                 lastTickerProcessed = enumerableCells.ElementAt(1).Trim().ToUpper();
-                                profilePersisted = profileDataAccessComponent.FetchDbProfile(enumerableCells.ElementAt(1).Trim());
+
+                                // Standard web-derived Profile (via 3rd party) database search.
+                                profilePersisted = profileDataAccessComponent.FetchDbProfile(enumerableCells.ElementAt(1).Trim(), "");
+                                if (!profilePersisted.Any())
+                                {
+                                    // Customized Profile (via 3rd party) database search.
+                                    Investor currentInvestor = _investorSvc.GetById(id);
+                                    profilePersisted = profileDataAccessComponent.FetchDbProfile(enumerableCells.ElementAt(1).Trim(), currentInvestor.LoginName);
+                                }
 
                                 if (profilePersisted != null)
                                 {
