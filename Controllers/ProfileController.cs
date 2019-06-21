@@ -51,14 +51,14 @@ namespace PIMS3.Controllers
         }
         
 
-        [HttpGet("{ticker}/{useDb}")]
-        public ActionResult<Profile> GetProfile(string ticker, bool useDb)
+        [HttpGet("{ticker}/{useDb}/{loggedInName}")]
+        public ActionResult<Profile> GetProfile(string ticker, bool useDb, string loggedInName)
         {
 
             ProfileDataProcessing profileDataAccessComponent = new ProfileDataProcessing(_dbCtx);
             try
             {
-                IQueryable<Data.Entities.Profile> dBProfile = profileDataAccessComponent.FetchDbProfile(ticker);
+                IQueryable<Profile> dBProfile = profileDataAccessComponent.FetchDbProfile(ticker, loggedInName);
                 return Ok(dBProfile);
             }
             catch 
@@ -116,7 +116,7 @@ namespace PIMS3.Controllers
                     UnitPrice = editsOrNew.unitPrice,
                     DividendMonths = editsOrNew.divPayMonths,
                     DividendPayDay = editsOrNew.divPayDay,
-                    CreatedBy = "rpasch@rpclassics.net",     // TODO: replace once security implemented.
+                    CreatedBy = editsOrNew.investor, 
                     LastUpdate = today
                 }
                 : new Profile
