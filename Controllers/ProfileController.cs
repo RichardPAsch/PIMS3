@@ -101,8 +101,6 @@ namespace PIMS3.Controllers
 
         private Profile MapToProfile(dynamic editsOrNew, bool isNewProfile = false)
         {
-            DateTime today = DateTime.Now;
-
             return isNewProfile
                 ? new Profile
                 {
@@ -117,13 +115,19 @@ namespace PIMS3.Controllers
                     DividendMonths = editsOrNew.divPayMonths,
                     DividendPayDay = editsOrNew.divPayDay,
                     CreatedBy = editsOrNew.investor, 
-                    LastUpdate = today
+                    LastUpdate = DateTime.Now
                 }
                 : new Profile
                 {
+                    TickerDescription = editsOrNew.tickerDesc,
+                    DividendRate = editsOrNew.divRate ?? 0,
+                    DividendYield = editsOrNew.divYield ?? 0,
                     DividendMonths = editsOrNew.divPayMonths,
                     DividendPayDay = editsOrNew.divPayDay,
                     TickerSymbol = editsOrNew.tickerSymbol,
+                    PERatio = editsOrNew.PE_ratio ?? 0,
+                    EarningsPerShare = editsOrNew.EPS ?? 0,
+                    UnitPrice = editsOrNew.unitPrice ?? 0,
                     LastUpdate = DateTime.Now
                 };
         }
