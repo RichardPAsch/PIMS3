@@ -295,6 +295,10 @@ export class ProfileComponent implements OnInit {
         profileToUpdate.tickerSymbol = this.assetProfileForm.controls["ticker"].value;
         profileToUpdate.divPayMonths = this.assetProfileForm.controls["divPayMonths"].value;
         profileToUpdate.divPayDay = this.assetProfileForm.controls["divPayDay"].value;
+        profileToUpdate.tickerDesc = this.assetProfileForm.controls["tickerDesc"].value;
+        profileToUpdate.divYield = this.assetProfileForm.controls["divYield"].value;
+        profileToUpdate.divRate = this.assetProfileForm.controls["divRate"].value;
+        profileToUpdate.unitPrice = this.assetProfileForm.controls["unitPrice"].value;
 
         try {
             dbProfileGet$ = this.profileSvc.getProfileDataViaDb(profileToUpdate.tickerSymbol, this.investor.username);
