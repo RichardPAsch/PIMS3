@@ -322,8 +322,13 @@ namespace PIMS3.DataAccess.Profile
             {
                 IQueryable<Data.Entities.Profile> existingProfile = _ctx.Profile.Where(p => p.TickerSymbol == editedProfile.TickerSymbol).AsQueryable();
 
+                existingProfile.First().TickerDescription = editedProfile.TickerDescription;
+                existingProfile.First().DividendRate = editedProfile.DividendRate;
+                existingProfile.First().DividendYield = editedProfile.DividendYield;
+                existingProfile.First().PERatio = editedProfile.PERatio;
                 existingProfile.First().DividendMonths = editedProfile.DividendMonths;
                 existingProfile.First().DividendPayDay = editedProfile.DividendPayDay;
+                existingProfile.First().UnitPrice = editedProfile.UnitPrice;
                 existingProfile.First().LastUpdate = Convert.ToDateTime(editedProfile.LastUpdate);
 
                 _ctx.UpdateRange(existingProfile);
