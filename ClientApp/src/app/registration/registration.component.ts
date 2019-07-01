@@ -35,9 +35,7 @@ export class RegistrationComponent implements OnInit {
         }
     }
 
-    ngOnInit() {
-       
-    }
+    ngOnInit() { }
 
     registrationForm = new FormGroup({
         firstName: new FormControl('', [Validators.required]),
@@ -63,7 +61,10 @@ export class RegistrationComponent implements OnInit {
         this.investorSvc.register(this.registrationForm.value)
             .pipe(first())
             .subscribe(registeredInvestor => {
-                alert('Registration successful for login : \n' + registeredInvestor.loginName );
+                alert('Registration successful for login : \n' + registeredInvestor.loginName);
+                // Leverage authentication service for nav-menu-component to authentication.service relationship
+                // re: menu option toggling.
+                this.authenticationSvc.register();
                 //this.alertService.success('Registration successful', true);  // TODO.
                 this.router.navigate(['/']);
             },
