@@ -69,12 +69,12 @@ import { GlobalsService } from '../app/shared/globals.service';
         { path: 'income-summary', component: IncomeSummaryComponent, canActivate: [AuthorizationGuard] },
         { path: 'income-receivables', component: IncomeReceivablesComponent, canActivate: [AuthorizationGuard] },  // 'income due'
         { path: 'income', component: IncomeComponent, canActivate: [AuthorizationGuard] },                         // 'income recorded'
-        { path: 'data-import', component: DataImportComponent/*, canActivate: [AuthorizationGuard]*/ },
+        { path: 'data-import', component: DataImportComponent, canActivate: [AuthorizationGuard] },
         { path: 'positions', component: PositionsComponent, canActivate: [AuthorizationGuard] },
         { path: 'profile', component: ProfileComponent, canActivate: [AuthorizationGuard] },
 
-          // Otherwise redirect to home
-          { path: '**', redirectTo: '' }
+         // Otherwise redirect to home
+         { path: '**', redirectTo: '' }
         ])
     ],
 
