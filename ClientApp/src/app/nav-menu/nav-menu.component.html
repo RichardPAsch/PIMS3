@@ -17,18 +17,24 @@
             <ul class='nav navbar-nav'>
                 <!--routerLinkActive :  Angular directive allowing for addition of a CSS class to an element when the link's route becomes active.
                     Note: Changes should also be reflected in 'app.module' - RouterModule.
+
+                    For hiding links via template reference vars, see ideas:
+                    https://angular.io/api/router/RouterLinkActive
+                    https://itnext.io/working-with-angular-5-template-reference-variable-e5aa59fb9af
+
+                    Login, Logout, & Registration represent CHILD components ?; each emitting booleans controlling parent vars, e.g., showLogin
                  -->
-                <li [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
-                    <a [routerLink]='["/"]' (click)='collapse(true)'>
+                <li *ngIf="showLogIn" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
+                    <a [routerLink]='["/"]' (click)='collapse(true)'> 
                         <span class='glyphicon glyphicon-home'></span> Home - Login
                     </a>
                 </li>
-                <li>
+                <li *ngIf="showLogOut">
                     <a [routerLink]='["/"]' (click)='logoutInvestor()'>
                         <span class='glyphicon glyphicon-user'></span> Log out
                     </a>
                 </li>
-                <li [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
+                <li  *ngIf="showRegistration" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
                     <a [routerLink]='["/registration"]' (click)='collapse(true)'>
                         <span class='glyphicon glyphicon-envelope'></span> Registration
                     </a>
