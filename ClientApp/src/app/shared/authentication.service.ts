@@ -22,9 +22,21 @@ import { GlobalsService } from '../shared/globals.service';
 
 export class AuthenticationService {
 
+    /* Notes on 'BehaviorSubject', per RxJS docs:
+         A variant of 'Subjects', and has a notion of "the current value". It stores the *latest* value emitted to its consumers,
+         and whenever a new Observer SUBSCRIBES, it will IMMEDIATELY receive the "current value" from the BehaviorSubject.
+
+        BehaviorSubjects represent "values over time". For instance:
+        An event stream of birthdays is a Subject, but the stream of a person's age would be a BehaviorSubject.
+    */
     private currentInvestorSubject: BehaviorSubject<Investor>;
     public currentInvestor$: Observable<Investor>;
     private baseUrl;
+
+    // Initialize 'nav-menu' boolean flag emitters, i.e., showLogIn, showLogOut, showRegistration.
+    public loggedIn: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+    public registered: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+    public loggedOut: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
 
     constructor(private http: HttpClient, globalsSvc: GlobalsService) {
@@ -43,11 +55,16 @@ export class AuthenticationService {
 
         return this.http.post<any>(this.baseUrl + "/api/investor/authenticateInvestor", { loginName, Password })
             .pipe(map(investor => {
-                // login successful if there's a jwt in the response.
+                // Login successful if there's a jwt in the response.
                 if (investor && investor.token) {
                     // ** Store investor user details and jwt in SESSION storage for now, ONLY while in development/testing mode. **
                     //localStorage.setItem('currentInvestor', JSON.stringify(investor));
                     sessionStorage.setItem('currentInvestor', JSON.stringify(investor));
+
+                    // Observable executions, sending 'Next' type of value notifications. Other notification types are: (Error | Complete).
+                    this.loggedIn.next(false);
+                    this.registered.next(false);
+                    this.loggedOut.next(true);
                     this.currentInvestorSubject.next(investor);
                 }
                 return investor;
@@ -59,8 +76,17 @@ export class AuthenticationService {
 
         // Remove user, via session storage key, from session (or from 'localStorage' at a later point ?) storage.
         sessionStorage.removeItem('currentInvestor');
-        //alert("Log out successful for: \n" + this.currentInvestorSubject.value.firstName + " " + this.currentInvestorSubject.value.lastName);
         this.currentInvestorSubject.next(null);
+        this.loggedIn.next(true);
+        this.loggedOut.next(false);
+        this.registered.next(true);
+    }
+
+
+    register() {
+        this.registered.next(false);
+        this.loggedIn.next(true);
+        this.loggedOut.next(false);
     }
 
 }
