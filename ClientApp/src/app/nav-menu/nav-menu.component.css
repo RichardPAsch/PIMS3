@@ -1,6 +1,17 @@
 li .glyphicon {
     margin-right: 10px;
 }
+#loginDisplay {
+    background-color: lightgoldenrodyellow;
+    color: #337AB7;
+    border-top:0px;
+    padding-left: 123px;
+}
+#menuHdr {
+    background-color:lightgoldenrodyellow;
+    color:#337AB7;
+    padding-left: 156px;
+}
 
 /* Highlighting rules for nav menu items */
 li.link-active a,
@@ -57,3 +68,29 @@ li.link-active a:focus {
         text-overflow: ellipsis;
     }
 }
+
+ /* ---- Deferred for possible future use. ---
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;*/
+    /* Position the tooltip */
+    /*position: absolute;
+    z-index: 1;
+    top: -5px;
+    left: 105%;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}*/
