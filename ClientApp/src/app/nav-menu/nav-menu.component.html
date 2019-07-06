@@ -1,31 +1,19 @@
 <div class='main-nav'>
     <div class='navbar navbar-inverse'>
-        <div class='navbar-header'>
-            <button type='button' class='navbar-toggle' data-toggle='collapse' data-target='.navbar-collapse' [attr.aria-expanded]='isExpanded' (click)='toggle()'>
-                <span class='sr-only'>Toggle navigation</span>
-                <span class='icon-bar'></span>
-                <span class='icon-bar'></span>
-                <span class='icon-bar'></span>
-            </button>
-            <a style="background-color:lightgoldenrodyellow; color:#337AB7; text-align:center" class='navbar-brand' [routerLink]='["/"]'>
-                P.I.M.S. 
-            </a>
+        <div class='navbar-header' style="background-color:lightgoldenrodyellow">
+            <span id="menuHdr" class='navbar-brand'>
+               <strong>P.I.M.S.</strong>
+            </span>
+            <span id="loginDisplay"><!--{{this.nameDisplayed}}--></span>
         </div>
-        <span id="loginDisplay" style="color:white"><!--{{this.nameDisplayed}}--></span>
         <div class='clearfix'></div>
         <div class='navbar-collapse collapse' [ngClass]='{ "in": isExpanded }'>
             <ul class='nav navbar-nav'>
                 <!--routerLinkActive :  Angular directive allowing for addition of a CSS class to an element when the link's route becomes active.
                     Note: Changes should also be reflected in 'app.module' - RouterModule.
-
-                    For hiding links via template reference vars, see ideas:
-                    https://angular.io/api/router/RouterLinkActive
-                    https://itnext.io/working-with-angular-5-template-reference-variable-e5aa59fb9af
-
-                    Login, Logout, & Registration represent CHILD components ?; each emitting booleans controlling parent vars, e.g., showLogin
-                 -->
+                -->
                 <li *ngIf="showLogIn" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
-                    <a [routerLink]='["/"]' (click)='collapse(true)'> 
+                    <a [routerLink]='["/"]'>
                         <span class='glyphicon glyphicon-home'></span> Home - Login
                     </a>
                 </li>
@@ -34,43 +22,44 @@
                         <span class='glyphicon glyphicon-user'></span> Log out
                     </a>
                 </li>
-                <li  *ngIf="showRegistration" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
-                    <a [routerLink]='["/registration"]' (click)='collapse(true)'>
+                <li *ngIf="showRegistration" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
+                    <a [routerLink]='["/registration"]'>
                         <span class='glyphicon glyphicon-envelope'></span> Registration
                     </a>
                 </li>
-                <li [routerLinkActive]='["link-active"]'>
-                    <a [routerLink]='["/income-summary"]' (click)='collapse()'>
+                <!-- to be inserted in <li> : matTooltip="test tooltip message"-->
+                <li [routerLinkActive]='["link-active"]' (mouseover)='aboutThis()'>
+                    <a [routerLink]='["/income-summary"]'>
                         <span class='glyphicon glyphicon-usd'></span> Income summary
                     </a>
                 </li>
-                <li [routerLinkActive]='["link-active"]'>
-                    <a [routerLink]='["/income-projections"]' (click)='collapse()'>
+                <li [routerLinkActive]='["link-active"]' (mouseover)='aboutThis()'>
+                    <a [routerLink]='["/income-projections"]'>
                         <span class='glyphicon glyphicon-usd'></span> Income projections
                     </a>
                 </li>
-                <li [routerLinkActive]='["link-active"]'>
-                    <a [routerLink]='["/income-receivables"]' (click)='collapse()'>
+                <li [routerLinkActive]='["link-active"]' (mouseover)='aboutThis()'>
+                    <a [routerLink]='["/income-receivables"]'>
                         <span class='glyphicon glyphicon-usd'></span> Income due
                     </a>
                 </li>
-                <li [routerLinkActive]='["link-active"]'>
-                    <a [routerLink]='["/income"]' (click)='collapse()'>
+                <li [routerLinkActive]='["link-active"]' (mouseover)='aboutThis()'>
+                    <a [routerLink]='["/income"]'>
                         <span class='glyphicon glyphicon-usd'></span> Income recorded
                     </a>
                 </li>
-                <li [routerLinkActive]='["link-active"]'>
-                    <a [routerLink]='["/data-import"]' (click)='collapse()'>
+                <li [routerLinkActive]='["link-active"]' (mouseover)='aboutThis()'>
+                    <a [routerLink]='["/data-import"]'>
                         <span class='glyphicon glyphicon-file'></span> Data import
                     </a>
                 </li>
                 <li [routerLinkActive]='["link-active"]'>
-                    <a [routerLink]='["/positions"]' (click)='collapse()'>
+                    <a [routerLink]='["/positions"]'>
                         <span class='glyphicon glyphicon-th-list'></span> Positions
                     </a>
                 </li>
-                <li [routerLinkActive]='["link-active"]'>
-                    <a [routerLink]='["/profile"]' (click)='collapse()'>
+                <li [routerLinkActive]='["link-active"]' (mouseover)='aboutThis()'>
+                    <a [routerLink]='["/profile"]'>
                         <span class='glyphicon glyphicon-file'></span> Asset profile
                     </a>
                 </li>
