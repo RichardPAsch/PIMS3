@@ -25,3 +25,8 @@ a {
 label {
     padding-top: 8px;
 }
+.jumbotron {
+    margin-top: 50px;
+    margin-bottom: 0;
+    width: 800px;
+}
