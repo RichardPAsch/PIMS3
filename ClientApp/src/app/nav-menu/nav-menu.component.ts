@@ -2,6 +2,9 @@ import { Component, OnInit, Injectable /*, Optional*/ } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService } from '../shared/authentication.service';
 
+// Deferred until dependent Angular components updated!
+//import { MatTooltipModule } from '@angular/material/tooltip'; 
+
 
 @Component({
   selector: 'app-nav-menu',
@@ -31,7 +34,7 @@ export class NavMenuComponent implements OnInit {
     public set initializeDisplayName(investorLogin: string) {
         // ** A hack. Could NOT get interpolation to work for this simple login name update!
         let spanElement = document.getElementById("loginDisplay");
-        spanElement.innerHTML = "Welcome:" + "&nbsp&nbsp&nbsp" + investorLogin;
+        spanElement.innerHTML = "Welcome - " + investorLogin;
         //this.nameDisplayed = investorLogin;
     }
     
@@ -40,22 +43,9 @@ export class NavMenuComponent implements OnInit {
         this.authenticationSvc.loggedIn.subscribe(isLoggedInValue => this.showLogIn = isLoggedInValue);
         this.authenticationSvc.registered.subscribe(isRegisteredValue => this.showRegistration = isRegisteredValue);
         this.authenticationSvc.loggedOut.subscribe(isLoggedOutValue => {
-            //alert("showLogdOut : " + isLoggedOutValue);
             this.showLogOut = isLoggedOutValue
         });
     }
-
-
-    collapse(isLoginOrRegistrationOption: boolean = false) {
-
-        if (!isLoginOrRegistrationOption && sessionStorage.length == 0) {
-            alert("No login credentials found, please login/register for application access.");
-            this.router.navigate(['/']);
-            return;
-        } 
-        this.isExpanded = false;
-    }
-
 
 
     logoutInvestor() {
@@ -70,8 +60,24 @@ export class NavMenuComponent implements OnInit {
     }
 
     
-   toggle() {
+    toggle() {
         this.isExpanded = !this.isExpanded;
+    }
+
+
+    aboutThis() {
+        // 7.6.19 - Temporary workaround until tooltips are implemented, pending necessary Angular component upgrades (v8.0).
+        if (this.showLogIn) {
+            alert("                              -- Menu Summary -- " +
+                "\n 1. Income summary - YTD summary of income by month." +
+                "\n 2. Income projections - Calculate monthly income for up to 5 tickers." +
+                "\n 3. Income due - Show outstanding payment(s) for the month." +
+                "\n 4. Income recorded - Show payment(s) received for up to last 5 years." +
+                "\n 5. Data import - Import new income and/or position(s) into system." +
+                "\n 6. Positions - Show both existing and old Position(s)." +
+                "\n 7. Asset profile - Show profile or enter/edit custom profile."
+            );
+        }
     }
 
 }
