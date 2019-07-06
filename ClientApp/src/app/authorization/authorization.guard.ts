@@ -29,8 +29,9 @@ export class AuthorizationGuard implements CanActivate {
             return true;
         }
 
-        alert("No login credentials found, please login for access.");
+        // No login credentials found.
         this.router.navigate(['/']);
         return false;
     }
+
 }
