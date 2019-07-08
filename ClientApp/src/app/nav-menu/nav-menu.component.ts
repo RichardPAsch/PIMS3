@@ -2,7 +2,7 @@ import { Component, OnInit, Injectable /*, Optional*/ } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService } from '../shared/authentication.service';
 
-// Deferred until dependent Angular components updated!
+// Deferred until dependent Angular components updated! (v.8.0.2)
 //import { MatTooltipModule } from '@angular/material/tooltip'; 
 
 
@@ -12,32 +12,18 @@ import { AuthenticationService } from '../shared/authentication.service';
   styleUrls: ['./nav-menu.component.css']
 })
 
-// Enable DI into HomeComponent to accommodate displaying investors' login.
- // TODO: unnecessary due to use of 'BehaviorSubject' ?
-@Injectable({
-    providedIn: 'root'
-})
 export class NavMenuComponent implements OnInit {
 
     constructor(private router: Router, private authenticationSvc: AuthenticationService/*, @Optional() private name: string*/) {
     }
 
-
     isExpanded = false;
-    //nameDisplayed: string; // deferred until hack eliminated.
+    nameDisplayed: string;
     homeComponentImported;
     showLogOut: boolean = true;
     showLogIn: boolean = true;
     showRegistration: boolean = true;
 
-
-    public set initializeDisplayName(investorLogin: string) {
-        // ** A hack. Could NOT get interpolation to work for this simple login name update!
-        let spanElement = document.getElementById("loginDisplay");
-        spanElement.innerHTML = "Welcome - " + investorLogin;
-        //this.nameDisplayed = investorLogin;
-    }
-    
 
     ngOnInit() {
         this.authenticationSvc.loggedIn.subscribe(isLoggedInValue => this.showLogIn = isLoggedInValue);
@@ -45,6 +31,7 @@ export class NavMenuComponent implements OnInit {
         this.authenticationSvc.loggedOut.subscribe(isLoggedOutValue => {
             this.showLogOut = isLoggedOutValue
         });
+        this.authenticationSvc.investorLoginName.subscribe(login => this.nameDisplayed = "Welcome - " + login); 
     }
 
 
@@ -66,7 +53,7 @@ export class NavMenuComponent implements OnInit {
 
 
     aboutThis() {
-        // 7.6.19 - Temporary workaround until tooltips are implemented, pending necessary Angular component upgrades (v8.0).
+        // 7.6.19 - Temporary workaround until tooltips are implemented, pending necessary Angular component upgrades (v8.0.2).
         if (this.showLogIn) {
             alert("                              -- Menu Summary -- " +
                 "\n 1. Income summary - YTD summary of income by month." +
