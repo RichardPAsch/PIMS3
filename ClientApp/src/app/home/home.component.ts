@@ -68,7 +68,7 @@ export class HomeComponent implements OnInit {
             () => {
                 //this.alertService.error(error);
                 this.loading = false;
-                alert("Unable to validate login credentials, \nplease check name and/or password entry(ies).");
+                alert("Invalid login credentials; \nplease check name and/or password entry(ies).");
             });
 
           
