@@ -26,12 +26,18 @@ export class NavMenuComponent implements OnInit {
 
 
     ngOnInit() {
+        // Subscribing to BehaviorSubject automatically updates here when value(s) change.
         this.authenticationSvc.loggedIn.subscribe(isLoggedInValue => this.showLogIn = isLoggedInValue);
         this.authenticationSvc.registered.subscribe(isRegisteredValue => this.showRegistration = isRegisteredValue);
         this.authenticationSvc.loggedOut.subscribe(isLoggedOutValue => {
             this.showLogOut = isLoggedOutValue
         });
-        this.authenticationSvc.investorLoginName.subscribe(login => this.nameDisplayed = "Welcome - " + login); 
+        // Avoid display if login not yet completed.
+        this.authenticationSvc.investorLoginName.subscribe(login => {
+            if (login != "") {
+                this.nameDisplayed = "Welcome - " + login;
+            }
+        }); 
     }
 
 
@@ -41,8 +47,7 @@ export class NavMenuComponent implements OnInit {
         this.authenticationSvc.registered.subscribe(isRegisteredValue => this.showRegistration = isRegisteredValue);
         this.router.navigate(['/']);
 
-        let spanElement = document.getElementById("loginDisplay");
-        spanElement.innerHTML = "";
+        this.nameDisplayed = "";
         return;
     }
 
