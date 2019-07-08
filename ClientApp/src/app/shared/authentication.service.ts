@@ -38,13 +38,16 @@ export class AuthenticationService {
     public registered: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
     public loggedOut: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
+    // Initialize login for "Welcome..." greeting.
+    public investorLoginName: BehaviorSubject<string> = new BehaviorSubject<string>("");  
+
 
     constructor(private http: HttpClient, globalsSvc: GlobalsService) {
         //this.currentInvestorSubject = new BehaviorSubject<Investor>(JSON.parse(localStorage.getItem('currentInvestor')));
         this.currentInvestorSubject = new BehaviorSubject<Investor>(JSON.parse(sessionStorage.getItem('currentInvestor')));
         this.currentInvestor$ = this.currentInvestorSubject.asObservable();
         this.baseUrl = globalsSvc.pimsBaseUrl;
-    }
+    } 
 
     public get currentInvestorValue(): Investor {
         return this.currentInvestorSubject.value;
@@ -65,6 +68,7 @@ export class AuthenticationService {
                     this.loggedIn.next(false);
                     this.registered.next(false);
                     this.loggedOut.next(true);
+                    this.investorLoginName.next(investor.firstName); 
                     this.currentInvestorSubject.next(investor);
                 }
                 return investor;
