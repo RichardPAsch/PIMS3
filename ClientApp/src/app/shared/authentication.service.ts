@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Investor } from '../shared/investor';
 import { GlobalsService } from '../shared/globals.service';
-
+import { HttpErrorResponse } from '@angular/common/http';
 
 
 /* ===== NOTES: =========
@@ -72,7 +72,9 @@ export class AuthenticationService {
                     this.currentInvestorSubject.next(investor);
                 }
                 return investor;
-            }));
+            },
+                (apiErr: HttpErrorResponse) => { return apiErr;}
+            ));
     }
 
 
