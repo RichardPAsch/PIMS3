@@ -7,8 +7,6 @@
         <li>The application is <em>not</em> intended to replace, nor mimic an asset management system that may currently be commerically available.</li>
     </ul>
 
-    <!--URL for sample: https://jasonwatmore.com/post/2018/10/29/angular-7-user-registration-and-login-example-tutorial  -->
-
     <hr />
     <div class="container">
         <div id="row1" class="row">
@@ -17,13 +15,13 @@
 
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
-            <label class="col-sm-2 control-label" for="investorName">Username:</label>
+            <label class="col-sm-2 control-label" for="investorName">Name:</label>
             <div class="col-sm-8">
                 <div class="input-group input-group-md">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-user"></span>
                     </span>
-                    <input type="text" class="form-control" placeholder="Email / Username" formControlName="investorName" [ngClass]="{'isInValid': submitted && formFields.investorName.errors}">
+                    <input type="text" class="form-control" placeholder="Email" formControlName="investorName" [ngClass]="{'isInValid': submitted && formFields.investorName.errors}">
                     <div *ngIf="submitted && formFields.investorName.errors" class="invalid-feedback">
                         <div *ngIf="formFields.investorName.required">Name is required</div>
                     </div>
