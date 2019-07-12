@@ -2,10 +2,10 @@ import { ValidatorFn, AbstractControl } from '@angular/forms';
 
 export class Pims3Validations {
 
-     static divFreqValidator(): ValidatorFn {
+    static divFreqValidator(): ValidatorFn {
 
-        // Returns a ValidatorFn, which takes a control, & returns either an object or null.
-        // returns object, if applicable which consists of key(type string) & value (type 'any')
+        // Returns a ValidatorFn, which takes a control, & returns either an object or null;
+        // returns object, if applicable, which consists of key(type string) & value (type 'any')
         return (control: AbstractControl): { [key: string]: any } | null => {
             if (control != null) {
                 return (control.value == "A" || control.value == "S" || control.value == "Q" || control.value == "M")
@@ -15,6 +15,7 @@ export class Pims3Validations {
             return null;
         };
     }
+
 
     static isNumberValidator(): ValidatorFn {
 
@@ -105,6 +106,43 @@ export class Pims3Validations {
         return isValidMonths;
     }
 
+    private static validatePassword(pwrd: string): boolean {
+
+        let hasLower = false;
+        let hasUpper = false;
+        let hasNum = false;
+        let hasSpecialChar = false;
+
+        // At minimum, apply the following:
+        // One lower case letter.
+        const lowercaseRegex = new RegExp("(?=.*[a-z])");
+        if (lowercaseRegex.test(pwrd)) { hasLower = true; }
+
+        // One upper case letter.
+        const uppercaseRegex = new RegExp("(?=.*[A-Z])"); 
+        if (uppercaseRegex.test(pwrd)) { hasUpper = true; }
+
+        // One number.
+        const numRegex = new RegExp("(?=.*\\d)"); 
+        if (numRegex.test(pwrd)) { hasNum = true; }
+
+        // One special char.
+        const specialcharRegex = new RegExp("[!@#$%^&*(),.?\":{}|<>]");
+        if (specialcharRegex.test(pwrd)) { hasSpecialChar = true; }
+
+        let counter = 0;
+        let checks = [hasLower, hasUpper, hasNum, hasSpecialChar];
+        for (let i = 0; i < checks.length; i++) {
+            if (checks[i]) { counter += 1; }
+        }
+
+        if (counter < 4) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
 
     static divPayMonthsValidator(): ValidatorFn {
 
@@ -113,7 +151,19 @@ export class Pims3Validations {
                 let validationResult = this.validateDividendPaymentMonths(control.value);
                 return validationResult ? null : { divPayMonths: { value: "bad month(s)" } };
             };
+            return null;
         }
+    }
+
+
+    static passwordValidator(): ValidatorFn {
+
+        return (control: AbstractControl): { [key: string]: any } | null => {
+            if (control != null && control.value != "") {
+                let passwordValidationResult = this.validatePassword(control.value);
+                return passwordValidationResult ? null : { pwrd: { value: "bad password" } };
+            }
+        };
     }
 
 
@@ -146,6 +196,55 @@ export class Pims3Validations {
     //        return forbidden ? { 'forbiddenName': { value: control.value } } : null;
     //    };
     //}
+
+
+    /* Sample validator for passwords from SO
+     * // https://stackoverflow.com/questions/52043495/custom-password-validation-in-angular-5
+            validate(ctrl: AbstractControl): {[key: string]: any} {
+            let password = ctrl.value;
+
+            let hasLower = false;
+            let hasUpper = false;
+            let hasNum = false;
+            let hasSpecial = false;
+
+            const lowercaseRegex = new RegExp("(?=.*[a-z])");// has at least one lower case letter
+            if (lowercaseRegex.test(password)) {
+              hasLower = true;
+            }
+
+            const uppercaseRegex = new RegExp("(?=.*[A-Z])"); //has at least one upper case letter
+            if (uppercaseRegex.test(password)) {
+              hasUpper = true;
+            }
+
+            const numRegex = new RegExp("(?=.*\\d)"); // has at least one number
+            if (numRegex.test(password)) {
+              hasNum = true;
+            }
+
+            const specialcharRegex = new RegExp("[!@#$%^&*(),.?\":{}|<>]");
+            if (specialcharRegex.test(password)) {
+              hasSpecial = true;
+            }
+
+            let counter = 0;
+            let checks = [hasLower, hasUpper, hasNum, hasSpecial];
+            for (let i = 0; i < checks.length; i++) {
+              if (checks[i]) {
+                counter += 1;
+              }
+            }
+
+            if (counter < 2) {
+              return { invalidPassword: true }
+            } else {
+              return null;
+            }
+
+          }
+
+    */
    
 
 
