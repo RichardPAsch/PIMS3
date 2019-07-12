@@ -26,6 +26,7 @@ import { AuthorizationGuard } from '../app/authorization/authorization.guard';
 import { JwtInterceptor } from '../app/shared/jwt.interceptor';
 import { HttpErrorInterceptor } from '../app/shared/http.error.interceptor';
 import { GlobalsService } from '../app/shared/globals.service';
+import { GettingStartedComponent } from './getting-started/getting-started.component';
 
 
 /* Notes:
@@ -50,7 +51,8 @@ import { GlobalsService } from '../app/shared/globals.service';
     PositionsComponent,
     IncomeComponent,
     ProfileComponent,
-    RegistrationComponent
+    RegistrationComponent,
+    GettingStartedComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -72,6 +74,7 @@ import { GlobalsService } from '../app/shared/globals.service';
         { path: 'data-import', component: DataImportComponent, canActivate: [AuthorizationGuard] },
         { path: 'positions', component: PositionsComponent, canActivate: [AuthorizationGuard] },
         { path: 'profile', component: ProfileComponent, canActivate: [AuthorizationGuard] },
+        { path: 'getting-started', component: GettingStartedComponent },  // informational only
 
          // Otherwise redirect to home
          { path: '**', redirectTo: '' }
@@ -79,7 +82,7 @@ import { GlobalsService } from '../app/shared/globals.service';
     ],
 
     /* ===== Notes:
-     Creators of services that NgModule contributes to the global collection of services, and are accessible to
+     Creators of services, which NgModule contributes to the global collection of services, provide functionality that is accessible to
      all parts of an app. (You can also specify providers at the component level, which is often preferred.)
      'Providers' enable Angular Dependency Injection (DI) to get value(s) for dependency(ies).
      The JWT and Error interceptors hook into the HTTP request pipeline via the Angular built-in injection token HTTP_INTERCEPTORS.
