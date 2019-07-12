@@ -6,6 +6,7 @@ li .glyphicon {
     color: #337AB7;
     border-top:0px;
     padding-left: 123px;
+    text-align: center;
 }
 #menuHdr {
     background-color:lightgoldenrodyellow;
