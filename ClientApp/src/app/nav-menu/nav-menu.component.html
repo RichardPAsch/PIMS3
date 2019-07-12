@@ -11,15 +11,10 @@
             <ul class='nav navbar-nav'>
                 <!--routerLinkActive :  Angular directive allowing for addition of a CSS class to an element when the link's route becomes active.
                     Note: Changes should also be reflected in 'app.module' - RouterModule.
-                -->
+    -->
                 <li *ngIf="showLogIn" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
                     <a [routerLink]='["/"]'>
                         <span class='glyphicon glyphicon-home'></span> Home - Login
-                    </a>
-                </li>
-                <li *ngIf="showLogOut">
-                    <a [routerLink]='["/"]' (click)='logoutInvestor()'>
-                        <span class='glyphicon glyphicon-user'></span> Log out
                     </a>
                 </li>
                 <li *ngIf="showRegistration" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
@@ -28,39 +23,49 @@
                     </a>
                 </li>
                 <!-- to be inserted in <li> : matTooltip="test tooltip message"-->
-                <li [routerLinkActive]='["link-active"]' (mouseover)='aboutThis()'>
+                <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
                     <a [routerLink]='["/income-summary"]'>
                         <span class='glyphicon glyphicon-usd'></span> Income summary
                     </a>
                 </li>
-                <li [routerLinkActive]='["link-active"]' (mouseover)='aboutThis()'>
+                <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
                     <a [routerLink]='["/income-projections"]'>
                         <span class='glyphicon glyphicon-usd'></span> Income projections
                     </a>
                 </li>
-                <li [routerLinkActive]='["link-active"]' (mouseover)='aboutThis()'>
+                <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
                     <a [routerLink]='["/income-receivables"]'>
                         <span class='glyphicon glyphicon-usd'></span> Income due
                     </a>
                 </li>
-                <li [routerLinkActive]='["link-active"]' (mouseover)='aboutThis()'>
+                <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
                     <a [routerLink]='["/income"]'>
                         <span class='glyphicon glyphicon-usd'></span> Income recorded
                     </a>
                 </li>
-                <li [routerLinkActive]='["link-active"]' (mouseover)='aboutThis()'>
+                <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
                     <a [routerLink]='["/data-import"]'>
                         <span class='glyphicon glyphicon-file'></span> Data import
                     </a>
                 </li>
-                <li [routerLinkActive]='["link-active"]'>
+                <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
                     <a [routerLink]='["/positions"]'>
                         <span class='glyphicon glyphicon-th-list'></span> Positions
                     </a>
                 </li>
-                <li [routerLinkActive]='["link-active"]' (mouseover)='aboutThis()'>
+                <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
                     <a [routerLink]='["/profile"]'>
                         <span class='glyphicon glyphicon-file'></span> Asset profile
+                    </a>
+                </li>
+                <li>
+                    <a [routerLink]='["/getting-started"]'>
+                        <span class='glyphicon glyphicon-file'></span> Getting started
+                    </a>
+                </li>
+                <li *ngIf="showLogOut">
+                    <a [routerLink]='["/"]' (click)='logoutInvestor()'>
+                        <span class='glyphicon glyphicon-user'></span> Log out
                     </a>
                 </li>
             </ul>
