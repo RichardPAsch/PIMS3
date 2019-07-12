@@ -50,7 +50,7 @@
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-user"></span>
                     </span>
-                    <input type="text" class="form-control" placeholder="Email / login name" formControlName="loginName" [ngClass]="{'isInValid': submitted && formFields.loginName.errors}">
+                    <input type="text" class="form-control" placeholder="Email" formControlName="loginName" [ngClass]="{'isInValid': submitted && formFields.loginName.errors}">
                     <div *ngIf="submitted && formFields.loginName.errors" class="invalid-feedback">
                         <div *ngIf="formFields.loginName.required">Login name is required</div>
                     </div>
@@ -64,10 +64,19 @@
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-lock"></span>
                     </span>
-                    <input type="password" placeholder="Minimum - 6 characters" class="form-control" formControlName="password" [ngClass]="{'isInValid': submitted && formFields.password.errors}">
+                    <input type="password" id="pwrd" placeholder="6 char minimum" class="form-control" formControlName="password" [ngClass]="{'isInValid': submitted && formFields.password.errors}">
                     <div *ngIf="submitted && formFields.password.errors" class="invalid-feedback">
                         <div *ngIf="formFields.password.required">Password is required</div>
                         <div *ngIf="formFields.password.errors.minLength">Password requires at least 6 characters</div>
+                        <div id="divPwrd" *ngIf="formFields.password.errors.pwrd">
+                            <hr/>Weak password. At minimum, ensure at least one
+                            <ul>
+                                <li>character is uppercase</li>
+                                <li>character is lowercase</li>
+                                <li>character is a number</li>
+                                <li>character is special case (e.g. #)</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
