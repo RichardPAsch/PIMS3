@@ -1,0 +1,81 @@
+<header>
+    - Initializing P.I.M.S. for first time use -
+</header>
+
+<div class="col-sm-7">
+    <div class="container" style="width:100%">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h5>
+                    In order to efficiently, and as quickly as possible, setup this system for use, it is recommended that
+                    these steps be followed in the logical order presented; this may help address possible
+                    questions/concerns regarding menu or general P.I.M.S. functionality.
+                </h5>
+            </div>
+            <div class="panel-body">
+                <ol type="I">
+                    <li>
+                        <strong>'Registration'</strong> - if not already done so, sign up by creating an account. Your
+                        entered 'Username' will serve as your login.
+                    </li>
+                    <li>
+                        <strong>'Home - 'Login'</strong>' - Login using your prior Registration info. Upon a successful login, you will
+                        automatically be directed to the 'Income summary' page, which at this point will NOT yet contain any data. This
+                        is as expected.
+                    </li>
+                    <li>
+                        <strong>'Data import'</strong>' - Consists of two parts for populating the system: 1) inserting assets/positions, and
+                        2) revenue, both of which are available as selectable options, and require the use of existing templated XLSX spreadsheets.
+                        All columns are <em>required</em>, and should be populated as necessary. Both parts require proper file paths for import
+                        to work successfully. Asset/positions depend upon valid ticker symbols for fetching Profile data behind the scenes.
+                        Both revenue & position entries may be back-dated. Any problem tickers are most likely due to Profile generation, and
+                        may be resolved by skipping to 'Asset Profile' menu option.
+                        <ul>
+                            <li>
+                                Assets/Positions - Recover 'PositionsTemplate.xlsx' and populate with your portfolio holdings. Any problems,
+                                e.g., unkown tickers, accounts, etc., will be flagged and shown at the end of the import process. Unkown ticker
+                                symbols may be handled via the 'Asset profile' menu option. Positions marked with a status of "I" are inactive &
+                                represent assets that have been sold, e.g., called, or sold.
+                            </li>
+                            <li>
+                                Revenue - Recover 'RevenueTemplate.xlsx' and populate with your position earnings. Actual importing
+                                of this type data should be <u>deferred</u> until ALL Position data has been first verified as Ok via
+                                the 'Positions' menu option!
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>'Positions'</strong> - Presents ( and confirms) existing Positions for your portfolio via a grid. This page
+                        allows for limited column editing/updates as well as sorting. Once confirmed all data entries are complete, proceed with
+                        executing 'Data import (revenue)' as noted from the step above.
+                    </li>
+                    <li>
+                        <strong>'Asset profile'</strong> - Provides asset Profile information, serving the following multiple purposes:
+                        <ul>
+                            <li> Allows for a quick check (via web) of an Asset, returning dividend frequency, rate, etc. via 'Get Profile' </li>
+                            <li>
+                                Allows for creation of a customized Profile, via 'Create Profile', as may be necessary if 'Get Profile' is
+                                either unable to fetch any data for an entered ticker, or if returned data is incomplete. A customized Profile
+                                is unique to each investor and may be updated, via 'Update Profile' as needed.
+                            </li>
+                            <li> Allows for a quick check (via local storage) or update of a custom Asset via 'Get Saved Profile' </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>'Income recorded'</strong> - Presents all existing revenue saved. Income displayed may be filtered and/or
+                        sorted, as desired, and may date back to the last 5 years.
+                    </li>
+                    <li>
+                        <strong>'Income summary'</strong> - Presents existing revenue saved, in summary form, for up to the last 8 years.
+                        Some columns are available for filtering and/or sorting.
+                    </li>
+                    <li>
+                        <strong>'Income projections'</strong> - Allows for input of up to 5 different ticker symbols, as an an aid in
+                        determining projected monthly revenue. Optionally, both 'Price' and 'Rate' columns allow for manual edits, should your
+                        input data be more current.
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>

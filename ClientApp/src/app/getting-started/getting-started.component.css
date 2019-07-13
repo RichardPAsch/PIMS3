@@ -1,0 +1,15 @@
+header {
+    background-color: #222;
+    padding: 5px;
+    text-align: center;
+    font-size: 17px;
+    color: white;
+    width: 626px;
+    height: 34px;
+}
+.container {
+    margin-left: -28px;
+}
+h5{
+    font-size: 15px;
+}
