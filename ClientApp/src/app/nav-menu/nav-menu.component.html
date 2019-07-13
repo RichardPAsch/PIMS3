@@ -58,7 +58,7 @@
                         <span class='glyphicon glyphicon-file'></span> Asset profile
                     </a>
                 </li>
-                <li>
+                <li [routerLinkActive]='["link-active"]' (click)='showGettingStarted()'>
                     <a [routerLink]='["/getting-started"]'>
                         <span class='glyphicon glyphicon-file'></span> Getting started
                     </a>
