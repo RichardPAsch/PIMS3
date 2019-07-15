@@ -66,6 +66,7 @@ namespace PIMS3.Services
             CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
             investor.PasswordHash = passwordHash;
             investor.PasswordSalt = passwordSalt;
+            investor.Role = "Investor";  // TODO: deferred - ability to register as "Admin".
 
             _ctx.Investor.Add(investor);
             _ctx.SaveChanges();
