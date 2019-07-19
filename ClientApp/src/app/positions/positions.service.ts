@@ -31,4 +31,10 @@ export class PositionsService {
         let webApi = this.baseUrl + "/api/Position/UpdateEditedPositions";
         return this.http.put<any>(webApi, positionEdits);
     }
+
+
+    GetAssetClassDescAndCode(): Observable<string> {
+        let webApi = this.baseUrl + "/api/AssetClasses";
+        return this.http.get<string>(webApi);
+    }
 }
