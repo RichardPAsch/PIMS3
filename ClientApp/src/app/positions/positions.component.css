@@ -19,6 +19,9 @@ ul {
     height: 400px;
     /*height: 900px;*/
 }
+.btn.btn-link{
+    font-size: 15px;
+}
 /*.ag-cell-edit-input { // doesn't work for dropdown width
     width: 70px;
 }*/
