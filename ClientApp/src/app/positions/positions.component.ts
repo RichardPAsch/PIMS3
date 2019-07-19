@@ -17,28 +17,29 @@ export class PositionsComponent implements OnInit {
 
     positionCount: number;
     includeInactive: boolean = false;
+    assetClassDropDownCodes = new Array<string>();
 
     @ViewChild('agGridPositions')
     agGridPositions: AgGridNg2;
 
     ngOnInit() {
         this.fetchPositions(false);
+        this.processAssetClassDescriptions(true);
     }
 
     columnDefs = [
         { headerName: "Ticker", field: "tickerSymbol", sortable: true, filter: true, checkboxSelection: true, width: 98, resizable: true, editable: true },
         { headerName: "Description", field: "tickerDescription", width: 160, resizable: true },
         { headerName: "Account", field: "accountTypeDesc", width: 92, editable: true, resizable: true, filter: true },
-        { headerName: "Status", field: "status", width: 77,
-            sortable: true,
+        { headerName: "Status", field: "status", width: 77, sortable: true, resizable: true, editable: true },
+        { headerName: "Asset Class", field: "assetClass", width: 117, sortable: true, editable: true, filter: true,
+            filterParams: { applyButton: true },
             resizable: true,
-            editable: true,
             cellEditor: "agPopupSelectCellEditor",
             cellEditorParams: {
-                values: ["A", "I"]
+                values: this.assetClassDropDownCodes
             }
         },
-        { headerName: "Asset Class", field: "assetClass", width: 117, sortable: true, filter: true, filterParams: { applyButton: true}, resizable: true},
         { headerName: "Unpaid",
             field: "pymtDue",
             resizable: true,
@@ -138,6 +139,34 @@ export class PositionsComponent implements OnInit {
 
     processInactiveData(includeInactive: any) {
         this.fetchPositions(includeInactive);
+    }
+
+    processAssetClassDescriptions(initializeDropDown: boolean): void {
+        this.positionSvc.GetAssetClassDescAndCode()
+            .retry(1)
+            .subscribe(assetClassesArr => {
+                if (!initializeDropDown)
+                    alert(this.buildAssetClassInfo(assetClassesArr, false));
+                else 
+                    this.buildAssetClassInfo(assetClassesArr, true);
+            })
+    }
+
+
+    buildAssetClassInfo(assetClassesData: any, forDropDownUse: boolean): string {
+
+        if (!forDropDownUse) {
+            let descAndCodes = "";
+            for (let i = 1; i < assetClassesData.length; i++) {
+                descAndCodes += i + ". " + assetClassesData[i].code + " : " + assetClassesData[i].description + "\n";
+            }
+            return descAndCodes;
+        } else {
+            for (let i = 1; i < assetClassesData.length; i++) {
+                this.assetClassDropDownCodes.push(assetClassesData[i].code);
+            }
+            return;
+        }
     }
 
 }
