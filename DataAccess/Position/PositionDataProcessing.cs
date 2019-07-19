@@ -168,6 +168,18 @@ namespace PIMS3.DataAccess.Position
 
         }
 
+
+        // Data used for lookup/dropdown functionality in 'Positions' grid ONLY, hence, including here for now.
+        public IQueryable<AssetClassesVm> GetAssetClassDescriptions()
+        {
+            return _ctx.AssetClass.Select((ac) => new AssetClassesVm() {
+                Code = ac.Code,
+                Description = ac.Description
+            })
+            .OrderBy(ac => ac.Code)
+            .AsQueryable();
+        }
+
     }
 
 }
