@@ -55,7 +55,7 @@ namespace PIMS3.Controllers
             return null;
         }
 
-
+       
         private PositionsForEditVm[] MapToVm(dynamic[] sourcePositions)
         {
             var posVms = new List<PositionsForEditVm>();
