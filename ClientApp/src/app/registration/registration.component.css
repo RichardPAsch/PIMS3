@@ -17,3 +17,8 @@ h3{
     padding-left: 21px;
     color: orangered;
 }
+.jumbotron {
+    margin-top: 50px;
+    margin-bottom: 0;
+    width: 800px;
+}
