@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { first } from 'rxjs/operators';
 import { AuthenticationService } from '../shared/authentication.service';
 import { InvestorService } from '../shared/investor.service';
+import { Pims3Validations } from '../shared/pims3-validations';
 
 // TODO:
 //import { AlertService } from '../_services';
@@ -41,7 +42,7 @@ export class RegistrationComponent implements OnInit {
         firstName: new FormControl('', [Validators.required]),
         lastName: new FormControl('', [Validators.required]),
         loginName: new FormControl('', [Validators.required]),
-        password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+        password: new FormControl('', [Validators.required, Validators.minLength(6), Pims3Validations.passwordValidator()]),
     });
 
     get formFields() { return this.registrationForm.controls; }
