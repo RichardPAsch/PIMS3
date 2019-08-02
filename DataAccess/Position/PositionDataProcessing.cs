@@ -180,6 +180,20 @@ namespace PIMS3.DataAccess.Position
             .AsQueryable();
         }
 
+
+        public string FetchAssetId(string targetPositionId)
+        {
+            if (_ctx == null)
+                return null;
+            else
+            {
+                return _ctx.Position.Where(p => p.PositionId == targetPositionId)
+                           .FirstOrDefault().AssetId
+                           .ToString();
+            }
+
+        }
+
     }
 
 }
