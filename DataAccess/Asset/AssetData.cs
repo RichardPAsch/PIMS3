@@ -27,6 +27,35 @@ namespace PIMS3.DataAccess.Asset
                                  .AsQueryable();
             }
         }
+
+
+       public bool UpdateAssetClass(string passedAssetId, string editedAssetClassCode)
+        {
+            int updateCount = 0;
+
+            try
+            {
+                IQueryable<Data.Entities.Asset> assetToBeUpdated = _ctx.Asset.Where(a => a.AssetId == passedAssetId);
+                string updatedAssetClassId = _ctx.AssetClass.Where(ac => ac.Code == editedAssetClassCode)
+                                                            .FirstOrDefault()
+                                                            .AssetClassId;
+
+                assetToBeUpdated.First().AssetClassId = updatedAssetClassId;
+                updateCount = _ctx.SaveChanges();
+            }
+            catch (System.Exception ex)
+            {
+                var debug = ex;
+                return false;
+            }
+
+            return updateCount > 0 
+                ? true 
+                : false;
+        }
+
+
+       
     }
 }
 
