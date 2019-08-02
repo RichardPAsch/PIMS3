@@ -111,6 +111,7 @@ export class PositionsComponent implements OnInit {
             editedPosition.positionId = selectedPositionEdits[pos].positionId;
             editedPosition.status = selectedPositionEdits[pos].status;
             editedPosition.pymtDue = selectedPositionEdits[pos].pymtDue;
+            editedPosition.assetClass = selectedPositionEdits[pos].assetClass;
 
             editedPositions.push(editedPosition);
         }
