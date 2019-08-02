@@ -5,6 +5,8 @@ using PIMS3.DataAccess.Position;
 using PIMS3.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
+using PIMS3.DataAccess.Asset;
+
 
 namespace PIMS3.Controllers
 {
@@ -46,10 +48,15 @@ namespace PIMS3.Controllers
         [HttpPut("UpdateEditedPositions")]
         public ActionResult UpdateEditedPositions([FromBody] dynamic[] positionEdits)
         {
-            var positionDataAccessComponent = new PositionDataProcessing(_ctx);
+            PositionDataProcessing positionDataAccessComponent = new PositionDataProcessing(_ctx);
             var positionsUpdated = positionDataAccessComponent.UpdatePositions(MapToVm(positionEdits));
 
-            if (positionsUpdated == positionEdits.Length)
+            // Update referenced 'Asset' table should asset class have been modified.
+            string fetchedAssetId = positionDataAccessComponent.FetchAssetId(positionEdits.First().positionId.Value);
+            AssetData assetDataAccessComponent = new AssetData(_ctx);
+            bool assetClassUpdated = assetDataAccessComponent.UpdateAssetClass(fetchedAssetId, positionEdits.First().assetClass.Value);
+
+            if (positionsUpdated == positionEdits.Length && assetClassUpdated)
                 return Ok(positionsUpdated);
 
             return null;
@@ -58,7 +65,7 @@ namespace PIMS3.Controllers
        
         private PositionsForEditVm[] MapToVm(dynamic[] sourcePositions)
         {
-            var posVms = new List<PositionsForEditVm>();
+            List<PositionsForEditVm> posVms = new List<PositionsForEditVm>();
 
             for(var i =0; i < sourcePositions.Length; i++)
             {
@@ -66,6 +73,7 @@ namespace PIMS3.Controllers
                 {
                     PositionId = sourcePositions[i].positionId.Value,
                     Status = sourcePositions[i].status.Value,
+                    AssetClass = sourcePositions[i].assetClass.Value,
                     // Any change in 'PymtDue' results in true/false cast as a string -- not a boolean.
                     // TODO: able to specify type in agGrid dropdown?
                     PymtDue = sourcePositions[i].pymtDue.Value.GetType() == typeof(string)
