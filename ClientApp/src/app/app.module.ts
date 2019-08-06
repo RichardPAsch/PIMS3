@@ -27,6 +27,7 @@ import { JwtInterceptor } from '../app/shared/jwt.interceptor';
 import { HttpErrorInterceptor } from '../app/shared/http.error.interceptor';
 import { GlobalsService } from '../app/shared/globals.service';
 import { GettingStartedComponent } from './getting-started/getting-started.component';
+import { PasswordResetComponent } from './password-reset/password-reset.component';
 
 
 /* Notes:
@@ -52,7 +53,8 @@ import { GettingStartedComponent } from './getting-started/getting-started.compo
     IncomeComponent,
     ProfileComponent,
     RegistrationComponent,
-    GettingStartedComponent
+    GettingStartedComponent,
+    PasswordResetComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -75,6 +77,7 @@ import { GettingStartedComponent } from './getting-started/getting-started.compo
         { path: 'positions', component: PositionsComponent, canActivate: [AuthorizationGuard] },
         { path: 'profile', component: ProfileComponent, canActivate: [AuthorizationGuard] },
         { path: 'getting-started', component: GettingStartedComponent },  // informational only
+        { path: 'password-reset', component: PasswordResetComponent },
 
          // Otherwise redirect to home
          { path: '**', redirectTo: '' }
