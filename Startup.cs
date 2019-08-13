@@ -41,7 +41,7 @@ namespace PIMS3
             // for the lifetime of a request (scoped).
             services.AddScoped<IIncomeRepository, IncomeRepository>(); // TODO: no longer needed ?
             services.AddScoped<InvestorDataProcessing>();
-            services.AddScoped<IInvestorSvc, InvestorSvc>();
+            services.AddScoped<InvestorSvc>();
             services.AddScoped<AppSettings>();
 
             services.AddCors();
@@ -71,7 +71,7 @@ namespace PIMS3
                 {
                     OnTokenValidated = ctx =>
                     {
-                        var investorService = ctx.HttpContext.RequestServices.GetRequiredService<IInvestorSvc>();
+                        var investorService = ctx.HttpContext.RequestServices.GetRequiredService<InvestorSvc>();
                         string investorId = ctx.Principal.Identity.Name;
                         Investor investor = investorService.GetById(investorId);
                         if (investor == null)
