@@ -23,11 +23,11 @@ namespace PIMS3.Controllers
     public class InvestorController : ControllerBase
     {
         private readonly PIMS3Context _context;
-        private IInvestorSvc _investorSvc;
+        private InvestorSvc _investorSvc;
         private readonly AppSettings _appSettings;
         
 
-        public InvestorController(PIMS3Context context, IInvestorSvc investorSvc, IOptions<AppSettings> appSettings)
+        public InvestorController(PIMS3Context context, InvestorSvc investorSvc, IOptions<AppSettings> appSettings)
         {
             _context = context;
             _investorSvc = investorSvc;
@@ -43,6 +43,30 @@ namespace PIMS3.Controllers
             InvestorDataProcessing investorDataAccessComponent = new InvestorDataProcessing(_context);
             IQueryable<InvestorVm> investors = MapToVm(investorDataAccessComponent.RetreiveAll());
             return Ok(investors);
+        }
+
+        [HttpGet("{loginName}/{oldPassword}/{newPassword}")]
+        public ActionResult GetInvestorForPasswordEditVerification(string loginName, string oldPassword, string newPassword)
+        {
+            InvestorDataProcessing investorDataAccessComponent = new InvestorDataProcessing(_context);
+            Investor fetchedInvestor = investorDataAccessComponent.RetreiveByName(loginName);
+
+            bool isValidPassword = _investorSvc.VerifyPasswordHash(oldPassword, fetchedInvestor.PasswordHash, fetchedInvestor.PasswordSalt);
+            if (isValidPassword)
+            {
+                _investorSvc.CreatePasswordHash(newPassword, out byte[] passwordHash, out byte[] passwordSalt);
+                Investor entityToUpdate = _context.Investor.Where(i => i.LoginName == loginName).First();
+                entityToUpdate.PasswordHash = passwordHash;
+                entityToUpdate.PasswordSalt = passwordSalt;
+                
+                investorDataAccessComponent.Update(entityToUpdate); 
+            }
+            else
+            {
+                return BadRequest("Unable to verify password.");
+            }
+
+            return Ok(fetchedInvestor); 
         }
 
 
@@ -149,87 +173,6 @@ namespace PIMS3.Controllers
         {
             return _context.Investor.Any(i => i.InvestorId == id);
         }
-
-
-        // == Default template: =========================================================
-        // GET: api/Investor/5
-        //[HttpGet("{id}")]
-        //public async Task<IActionResult> GetAssetInvestor([FromRoute] string id)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    var assetInvestor = await _context.AssetInvestor.FindAsync(id);
-
-        //    if (assetInvestor == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return Ok(assetInvestor);
-        //}
-
-        //// PUT: api/Investor/5
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutAssetInvestor([FromRoute] string id, [FromBody] AssetInvestor assetInvestor)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    if (id != assetInvestor.AssetId)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    _context.Entry(assetInvestor).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!AssetInvestorExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
-
-
-        //// DELETE: api/Investor/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteAssetInvestor([FromRoute] string id)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    var assetInvestor = await _context.AssetInvestor.FindAsync(id);
-        //    if (assetInvestor == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.AssetInvestor.Remove(assetInvestor);
-        //    await _context.SaveChangesAsync();
-
-        //    return Ok(assetInvestor);
-        //}
-
-
-
 
 
 
