@@ -11,7 +11,7 @@
             <ul class='nav navbar-nav'>
                 <!--routerLinkActive :  Angular directive allowing for addition of a CSS class to an element when the link's route becomes active.
                     Note: Changes should also be reflected in 'app.module' - RouterModule.
-    -->
+                 -->
                 <li *ngIf="showLogIn" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
                     <a [routerLink]='["/"]'>
                         <span class='glyphicon glyphicon-home'></span> Home - Login
@@ -63,7 +63,7 @@
                         <span class='glyphicon glyphicon-file'></span> Getting started
                     </a>
                 </li>
-                <li [routerLinkActive]='["link-active"]' (click)='processPasswordReset()'>
+                <li *ngIf="showPasswordReset" [routerLinkActive]='["link-active"]'>
                     <a [routerLink]='["/password-reset"]'>
                         <span class='glyphicon glyphicon-file'></span> Password reset
                     </a>
