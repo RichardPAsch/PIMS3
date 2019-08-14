@@ -16,7 +16,7 @@ namespace PIMS3.Services
         available via 'InvestorDataProcessing'.
     */
 
-    public class InvestorSvc : IInvestorSvc
+    public class InvestorSvc 
     {
 
         private readonly PIMS3Context _ctx;
@@ -32,6 +32,13 @@ namespace PIMS3.Services
         public Investor GetById(string id)
         {
             return _ctx.Investor.Find(id);
+        }
+
+
+        public Investor GetByLogin(string loginName)
+        {
+            return _ctx.Investor.Where(i => i.LoginName == loginName)
+                       .FirstOrDefault();
         }
 
 
@@ -97,7 +104,7 @@ namespace PIMS3.Services
 
         #region Helpers
 
-            private static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+            public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
             {
                 if (password == null) throw new ArgumentNullException("password");
                 if (string.IsNullOrWhiteSpace(password)) throw new ArgumentException(NULL_OR_WS_MSG, "password");
@@ -109,7 +116,7 @@ namespace PIMS3.Services
                 }
             }
 
-            private static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
+            public bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
             {
                 if (password == null) throw new ArgumentNullException("password");
                 if (storedHash == null) throw new ArgumentNullException("storedHash");
@@ -131,10 +138,10 @@ namespace PIMS3.Services
                 return true;
             }
 
-        public Investor GetById()
-        {
-            throw new NotImplementedException();
-        }
+            public Investor GetById()
+            {
+                throw new NotImplementedException();
+            }
 
         #endregion
 
