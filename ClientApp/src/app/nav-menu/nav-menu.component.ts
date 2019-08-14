@@ -23,6 +23,7 @@ export class NavMenuComponent implements OnInit {
     showLogOut: boolean = true;
     showLogIn: boolean = true;
     showRegistration: boolean = true;
+    showPasswordReset: boolean = false;
 
 
     ngOnInit() {
@@ -32,10 +33,12 @@ export class NavMenuComponent implements OnInit {
         this.authenticationSvc.loggedOut.subscribe(isLoggedOutValue => {
             this.showLogOut = isLoggedOutValue
         });
+
         // Avoid display if login not yet completed.
         this.authenticationSvc.investorLoginName.subscribe(login => {
             if (login != "") {
                 this.nameDisplayed = "Welcome - " + login;
+                this.showPasswordReset = true;
             }
         }); 
     }
@@ -48,6 +51,7 @@ export class NavMenuComponent implements OnInit {
         this.router.navigate(['/']);
 
         this.nameDisplayed = "";
+        this.showPasswordReset = false;
         return;
     }
 
