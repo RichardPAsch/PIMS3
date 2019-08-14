@@ -45,7 +45,7 @@
                 </li>
                 <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
                     <a [routerLink]='["/data-import"]'>
-                        <span class='glyphicon glyphicon-file'></span> Data import
+                        <span class='glyphicon glyphicon-import'></span> Data import
                     </a>
                 </li>
                 <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
@@ -65,12 +65,12 @@
                 </li>
                 <li *ngIf="showPasswordReset" [routerLinkActive]='["link-active"]'>
                     <a [routerLink]='["/password-reset"]'>
-                        <span class='glyphicon glyphicon-file'></span> Password reset
+                        <span class='glyphicon glyphicon-edit'></span> Password reset
                     </a>
                 </li>
                 <li *ngIf="showLogOut">
                     <a [routerLink]='["/"]' (click)='logoutInvestor()'>
-                        <span class='glyphicon glyphicon-user'></span> Log out
+                        <span class='glyphicon glyphicon-log-out'></span> Log out
                     </a>
                 </li>
             </ul>

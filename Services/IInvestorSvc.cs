@@ -11,5 +11,6 @@ namespace PIMS3.Services
         void Update(Investor investor, string password = null);
         void Delete(int id);
         Investor GetById(string id);
+        bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt);
     }
 }
