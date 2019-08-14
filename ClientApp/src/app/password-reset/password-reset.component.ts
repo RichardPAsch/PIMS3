@@ -3,7 +3,6 @@ import { FormGroup, Validators, FormControl } from '@angular/forms';
 import { Pims3Validations } from '../shared/pims3-validations';
 import { AuthenticationService } from '../shared/authentication.service';
 import { InvestorService } from '../shared/investor.service';
-//import { first } from 'rxjs/operators';
 import { HttpErrorResponse } from '@angular/common/http';
 import { PasswordResetService } from '../password-reset/password-reset.service';
 
