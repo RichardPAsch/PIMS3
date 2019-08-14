@@ -7,4 +7,6 @@ export class Investor {
     lastName: string;   
     token?: string;
     role: string;
+    passwordHash: string;
+    passwordSalt: string;
 }
