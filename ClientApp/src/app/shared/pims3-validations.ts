@@ -1,4 +1,4 @@
-import { ValidatorFn, AbstractControl } from '@angular/forms';
+import { ValidatorFn, AbstractControl, FormGroup } from '@angular/forms';
 
 export class Pims3Validations {
 
@@ -53,6 +53,42 @@ export class Pims3Validations {
     }
 
 
+    static divPayMonthsValidator(): ValidatorFn {
+
+        return (control: AbstractControl): { [key: string]: any } | null => {
+            if (control != null) {
+                let validationResult = this.validateDividendPaymentMonths(control.value);
+                return validationResult ? null : { divPayMonths: { value: "bad month(s)" } };
+            };
+            return null;
+        }
+    }
+
+
+    static passwordValidator(): ValidatorFn {
+
+        return (control: AbstractControl): { [key: string]: any } | null => {
+            if (control != null && control.value != "") {
+                let passwordValidationResult = this.validatePassword(control.value);
+                return passwordValidationResult ? null : { pwrd: { value: "bad password" } };
+            }
+        };
+    }
+
+
+    static passwordConfirmationValidator(): ValidatorFn {
+
+        return (control: AbstractControl): { [key: string]: any } | null => {
+            if (control != null && control.value != "") {
+                let passwordValidationResult = this.validatePassword(control.value);
+                return passwordValidationResult
+                    ? null
+                    : { newPwrd: { value: "bad password confirmation" } };
+            }
+        };
+    }
+
+
     private static validateDividendPaymentMonths(pymtMonths: string): boolean {
 
         let isValidMonths: boolean;
@@ -77,9 +113,9 @@ export class Pims3Validations {
                 months += pymtMonths.charAt(i);
                 isValidMonths = true;
             }
-            else 
+            else
                 isValidMonths = false;
-        } 
+        }
 
 
         // Format checks.
@@ -88,7 +124,7 @@ export class Pims3Validations {
             if (months.length == 2 && parseInt(months) <= 12) {
                 isValidMonths = true;
             }
-            else 
+            else
                 isValidMonths = false;
         }
         else {
@@ -119,11 +155,11 @@ export class Pims3Validations {
         if (lowercaseRegex.test(pwrd)) { hasLower = true; }
 
         // One upper case letter.
-        const uppercaseRegex = new RegExp("(?=.*[A-Z])"); 
+        const uppercaseRegex = new RegExp("(?=.*[A-Z])");
         if (uppercaseRegex.test(pwrd)) { hasUpper = true; }
 
         // One number.
-        const numRegex = new RegExp("(?=.*\\d)"); 
+        const numRegex = new RegExp("(?=.*\\d)");
         if (numRegex.test(pwrd)) { hasNum = true; }
 
         // One special char.
@@ -141,29 +177,6 @@ export class Pims3Validations {
         } else {
             return true;
         }
-    }
-
-
-    static divPayMonthsValidator(): ValidatorFn {
-
-        return (control: AbstractControl): { [key: string]: any } | null => {
-            if (control != null) {
-                let validationResult = this.validateDividendPaymentMonths(control.value);
-                return validationResult ? null : { divPayMonths: { value: "bad month(s)" } };
-            };
-            return null;
-        }
-    }
-
-
-    static passwordValidator(): ValidatorFn {
-
-        return (control: AbstractControl): { [key: string]: any } | null => {
-            if (control != null && control.value != "") {
-                let passwordValidationResult = this.validatePassword(control.value);
-                return passwordValidationResult ? null : { pwrd: { value: "bad password" } };
-            }
-        };
     }
 
 
