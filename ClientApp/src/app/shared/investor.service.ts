@@ -30,6 +30,11 @@ export class InvestorService {
         //...get<User[]>(`${config.apiUrl}/users`);
     }
 
+    updateLogin(login: string, oldPwrd: string, newPwrd: string) {
+        let webApiUri = this.baseUrl + "/api/Investor/" + login + "/" + oldPwrd + "/" + newPwrd;
+        return this.http.get<Investor>(webApiUri);
+    }
+
     register(investor: Investor) {
         investor.investorId = Guid.create().toString();
         let webApiUri = this.baseUrl + "/api/Investor/Register";
