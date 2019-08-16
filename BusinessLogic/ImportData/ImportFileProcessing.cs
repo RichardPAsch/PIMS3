@@ -221,7 +221,6 @@ namespace PIMS3.BusinessLogic.ImportData
                                     if (positionsToBeSaved == null)
                                         return null;
 
-                                    // TODO: AssetClassId hard-coded to default: 'common stock'. Make available via XLSX? 
                                     assetsToCreateList.Add(new AssetCreationVm
                                     {
                                         AssetId = Guid.NewGuid().ToString(),  
