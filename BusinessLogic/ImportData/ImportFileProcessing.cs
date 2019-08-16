@@ -151,7 +151,6 @@ namespace PIMS3.BusinessLogic.ImportData
             List<AssetCreationVm> assetsToCreateList = new List<AssetCreationVm>();
             var profileDataAccessComponent = new ProfileDataProcessing(_ctx);
             var existingProfileId = string.Empty;
-            // TODO: AssetClassId hard-coded to default: 'common stock'. Make available via XLSX? ** 12.27.18
             var existingAssetClassId = "6215631D-5788-4718-A1D0-A2FC00A5B1A7"; ;
             var newAssetId = Guid.NewGuid().ToString();
             List<Position> positionsToBeSaved = null;
@@ -242,6 +241,9 @@ namespace PIMS3.BusinessLogic.ImportData
                                     }
                                     else
                                     {
+                                        // Dividend freq, months, & payDay all may be edited via 'Asset Profile'
+                                        // functionality for any created *customized* Profile only. Any standard
+                                        // Profile may NOT be edited this way, as this would impact many investors.
                                         Profile newProfile = new Profile
                                         {
                                             ProfileId = webProfileData.ProfileId, 
@@ -251,9 +253,9 @@ namespace PIMS3.BusinessLogic.ImportData
                                             CreatedBy = null, 
                                             DividendRate = webProfileData.DividendRate > 0 ? webProfileData.DividendRate : 0, 
                                             ExDividendDate = webProfileData.ExDividendDate ?? new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day), 
-                                            DividendFreq = webProfileData.DividendFreq ?? "M", // TODO: allow user to change
-                                            DividendMonths = null,                             // TODO: allow user to change 
-                                            DividendPayDay = 15,                               // TODO: allow user to change  
+                                            DividendFreq = webProfileData.DividendFreq ?? "M", 
+                                            DividendMonths = null,                            
+                                            DividendPayDay = 15,                           
                                             EarningsPerShare = webProfileData.EarningsPerShare > 0  
                                                 ? webProfileData.EarningsPerShare 
                                                 : 0,
