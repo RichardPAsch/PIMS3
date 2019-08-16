@@ -5,6 +5,7 @@ import { first } from 'rxjs/operators';
 import { AuthenticationService } from '../shared/authentication.service';
 import { InvestorService } from '../shared/investor.service';
 import { Pims3Validations } from '../shared/pims3-validations';
+import { HttpErrorResponse } from '@angular/common/http';
 
 // TODO:
 //import { AlertService } from '../_services';
@@ -69,8 +70,13 @@ export class RegistrationComponent implements OnInit {
                 //this.alertService.success('Registration successful', true);  // TODO.
                 this.router.navigate(['/']);
             },
-            error => {  // TODO: error = undefined here.
-                alert('Unable to complete registration. \nPossible duplicate login name or system error, retry using an alternative login.');
+            (apiError: HttpErrorResponse) => {
+                if (apiError.error instanceof Error) {
+                    alert('Error completing registration; possible network issue due to:\n ' + apiError.error.message);
+                } else {
+                    alert('Unable to complete registration.\nPossible duplicate login name or system error, retry using an alternative login.' + apiError.message);
+                }
+
                 //this.alertService.error(error);  // TODO.
                 this.loading = false;
             });
