@@ -11,6 +11,7 @@ using PIMS3.Data;
 using PIMS3.BusinessLogic.PositionData;
 using PIMS3.DataAccess.IncomeData;
 using Microsoft.AspNetCore.Authorization;
+using PIMS3.BusinessLogic.Income;
 
 
 namespace PIMS3.Controllers
@@ -27,6 +28,7 @@ namespace PIMS3.Controllers
         private decimal[] _incomeCount;
         private IList<YtdRevenueSummaryVm> _tempListing = new List<YtdRevenueSummaryVm>();
         private readonly PIMS3Context _ctx;
+        public readonly IncomeProcessing _incomeProcessingBusLogicComponent;
 
 
         public IncomeController(IIncomeRepository repo, ILogger<IncomeController> logger, PIMS3Context ctx)
@@ -34,6 +36,7 @@ namespace PIMS3.Controllers
             _repo = repo;
             _logger = logger;
             _ctx = ctx;
+            _incomeProcessingBusLogicComponent = new IncomeProcessing(_ctx);
         }
 
 
@@ -43,11 +46,12 @@ namespace PIMS3.Controllers
         {
             // isRevenueSummary param used only for URL routing here vs. GetRevenue().
             IEnumerable<Income> incomeData;
+            IncomeProcessing blComponent = new IncomeProcessing(_ctx);
             try
             {
                 _logger.LogInformation("Attempting GetRevenueSummary().");
                 incomeData = _repo.GetRevenueSummaryForYear(yearsToBackDate, Id);
-                var ytdRevenueSummary = CalculateRevenueTotals(incomeData.AsQueryable());
+                IEnumerable<YtdRevenueSummaryVm> ytdRevenueSummary = blComponent.CalculateRevenueTotals(incomeData.AsQueryable());
                 _incomeCount = new decimal[ytdRevenueSummary.Count()];
                 ytdRevenueSummary.ToList().ForEach(CalculateAverages);
                 _logger.LogInformation("Successfull YTD income summary via GetRevenueSumary()");
@@ -97,64 +101,21 @@ namespace PIMS3.Controllers
 
         #region Helpers
 
-            // TODO: Move to busLogic compenent !
-            private static IEnumerable<YtdRevenueSummaryVm> CalculateRevenueTotals(IQueryable<Income> recvdIncome)
-                {
-                    IList<YtdRevenueSummaryVm> averages = new List<YtdRevenueSummaryVm>();
-                    var currentMonth = 0;
-                    var total = 0M;
-                    var counter = 0;
+        private void CalculateAverages(YtdRevenueSummaryVm item)
+        {
+            // YTD & 3Mos rolling averages.
+            _runningYtdTotal += item.AmountRecvd;
+            _incomeCount[_counter - 1] = item.AmountRecvd;
+            item.YtdAverage = Math.Round(_runningYtdTotal / _counter, 2);
+            if (_counter >= 3)
+            {
+                item.Rolling3MonthAverage = Math.Round((item.AmountRecvd + _incomeCount[_counter - 2] + _incomeCount[_counter - 3]) / 3, 2);
+            }
+            _tempListing.Add(item);
+            _counter += 1;
+        }
 
-                    foreach (var income in recvdIncome)
-                    {
-                        if (currentMonth != DateTime.Parse(income.DateRecvd.ToString(CultureInfo.InvariantCulture)).Month)
-                        {
-                            // Last record for currently processed month.
-                            if (total > 0)
-                            {
-                                averages.Add(new YtdRevenueSummaryVm
-                                {
-                                    AmountRecvd = total,
-                                    MonthRecvd = currentMonth
-                                });
-                                total = 0M;
-                            }
-                        }
-
-                        currentMonth = DateTime.Parse(income.DateRecvd.ToString(CultureInfo.InvariantCulture)).Month;
-                        total += income.AmountRecvd;
-                        counter++;
-
-                        // Add last record.
-                        if (counter == recvdIncome.Count())
-                        {
-                            averages.Add(new YtdRevenueSummaryVm
-                            {
-                                AmountRecvd = total,
-                                MonthRecvd = DateTime.Parse(income.DateRecvd.ToString(CultureInfo.InvariantCulture)).Month
-                            });
-                        }
-
-                    }
-
-                    return averages.AsQueryable();
-                }
-
-            private void CalculateAverages(YtdRevenueSummaryVm item)
-                {
-                    // YTD & 3Mos rolling averages.
-                    _runningYtdTotal += item.AmountRecvd;
-                    _incomeCount[_counter - 1] = item.AmountRecvd;
-                    item.YtdAverage = Math.Round(_runningYtdTotal / _counter, 2);
-                    if (_counter >= 3)
-                    {
-                        item.Rolling3MonthAverage = Math.Round((item.AmountRecvd + _incomeCount[_counter - 2] + _incomeCount[_counter - 3]) / 3, 2);
-                    }
-                    _tempListing.Add(item);
-                    _counter += 1;
-                }
-
-            private IncomeForEditVm[] MapToVm(dynamic sourceData)
+        private IncomeForEditVm[] MapToVm(dynamic sourceData)
             {
                 // Mapping only necessary fields.
                 var listing = new List<IncomeForEditVm>();
