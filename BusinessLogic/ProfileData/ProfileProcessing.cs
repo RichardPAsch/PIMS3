@@ -28,7 +28,6 @@ namespace PIMS3.BusinessLogic.ProfileData
 
         private void CalculateDividendYield()
         {
-            // TODO: ** duplicate of ImportFileProcessing.CalculateDividendYield(). **
             decimal calculatedAnuualizedDividendRate = 0M;
             if (profileToBeInitialized.DividendRate > 0 && profileToBeInitialized.UnitPrice > 0)
             {
