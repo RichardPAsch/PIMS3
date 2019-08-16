@@ -82,11 +82,13 @@ export class DataImportComponent {
                             }
                         },
                         (err: HttpErrorResponse) => {
+                            // 'Observable' response stream error or failure may result from 1) Http request, or 2) parsing of response.
+                            // Error either an object, or the response itself.
                             if (err.error instanceof Error) {
-                                // TODO: 11.5.18 - just have 1 alert, but use logging to log different issues.
+                                // Error object containing info.
                                 alert('Error saving import data (network?) due to: ' + err.error.message);
                             } else {
-                                //Backend returns unsuccessful response codes such as 404, 500 etc.
+                                //Backend returns unsuccessful error response codes such as 404, 500 etc.
                                 alert('Error saving Income import data (server?) with status of : ' + err.message);
                             }
                         });
@@ -102,10 +104,8 @@ export class DataImportComponent {
                         },
                         (err: HttpErrorResponse) => {
                             if (err.error instanceof Error) {
-                                // TODO: 11.5.18 - just have 1 alert, but use logging to log different issues.
                                 alert('Error saving import data (network?) due to: ' + err.error.message);
                             } else {
-                                //Backend returns unsuccessful response codes such as 404, 500 etc.
                                 alert('Error saving Position import data (server?) due to :\n ' + err.error.message);
                             }
                         });
