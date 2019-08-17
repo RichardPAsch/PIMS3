@@ -39,7 +39,7 @@ namespace PIMS3
 
             // Configure DI for application services, e.g.,Service, interface & implementation(s), available 
             // for the lifetime of a request (scoped).
-            services.AddScoped<IIncomeRepository, IncomeRepository>(); // TODO: no longer needed ?
+            services.AddScoped<IIncomeRepository, IncomeRepository>(); 
             services.AddScoped<InvestorDataProcessing>();
             services.AddScoped<InvestorSvc>();
             services.AddScoped<AppSettings>();
