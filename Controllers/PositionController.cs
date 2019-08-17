@@ -75,7 +75,6 @@ namespace PIMS3.Controllers
                     Status = sourcePositions[i].status.Value,
                     AssetClass = sourcePositions[i].assetClass.Value,
                     // Any change in 'PymtDue' results in true/false cast as a string -- not a boolean.
-                    // TODO: able to specify type in agGrid dropdown?
                     PymtDue = sourcePositions[i].pymtDue.Value.GetType() == typeof(string)
                                             ? bool.Parse(sourcePositions[i].pymtDue.Value)
                                             : sourcePositions[i].pymtDue.Value
