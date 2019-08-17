@@ -44,8 +44,9 @@ namespace PIMS3.Data.Entities
         public DateTime LastUpdate { get; set; }
 
 
-        // TODO: set [Required] attr? If set, will be part of ModelState validation.
+        // Design spec for 'Position' db field -> no nulls allowed.
         // Date Position added to asset; used in Revenue editing (back-dating checks)
+        [Required]
         public DateTime PositionDate { get; set; }
 
 
