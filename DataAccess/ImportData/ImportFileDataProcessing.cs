@@ -85,7 +85,6 @@ namespace PIMS3.DataAccess.ImportData
 
                 if (assetListingToSave == null)
                 {
-                    // TODO: Populate with any error msg if no exception tickers.
                     importVmToSave.ExceptionTickers = _exceptionTickers;
                     return importVmToSave;
                 }
