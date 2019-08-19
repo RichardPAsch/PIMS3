@@ -31,7 +31,12 @@ export class PositionsComponent implements OnInit {
         { headerName: "Ticker", field: "tickerSymbol", sortable: true, filter: true, checkboxSelection: true, width: 98, resizable: true, editable: true },
         { headerName: "Description", field: "tickerDescription", width: 160, resizable: true },
         { headerName: "Account", field: "accountTypeDesc", width: 92, editable: true, resizable: true, filter: true },
-        { headerName: "Status", field: "status", width: 77, sortable: true, resizable: true, editable: true },
+        { headerName: "Status", field: "status", width: 77, sortable: true, resizable: true, editable: true,
+            cellEditor: "agPopupSelectCellEditor",
+            cellEditorParams: {
+                values: ["A", "I"]
+            }
+        },
         { headerName: "Asset Class", field: "assetClass", width: 117, sortable: true, editable: true, filter: true,
             filterParams: { applyButton: true },
             resizable: true,
