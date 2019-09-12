@@ -46,8 +46,9 @@ namespace PIMS3.Controllers
 
 
         [HttpPut("UpdateEditedPositions")]
-        public ActionResult UpdateEditedPositions([FromBody] dynamic[] positionEdits)
+        public ActionResult<int> UpdateEditedPositions([FromBody] dynamic[] positionEdits)
         {
+            int recordsUpdatedCount = 0;
             PositionDataProcessing positionDataAccessComponent = new PositionDataProcessing(_ctx);
             var positionsUpdated = positionDataAccessComponent.UpdatePositions(MapToVm(positionEdits));
 
@@ -56,10 +57,12 @@ namespace PIMS3.Controllers
             AssetData assetDataAccessComponent = new AssetData(_ctx);
             bool assetClassUpdated = assetDataAccessComponent.UpdateAssetClass(fetchedAssetId, positionEdits.First().assetClass.Value);
 
-            if (positionsUpdated == positionEdits.Length && assetClassUpdated)
-                return Ok(positionsUpdated);
-
-            return null;
+            if(positionEdits.Length > 0)
+            {
+                recordsUpdatedCount = positionEdits.Length;
+            }
+           
+            return Ok(recordsUpdatedCount);
         }
 
        
