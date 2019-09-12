@@ -132,13 +132,14 @@ export class PositionsComponent implements OnInit {
                     alert("Error updating Position(s).");
             },
             (apiError: HttpErrorResponse) => {
-                if (apiError.error instanceof Error)
+                if (apiError.error instanceof Error) {
                     alert("Error processing Position update(s) : \network or application error. Please try later.");
+                }
                 else {
                     alert("Error processing Position update(s) due to : \n" + apiError.message);
                 }
             }
-         ) // end subscribe()
+            ); // end subscribe()
 
     }
 
