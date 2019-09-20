@@ -122,7 +122,7 @@ namespace PIMS3
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            logFilePath = env.ContentRootPath + @"\Logs\PIMS3_log.txt";
+            logFilePath = env.ContentRootPath + @"\Logs\PIMS3_log_.txt";
             ConfigureLogger();
 
             if (env.IsDevelopment())
