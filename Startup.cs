@@ -14,17 +14,24 @@ using PIMS3.Helpers;
 using PIMS3.Services;
 using System.Threading.Tasks;
 using PIMS3.Data.Entities;
+using Serilog;
+using Serilog.Events;
+using System;
+
 
 namespace PIMS3
 {
     public class Startup
     {
+        public string logFilePath = string.Empty;
+        public IConfiguration Configuration { get; }
+
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
-
-        public IConfiguration Configuration { get; }
+        
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -115,6 +122,9 @@ namespace PIMS3
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            logFilePath = env.ContentRootPath + @"\Logs\PIMS3_log.txt";
+            ConfigureLogger();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -164,5 +174,35 @@ namespace PIMS3
             });
 
         }
+
+
+        public void ConfigureLogger()
+        {
+            /* -- Configures 3rd-party logging library: 'Serilog' --
+               Logging event levels may only be raised for sinks, not lowered.
+               Event-level hierarchy: [ Verbose -> Debug -> Information -> Warning -> Error -> Fatal ].
+            */
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .Enrich.WithEnvironmentUserName()
+                .Enrich.With(new SystemExceptionEnricher())
+                .WriteTo.File(logFilePath,
+                               rollingInterval: RollingInterval.Day,
+                               outputTemplate: "[{Timestamp: MM-dd-yyyy HH:mm:ss} {Level:u3}]  {Message:lj} " + "{Properties:j}{NewLine}",
+                               // {Message:lj} - format options cause data embedded in the message to be output as JSON (j), except for string literals, 
+                               //                which are output as-is.
+                               // {Level:u3} or {Level:w3} - formats three-character upper- or lowercase level names, respectively.
+                               // {Properties:j} - added to the output template for including additional context information.
+                               // {Exception} - removed to avoid verbose StackTrace data.
+                               retainedFileCountLimit: 5,
+                               fileSizeLimitBytes: 1_000_000,
+                               rollOnFileSizeLimit: true,
+                               flushToDiskInterval: TimeSpan.FromSeconds(1))
+                .CreateLogger();
+
+            Log.Information("=== Starting 'PIMS3' service ===");
+        }
+
     }
 }
