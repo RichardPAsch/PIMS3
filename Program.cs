@@ -8,8 +8,7 @@ namespace PIMS3
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build()
-                                      .Run();
+            CreateWebHostBuilder(args).Build().Run();
         }
 
         // ** TODO: **
@@ -18,7 +17,12 @@ namespace PIMS3
         // HTTP requests, forwarding them to 'Kestrel' after initial handling and security checks.
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+
             WebHost.CreateDefaultBuilder(args)
                    .UseStartup<Startup>();
+
+
+        
+
     }
 }
