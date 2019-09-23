@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-
+using Serilog;
 
 namespace PIMS3
 {
@@ -19,7 +19,8 @@ namespace PIMS3
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
 
             WebHost.CreateDefaultBuilder(args)
-                   .UseStartup<Startup>();
+                   .UseStartup<Startup>()
+                   .UseSerilog(); // set Serilog as the logging provider.
 
 
         
