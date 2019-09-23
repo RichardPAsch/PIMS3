@@ -6,12 +6,12 @@ using Microsoft.Extensions.Logging;
 using PIMS3.Data.Entities;
 using PIMS3.Data.Repositories.IncomeSummary;
 using PIMS3.ViewModels;
-using System.Globalization;
 using PIMS3.Data;
 using PIMS3.BusinessLogic.PositionData;
 using PIMS3.DataAccess.IncomeData;
 using Microsoft.AspNetCore.Authorization;
 using PIMS3.BusinessLogic.Income;
+using Serilog;
 
 
 namespace PIMS3.Controllers
@@ -49,7 +49,6 @@ namespace PIMS3.Controllers
             IncomeProcessing blComponent = new IncomeProcessing(_ctx);
             try
             {
-                _logger.LogInformation("Attempting GetRevenueSummary().");
                 incomeData = _repo.GetRevenueSummaryForYear(yearsToBackDate, Id);
                 IEnumerable<YtdRevenueSummaryVm> ytdRevenueSummary = blComponent.CalculateRevenueTotals(incomeData.AsQueryable());
                 _incomeCount = new decimal[ytdRevenueSummary.Count()];
@@ -59,7 +58,8 @@ namespace PIMS3.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Unable to fetch/calculate income via GetRevenueSummary() due to: {ex}");
+                Log.Error($"Unable to fetch/calculate income due to: {ex.Message.ToString()}");
+               // _logger.LogError($"Unable to fetch/calculate income via GetRevenueSummary() due to: {ex}");
                 return null;
             }
         }
