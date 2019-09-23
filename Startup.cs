@@ -188,6 +188,7 @@ namespace PIMS3
                 .Enrich.WithEnvironmentUserName()
                 .Enrich.With(new SystemExceptionEnricher())
                 .WriteTo.File(logFilePath,
+                               shared: true, // Enable multi-process shared log files.
                                rollingInterval: RollingInterval.Day,
                                outputTemplate: "[{Timestamp: MM-dd-yyyy HH:mm:ss} {Level:u3}]  {Message:lj} " + "{Properties:j}{NewLine}",
                                // {Message:lj} - format options cause data embedded in the message to be output as JSON (j), except for string literals, 
