@@ -17,6 +17,7 @@ using PIMS3.Data.Entities;
 using Serilog;
 using Serilog.Events;
 using System;
+using PIMS3.Controllers;
 
 
 namespace PIMS3
@@ -125,6 +126,15 @@ namespace PIMS3
             logFilePath = env.ContentRootPath + @"\Logs\PIMS3_log_.txt";
             ConfigureLogger();
 
+            // Set for possible later reference.
+            CommonSvc.LogFile = logFilePath;
+         
+            // testing...
+            //var ctrl = new LoggingController();
+            //ctrl.WriteToFile(null);
+
+           
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -187,7 +197,7 @@ namespace PIMS3
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
                 .Enrich.WithEnvironmentUserName()
                 .Enrich.With(new SystemExceptionEnricher())
-                .WriteTo.File(logFilePath,
+                .WriteTo.File(logFilePath,   // path acccesible throughout app.
                                shared: true, // Enable multi-process shared log files.
                                rollingInterval: RollingInterval.Day,
                                outputTemplate: "[{Timestamp: MM-dd-yyyy HH:mm:ss} {Level:u3}]  {Message:lj} " + "{Properties:j}{NewLine}",
