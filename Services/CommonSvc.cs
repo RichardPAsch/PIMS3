@@ -1,14 +1,13 @@
 ﻿using PIMS3.Data;
-using PIMS3.Data.Repositories;
 using System;
 using System.Linq;
-
 
 namespace PIMS3.Services
 {
     public class CommonSvc : ICommonSvc
     {
         private readonly PIMS3Context _ctx;
+        private static string logFile = string.Empty;
 
         public CommonSvc(PIMS3Context ctx) 
         {
@@ -16,6 +15,19 @@ namespace PIMS3.Services
         }
 
 
+        public static string LogFile
+        {
+            // Includes full file path.
+            get => logFile;
+            set
+            {
+                if (value != string.Empty && value != null)
+                {
+                    logFile = value.Trim();
+                }
+            }
+        }
+        
         public string GetInvestorIdFromInvestor(string login)
         {
             return _ctx.Investor
@@ -23,8 +35,7 @@ namespace PIMS3.Services
                        .FirstOrDefault().InvestorId
                        .ToString();
         }
-
-
+        
         public static string ParseAccountTypeFromDescription(string accountDesc)
         {
             // Any received account description that includes superfluous data, e.g.,account number,
