@@ -38,8 +38,9 @@ export class AuthenticationService {
     public registered: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
     public loggedOut: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
-    // Initialize login for "Welcome..." greeting.
-    public investorLoginName: BehaviorSubject<string> = new BehaviorSubject<string>("");  
+    // Initialize login for "Welcome..." greeting & email login used during logging of log out.
+    public investorLoginName: BehaviorSubject<string> = new BehaviorSubject<string>("");
+    public investorLoginEMailName: BehaviorSubject<string> = new BehaviorSubject<string>("");  
 
 
     constructor(private http: HttpClient, globalsSvc: GlobalsService) {
@@ -68,8 +69,8 @@ export class AuthenticationService {
                     this.loggedIn.next(false);
                     this.registered.next(false);
                     this.loggedOut.next(true);
-                    //this.investorLoginName.next(investor.firstName);
-                    this.investorLoginName.next(investor.username); 
+                    this.investorLoginName.next(investor.firstName);
+                    this.investorLoginEMailName.next(investor.username);
                     this.currentInvestorSubject.next(investor);
                 }
                 return investor;
