@@ -20,7 +20,7 @@ export class IncomeSummaryService {
     }
 
     BuildIncomeSummary(yearsBackDated: number): Observable<string> {
-
+        //throw new Error("testing log entry");
         let webApi = this.baseUrl + "/api/Income/" + yearsBackDated + "/" + true + "/" + this.currentInvestorId;
         return this.http.get<string>(webApi);
     }
