@@ -31,7 +31,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
                     location.reload(true);
                 }
 
-                let error = errorResponse.error.errormessage || errorResponse.error.statusText;
+                let error = errorResponse.message || errorResponse.statusText;
                 return throwError(error);
             }))
 
