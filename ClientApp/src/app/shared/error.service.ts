@@ -23,35 +23,43 @@ export class ErrorService implements ErrorHandler {
     //  A global error handler trapping all *non-Http* related client-side exceptions, via implementation
     //  and registration (app.module) of Angulars' intrinsic error handler.
     handleError(error: any) {
-        const router = this.injector.get(Router);
+        let idx = error.message.indexOf("not a function");
 
-        let exceptionInfo = new LogException();
-        exceptionInfo.eventLevel = "Error";
-        exceptionInfo.message = error.message == undefined ? error : error.message;
-        exceptionInfo.eventLevel = "Error";
-        // Only the first 125 chars are needed now.
-        exceptionInfo.stackTrace = error.stack == undefined ? "undefined stack trace" : error.stack.substring(0, 125);  
-        exceptionInfo.source = router.url.substring(1);
+        // 10.11.19 - ** A temporary hack! Unresolved error upon selecting 'Getting Started' ->
+        //              '_co.showGettingStarted is not a function' Why ?? **
+        if (idx < 0) {
+            const router = this.injector.get(Router);
 
-        alert("Sorry!\nAn error has occurred." + "\n\nYou will automatically be logged out. Please try again later.");
+            let exceptionInfo = new LogException();
+            exceptionInfo.eventLevel = "Error";
+            exceptionInfo.message = error.message == undefined ? error : error.message;
+            exceptionInfo.eventLevel = "Error";
+            // Only the first 125 chars are needed now.
+            exceptionInfo.stackTrace = error.stack == undefined ? "undefined stack trace" : error.stack.substring(0, 125);
+            exceptionInfo.source = router.url.substring(1);
 
-        this.logError(exceptionInfo)
-            .subscribe(result => {
-                console.log(result)
-            },
-            (apiErr: HttpErrorResponse) => {
-                if (apiErr.error instanceof Error) {
-                    // Client-side or network error encountered.
-                    alert("Application or network error(s) encountered.");
-                }
-                else {
-                    alert("Error logging error(s): due to : \n" + exceptionInfo.message + ".");
-                }
-            }
-        );
+            alert("Sorry!\nAn error has occurred." + "\n\nYou will automatically be logged out. Please try again later.");
+
+            this.logError(exceptionInfo)
+                .subscribe(result => {
+                    console.log(result)
+                },
+                    (apiErr: HttpErrorResponse) => {
+                        if (apiErr.error instanceof Error) {
+                            // Client-side or network error encountered.
+                            alert("Application or network error(s) encountered.");
+                        }
+                        else {
+                            alert("Error logging error(s): due to : \n" + exceptionInfo.message + ".");
+                        }
+                    }
+                );
+
+            this.authenticationSvc.logout();
+            router.navigate(['/']);
+            window.location.reload();
+        }
         
-        this.authenticationSvc.logout();
-        router.navigate(['/']);
     }
 
 
