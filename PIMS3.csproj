@@ -47,6 +47,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\data-import\data-importVm.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\income-projections\projection-profile.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\income-summary\income-summary.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\error-logging\logException.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\message.service.ts" />
   </ItemGroup>
 
