@@ -14,6 +14,8 @@ using System.Security.Claims;
 using PIMS3.Helpers;
 using System.Text;
 using Microsoft.Extensions.Options;
+using Serilog;
+using Serilog.Events;
 
 namespace PIMS3.Controllers
 {
@@ -103,6 +105,11 @@ namespace PIMS3.Controllers
             SecurityToken generatedToken = tokenHandler.CreateToken(tokenDescriptor);
             string tokenString = tokenHandler.WriteToken(generatedToken);
 
+            if(registeredInvestor.InvestorId != string.Empty)
+            {
+                Log.Information("Login successful for: {0}", registeredInvestor.LoginName);
+            }
+
             // Return investor info for use/storage by UI.
             return Ok(new
             {
@@ -127,6 +134,7 @@ namespace PIMS3.Controllers
             try
             {
                 _investorSvc.Create(mappedInvestor, investorToRegister.Password);
+                Log.Information("Registration successful for: {0}", mappedInvestor.FirstName + " " + mappedInvestor.LastName);
                 return Ok(mappedInvestor);
             }
             catch (AppException ex)
