@@ -57,8 +57,7 @@ export class NavMenuComponent implements OnInit {
         this.router.navigate(['/']);
 
         this.showPasswordReset = false;
-        let test = this.authenticationSvc.investorLoginName.subscribe(x => x);
-        this.logLogOut("Logout successful for: " + this.authenticationSvc.investorLoginName.value)
+        this.logLogOut("Logout successful for: " + this.authenticationSvc.investorLoginEMailName.value)
             .subscribe(result => {
                 console.log(result)
             })
