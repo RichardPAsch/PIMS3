@@ -68,7 +68,8 @@ export class AuthenticationService {
                     this.loggedIn.next(false);
                     this.registered.next(false);
                     this.loggedOut.next(true);
-                    this.investorLoginName.next(investor.firstName); 
+                    //this.investorLoginName.next(investor.firstName);
+                    this.investorLoginName.next(investor.username); 
                     this.currentInvestorSubject.next(investor);
                 }
                 return investor;
