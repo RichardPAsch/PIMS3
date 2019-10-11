@@ -10,10 +10,8 @@ export class GettingStartedComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-  }
+    }
 
-  showGettingStarted() {
-
-  } 
+  showGettingStarted() {}
 
 }
