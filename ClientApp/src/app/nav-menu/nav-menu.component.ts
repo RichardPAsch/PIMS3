@@ -1,6 +1,9 @@
 import { Component, OnInit, Injectable /*, Optional*/ } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthenticationService } from '../shared/authentication.service';
+import { HttpClient } from '@angular/common/http';
+import { GlobalsService } from '../shared/globals.service';
+import { LogNonException } from '../error-logging/log-non-exception';
 
 // Deferred until dependent Angular components updated! (v.8.0.2)
 //import { MatTooltipModule } from '@angular/material/tooltip'; 
@@ -14,7 +17,10 @@ import { AuthenticationService } from '../shared/authentication.service';
 
 export class NavMenuComponent implements OnInit {
 
-    constructor(private router: Router, private authenticationSvc: AuthenticationService/*, @Optional() private name: string*/) {
+    private baseUrl;
+
+    constructor(private router: Router, private authenticationSvc: AuthenticationService, private http: HttpClient, globalsSvc: GlobalsService/*, @Optional() private name: string*/) {
+        this.baseUrl = globalsSvc.pimsBaseUrl;
     }
 
     isExpanded = false;
@@ -50,9 +56,22 @@ export class NavMenuComponent implements OnInit {
         this.authenticationSvc.registered.subscribe(isRegisteredValue => this.showRegistration = isRegisteredValue);
         this.router.navigate(['/']);
 
-        this.nameDisplayed = "";
         this.showPasswordReset = false;
+        let test = this.authenticationSvc.investorLoginName.subscribe(x => x);
+        this.logLogOut("Logout successful for: " + this.authenticationSvc.investorLoginName.value)
+            .subscribe(result => {
+                console.log(result)
+            })
+            .unsubscribe;
+
+        this.nameDisplayed = "";
         return;
+    }
+
+    logLogOut(message: string) {
+        let informationalLogModel = new LogNonException();
+        informationalLogModel.message1 = message;
+        return this.http.post<string>(this.baseUrl + '/api/Logging/LogNonError', informationalLogModel);
     }
 
     
