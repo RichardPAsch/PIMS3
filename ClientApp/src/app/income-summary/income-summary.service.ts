@@ -24,4 +24,5 @@ export class IncomeSummaryService {
         let webApi = this.baseUrl + "/api/Income/" + yearsBackDated + "/" + true + "/" + this.currentInvestorId;
         return this.http.get<string>(webApi);
     }
+
 }
