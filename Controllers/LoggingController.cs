@@ -8,21 +8,36 @@ namespace PIMS3.Controllers
     [ApiController]
     public class LoggingController : ControllerBase
     {
-        /* 
-            Provides API for logging client-side (Angular) errors, information, etc. 
-        */
+        /*  API for logging client-side (Angular) errors, information, etc.  */
 
-        // POST: api/Logging
-        [HttpPost]
-        public void WriteToFile([FromBody] object errorObj)
+        [HttpPost("")]
+        [Route("LogError")]
+        public ActionResult WriteToFile([FromBody] dynamic errorObj)
         {
-            // WIP - Write contents of errorObj to text file.
-            //string logFile = CommonSvc.LogFile; // ok, but not needed.
-            //Log.Information($"LoggingController.WriteToFile() called, with path of {logFile}."); // ok
-            Log.Information("LoggingController.WriteToFile() completed.");
+            string sourceComponent = errorObj.source.Value;
+            string errorMsg = errorObj.message.Value;
+            string eventLevel = errorObj.eventLevel.Value;
+            string stackTrace = errorObj.stackTrace.Value;
+
+            Log.Error($"Source: {sourceComponent}");
+            Log.Error($"Message: {errorMsg}");
+            Log.Error($"EventLevel: {eventLevel}");
+            Log.Error($"StackTrace: {stackTrace}");
+
+            Log.Information("Error logging complete.");
+            return Ok();
         }
 
-        
+        [HttpPost("")]
+        [Route("LogNonError")]
+        public ActionResult WriteNonErrorToFile([FromBody] dynamic nonErrorObj)
+        {
+            // Logs any Debug, Information, Warning, or Fatal level event.
+            Log.Information(nonErrorObj.message1.Value);
+            return Ok();
+        }
+
+
 
     }
 }
