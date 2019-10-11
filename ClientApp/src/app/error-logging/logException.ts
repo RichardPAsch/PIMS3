@@ -8,4 +8,5 @@ export class LogException {
     stackTrace: string;
     hResult: number;
     eventLevel: string;
+    investorLogin: string;
 }
