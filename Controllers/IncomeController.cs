@@ -53,13 +53,12 @@ namespace PIMS3.Controllers
                 IEnumerable<YtdRevenueSummaryVm> ytdRevenueSummary = blComponent.CalculateRevenueTotals(incomeData.AsQueryable());
                 _incomeCount = new decimal[ytdRevenueSummary.Count()];
                 ytdRevenueSummary.ToList().ForEach(CalculateAverages);
-                _logger.LogInformation("Successfull YTD income summary via GetRevenueSumary()");
+                //_logger.LogInformation("Successfull YTD income summary via GetRevenueSumary()");
                 return ytdRevenueSummary.OrderByDescending(r => r.MonthRecvd).ToList();
             }
             catch (Exception ex)
             {
                 Log.Error($"Unable to fetch/calculate income due to: {ex.Message.ToString()}");
-               // _logger.LogError($"Unable to fetch/calculate income via GetRevenueSummary() due to: {ex}");
                 return null;
             }
         }
