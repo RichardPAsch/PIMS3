@@ -24,6 +24,7 @@ namespace PIMS3.Controllers
             Log.Error($"EventLevel: {eventLevel}");
             Log.Error($"StackTrace: {stackTrace}");
 
+            Log.Warning("Automatic logout triggered for {0}", errorObj.investorLogin.Value);
             Log.Information("Error logging complete.");
             return Ok();
         }
