@@ -21,13 +21,15 @@ import { ProfileComponent } from './profile/profile.component';
 import { RegistrationComponent } from './registration/registration.component';
 import { AuthenticationService } from '../app/shared/authentication.service';
 import { InvestorService } from '../app/shared/investor.service';
-//import { Role } from '../app/authorization/role.enum';
 import { AuthorizationGuard } from '../app/authorization/authorization.guard';
 import { JwtInterceptor } from '../app/shared/jwt.interceptor';
 import { HttpErrorInterceptor } from '../app/shared/http.error.interceptor';
 import { GlobalsService } from '../app/shared/globals.service';
 import { GettingStartedComponent } from './getting-started/getting-started.component';
 import { PasswordResetComponent } from './password-reset/password-reset.component';
+import { ErrorService } from '../app/shared/error.service';
+import { ErrorHandler } from '@angular/core';
+
 
 
 /* Notes:
@@ -86,20 +88,21 @@ import { PasswordResetComponent } from './password-reset/password-reset.componen
 
     /* ===== Notes:
      Creators of services, which NgModule contributes to the global collection of services, provide functionality that is accessible to
-     all parts of an app. (You can also specify providers at the component level, which is often preferred.)
+     all parts of PIMS.
      'Providers' enable Angular Dependency Injection (DI) to get value(s) for dependency(ies).
      The JWT and Error interceptors hook into the HTTP request pipeline via the Angular built-in injection token HTTP_INTERCEPTORS.
      Angular has several built in injection tokens that enable hooking into different parts of the framework and application lifecycle
      events. The 'multi: true' argument option tells Angular to ADD the provider to the collection of HTTP_INTERCEPTORS, rather than
      replacing the collection with a single provider. This allows adding multiple HTTP interceptors to the request pipeline for handling different tasks.
 
-     Providing services on a component level leads to multiple service instances ( one per component ), therefore, we'll declaring
-     at the module level.
+     Providing services at a component level leads to multiple service instances ( one per component ), therefore, we're declaring
+     them at the module level.
     */
-    providers: [ DataImportService, MessageService, ProfileService,
-                 AuthenticationService, InvestorService, GlobalsService,
-               { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
-               { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true }
+    providers: [DataImportService, MessageService, ProfileService, 
+                AuthenticationService, InvestorService, GlobalsService,
+        { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
+        { provide: ErrorHandler, useClass: ErrorService },
+        { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true }
     ], 
 
     bootstrap: [AppComponent] // The main application view, called the root component, which HOSTS all other app views.
