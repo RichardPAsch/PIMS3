@@ -33,7 +33,6 @@ namespace PIMS3.Data.Repositories.IncomeSummary
 
             try
             {
-                _logger.LogInformation("GetRevenue() called.");
                 var positions = _ctx.Asset
                                .Where(a => a.InvestorId == investorId) 
                                .AsQueryable()
