@@ -1,11 +1,8 @@
 import { Component, ViewChild, OnInit } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
 import 'rxjs/add/operator/retry';
 import { AgGridNg2 } from 'ag-grid-angular';
 import { IncomeSummaryService } from '../income-summary/income-summary.service';
 import { IncomeSummary } from '../income-summary/income-summary';
-//import { PIMS_ErrorHandler } from '../error-logging/pims-error-handler';
-//import { catchError } from 'rxjs/operators';
 
 
 @Component({
@@ -70,18 +67,8 @@ export class IncomeSummaryComponent implements OnInit {
                     runningTotal += parseFloat(mappedSummaryResults[ctr].AmountRecvd.toString());
                 }
                 this.incomeSummaryTotal = runningTotal;
-            },
-                (error: HttpErrorResponse) => {  // activated only on http call errors.
-                    alert("Error retreiving income summary data.")
-                    //let errHndlr = new PIMS_ErrorHandler(null);
-                    //if (error == undefined) {
-                    //    errHndlr.handleError("no data"); // ok; TODO: populate 'logException' & pass as param.
-                    //}
-
-                }
-
+            }
         );
-
     }
 
 
@@ -101,10 +88,7 @@ export class IncomeSummaryComponent implements OnInit {
             return mappedSummaryArr;
         } else
             return null;
-       
-       
     }
-
 
 }
 
