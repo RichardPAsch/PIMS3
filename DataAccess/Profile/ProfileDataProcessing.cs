@@ -32,7 +32,7 @@ namespace PIMS3.DataAccess.Profile
                               .Select(p => p)
                               .AsQueryable();
 
-
+            
             // ** Re-examine how we want to use AssetCreationVm.
             if (!dbProfile.Any())
                 return null;
