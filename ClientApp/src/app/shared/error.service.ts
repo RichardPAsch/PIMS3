@@ -20,16 +20,16 @@ export class ErrorService implements ErrorHandler {
         return this.http.post<any>(this.baseUrl + '/api/Logging/LogError', logInfo);
     }
 
-    //  A global error handler trapping all *non-Http* related client-side exceptions, via implementation
+    //  A GLOBAL error handler trapping all *non-Http* related client-side exceptions, via implementation
     //  and registration (app.module) of Angulars' intrinsic error handler.
     handleError(error: any) {
         let idx = error.message.indexOf("not a function");
 
-        // 10.11.19 - ** A temporary hack! Unresolved error upon selecting 'Getting Started' ->
-        //              '_co.showGettingStarted is not a function' Why ?? **
+        // ** A temporary hack! Unresolved error upon selecting 'Getting Started' menu ->  '_co.showGettingStarted is not a function' Why ?? **
         if (idx < 0) {
             const router = this.injector.get(Router);
 
+            // Refactor ? HttpErrorInterceptor duplicate ?
             let exceptionInfo = new LogException();
             exceptionInfo.eventLevel = "Error";
             exceptionInfo.message = error.message == undefined ? error : error.message;
@@ -37,6 +37,7 @@ export class ErrorService implements ErrorHandler {
             // Only the first 125 chars are needed now.
             exceptionInfo.stackTrace = error.stack == undefined ? "undefined stack trace" : error.stack.substring(0, 125);
             exceptionInfo.source = router.url.substring(1);
+            exceptionInfo.investorLogin = this.authenticationSvc.investorLoginEMailName.value;
 
             alert("Sorry!\nAn error has occurred." + "\n\nYou will automatically be logged out. Please try again later.");
 
