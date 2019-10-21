@@ -7,13 +7,18 @@ namespace PIMS3
     {
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
-            if(logEvent.Level.ToString() == "Error"){
-                string shortenedException = logEvent.Exception.StackTrace.Substring(0, 160) +
-                                            "Exception: " + logEvent.Exception.Message.ToString();
+            if(logEvent.Exception != null)
+            {
+                if (logEvent.Level.ToString() == "Error")
+                {
+                    string shortenedException = logEvent.Exception.StackTrace.Substring(0, 160) +
+                                                "Exception: " + logEvent.Exception.Message.ToString();
 
-                logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
-                "TruncatedSystemException", shortenedException));
+                    logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
+                    "TruncatedSystemException", shortenedException));
+                }
             }
+            
         }
     }
 }
