@@ -9,4 +9,5 @@ export class LogException {
     hResult: number;
     eventLevel: string;
     investorLogin: string;
+    status: any;
 }
