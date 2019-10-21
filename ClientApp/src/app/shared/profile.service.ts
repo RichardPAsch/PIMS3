@@ -1,26 +1,26 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Profile } from '../profile/profile';
 import { ProjectionProfile } from '../income-projections/projection-profile';
 import { GlobalsService } from '../shared/globals.service';
 
 
-
-let httpHeaders = new HttpHeaders()
-    .set('Content-Type', 'application/json')
-    .set('Cache-Control', 'no-cache');
-
 @Injectable({
   providedIn: 'root'
 })
 
 export class ProfileService {
-    baseUrl: string;
 
+    // 'HttpBackend' injection may be a future option, as it bypasses use of 'http.error.interceptor'; however,
+    // it also interferes with normal valid backend operations, eg. 'CSQ'. Investigate?
+
+    baseUrl: string;
+ 
     constructor(private http: HttpClient, globalsSvc: GlobalsService) {
         this.baseUrl = globalsSvc.pimsBaseUrl;
     }
+
 
     getProfileData(ticker: string): Observable<Profile> {
 
