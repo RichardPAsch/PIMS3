@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ProfileService } from '../shared/profile.service';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Profile } from '../profile/profile';
-import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { tap, switchMap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 import { Pims3Validations } from '../shared/pims3-validations';
@@ -41,6 +40,7 @@ export class ProfileComponent implements OnInit {
     });
     assetProfileFreqAndMonths: any;
 
+
     // General validation flags.
     btnNewProfileSubmitted: boolean = false;
     btnUpdateProfileSubmitted: boolean = false;
@@ -75,7 +75,6 @@ export class ProfileComponent implements OnInit {
             this.btnCreateProfileIsDisabled = true;
             this.isReadOnly = false;
         }
-        
     }
 
 
@@ -84,6 +83,7 @@ export class ProfileComponent implements OnInit {
 
         // Obtain Profile basics.
         let profileData: any = this.profileSvc.getProfileData(this.assetProfileForm.controls["ticker"].value);
+        
         // Obtain dividend 'frequency' & 'months paid' calculations via parsing of 12 month pricing/dividend history.
         let dividendData: any = this.profileSvc.getProfileDividendInfo(this.assetProfileForm.controls["ticker"].value);
 
@@ -109,31 +109,34 @@ export class ProfileComponent implements OnInit {
 
             if (model.divFreq == "" || model.divFreq == null || model.divFreq == "NA")
                 model.divFreq = dividendElement.DF;
-            
+
             this.initializeView(model, false);
             this.btnUpdateProfileIsDisabled = true;
             this.isReadOnlyPayMonthsAndDay = false;
         },
-        (apiErr: HttpErrorResponse) => {
-        if (this.assetProfileForm.controls["ticker"].value == "") {
-            alert("A ticker symbol entry is required.")
-            this.btnGetProfileIsDisabled = true;
-            return;
-        }
+            () => {
+                if (this.assetProfileForm.controls["ticker"].value == "") {
+                    alert("A ticker symbol entry is required.")
+                    this.btnGetProfileIsDisabled = true;
+                    return;
+                }
 
-        let isNewProfile = confirm("No data found via web for: \n" + this.assetProfileForm.controls["ticker"].value + ".\nCreate new Profile?");
-        if (isNewProfile) {
-            this.isReadOnly = false;
-            this.isReadOnlyPayMonthsAndDay = false;
-            this.btnCreateProfileIsDisabled = false;
-            this.btnUpdateProfileIsDisabled = true;
-        } else {
-            this.initializeView(null, true);
-            this.cancelledNewProfileCreation = true;
-        }
-        this.btnGetProfileIsDisabled = true;
-        this.btnGetDbProfileIsDisabled = true;
-        });
+                let isNewProfile = confirm("No data found via web for: \n" + this.assetProfileForm.controls["ticker"].value + ".\nCreate new Profile?");
+                if (isNewProfile) {
+                    this.isReadOnly = false;
+                    this.isReadOnlyPayMonthsAndDay = false;
+                    this.btnCreateProfileIsDisabled = false;
+                    this.btnUpdateProfileIsDisabled = true;
+                } else {
+                    this.initializeView(null, true);
+                    this.cancelledNewProfileCreation = true;
+                }
+                this.btnGetProfileIsDisabled = true;
+                this.btnGetDbProfileIsDisabled = true;
+            }
+
+        );
+      
     }
 
 
@@ -142,7 +145,7 @@ export class ProfileComponent implements OnInit {
             .retry(2)
             .subscribe(profileResponse => {
                 if (profileResponse == null) {
-                    alert("No saved profile found for: \n" + this.assetProfileForm.controls["ticker"].value);
+                    alert("No saved profile was found for: \n" + this.assetProfileForm.controls["ticker"].value + "\n\nPlease check ticker validity.");
                     return;
                 } else {
                     this.initializeView(this.mapResponseToModel(profileResponse[0]), false);
@@ -152,12 +155,11 @@ export class ProfileComponent implements OnInit {
                     this.btnGetDbProfileIsDisabled = true;
                 }
             },
-            (apiErr: HttpErrorResponse) => {
+            () => {
                 this.btnGetProfileIsDisabled = false;
                 this.btnGetDbProfileIsDisabled = false;
-                if (apiErr.error instanceof Error) {
-                    alert("Error retreiving existing profile: \network or application error. Please try later.");
-                }
+               
+                alert("Error retreiving existing profile: \network or application error. Please try later.");
             }
         ).unsubscribe;
         this.isReadOnlyPayMonthsAndDay = false;
@@ -174,7 +176,7 @@ export class ProfileComponent implements OnInit {
             return;
         }
 
-        // Dividend pay months are irrelevant for "M" frequency.
+        // Dividend pay months are irrelevant for "M" distribution frequency.
         if (this.assetProfileForm.controls["divFreq"].value == "M")  {
             freqAndMonthsReconcile = true;
         }
