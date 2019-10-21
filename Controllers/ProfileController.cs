@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PIMS3.Data.Entities;
 using Microsoft.AspNetCore.Authorization;
+using Serilog;
 
 
 namespace PIMS3.Controllers
@@ -32,21 +33,23 @@ namespace PIMS3.Controllers
             {
                 TickerSymbol = tickerProfileToFetch
             };
+          
+            Dictionary<string, string> dividendFreqAndMonths = profileBusLogicComponent.CalculateDivFreqAndDivMonths(profileModel.TickerSymbol, _dbCtx);
 
-            try
+
+            if(dividendFreqAndMonths != null)
             {
-                Dictionary<string, string> dividendFreqAndMonths = profileBusLogicComponent.CalculateDivFreqAndDivMonths(profileModel.TickerSymbol, _dbCtx);
                 profileModel.DividendFreq = dividendFreqAndMonths["DF"];
 
                 Profile initializedProfile = profileBusLogicComponent.BuildProfileForProjections(profileModel, _dbCtx);
                 initializedProfile.DividendFreq = dividendFreqAndMonths["DF"];
-                
-                return Ok(initializedProfile); 
+
+                return Ok(initializedProfile);
             }
-            catch (Exception)
+            else
             {
-                // TODO: Log error.
-                return BadRequest(new { errorMsg = "No web Profile data found."}); 
+                Log.Warning("No web Profile data found [ProfileController.GetProfile()] for {0}; custom Profile creation?", tickerProfileToFetch);
+                return BadRequest(new { warningMsg = "No web Profile data found." }); // status: 400.
             }
         }
         
@@ -59,11 +62,12 @@ namespace PIMS3.Controllers
             try
             {
                 IQueryable<Profile> dBProfile = profileDataAccessComponent.FetchDbProfile(ticker, loggedInName);
-                return Ok(dBProfile);
+                return Ok(dBProfile);  // dBProfile : null || valid Profile.
             }
             catch 
             {
-                return BadRequest(new { errorMsg = "Error fetching Profile." });
+                Log.Error("Error searching Db profile for {0}", ticker);
+                return BadRequest(new { errorMsg = "Error fetching custom Profile." });
             }
         }
 
