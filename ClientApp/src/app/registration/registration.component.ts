@@ -6,10 +6,7 @@ import { AuthenticationService } from '../shared/authentication.service';
 import { InvestorService } from '../shared/investor.service';
 import { Pims3Validations } from '../shared/pims3-validations';
 import { HttpErrorResponse } from '@angular/common/http';
-
-// TODO:
-//import { AlertService } from '../_services';
-
+import { AlertService } from '../shared/alert.service';
 
 /*  Creates a new investor via the investor service when the registration is submitted. If the investor is already logged in,
     they are automatically redirected to their 'income summary' page.
@@ -27,10 +24,7 @@ export class RegistrationComponent implements OnInit {
     loading = false;
     submitted = false;
 
-    constructor(private router: Router, private authenticationSvc: AuthenticationService, private investorSvc: InvestorService) {
-        // TODO: params
-        //private alertService: AlertService
-
+    constructor(private router: Router, private authenticationSvc: AuthenticationService, private investorSvc: InvestorService, private alertSvc: AlertService) {
         // Redirect if already logged in.
         if (this.authenticationSvc.currentInvestorValue) {
             this.router.navigate(['/income-summary']);
@@ -63,21 +57,19 @@ export class RegistrationComponent implements OnInit {
         this.investorSvc.register(this.registrationForm.value)
             .pipe(first())
             .subscribe(registeredInvestor => {
-                alert('Registration successful for login : \n' + registeredInvestor.loginName);
-                // Leverage authentication service for nav-menu-component to authentication.service relationship
-                // re: menu option toggling.
+                this.alertSvc.success('Registration successful for new login : ' + registeredInvestor.loginName);
+                // Leverage authentication service for (nav-menu-component - authentication.service) relationship
+                // regarding: menu option toggling.
                 this.authenticationSvc.register();
-                //this.alertService.success('Registration successful', true);  // TODO.
                 this.router.navigate(['/']);
             },
             (apiError: HttpErrorResponse) => {
                 if (apiError.error instanceof Error) {
-                    alert('Error completing registration; possible network issue due to:\n ' + apiError.error.message);
+                    this.alertSvc.error('Error completing registration; possible network issue due to: ' + apiError.error.message);
                 } else {
-                    alert('Unable to complete registration.\nPossible duplicate login name or system error, retry using an alternative login.' + apiError.message);
+                    this.alertSvc.warn('Unable to complete registration: possible duplicate login name or system error. Retry using an alternative login. ');
                 }
 
-                //this.alertService.error(error);  // TODO.
                 this.loading = false;
             });
 

@@ -5,6 +5,7 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { tap, switchMap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 import { Pims3Validations } from '../shared/pims3-validations';
+import { AlertService } from '../shared/alert.service';
 
 
 @Component({
@@ -15,7 +16,7 @@ import { Pims3Validations } from '../shared/pims3-validations';
 
 export class ProfileComponent implements OnInit {
 
-    constructor(private profileSvc: ProfileService) {
+    constructor(private profileSvc: ProfileService, private alertSvc: AlertService) {
         this.investor = JSON.parse(sessionStorage.getItem('currentInvestor')); 
     }
 
@@ -96,7 +97,9 @@ export class ProfileComponent implements OnInit {
             let profileElement: any = profileAndDivInfoArr[0];
             // Scenario may arise where we have a valid ticker, but with incomplete or non-existent pricing info: (profileAndDivInfoArr[1]).
             if (profileElement.tickerSymbol == null || profileAndDivInfoArr[1] == null) {
-                alert("Insufficient, or no web Profile data found for: \n" + this.assetProfileForm.controls["ticker"].value + "\nPlease check ticker validity.");
+                this.alertSvc.warn("Insufficient, or no web Profile data found for: " + "'" +
+                    this.assetProfileForm.controls["ticker"].value + "'." +
+                    " Please check ticker validity.");
                 this.initializeView(null, true);
                 return;
             }
@@ -116,7 +119,7 @@ export class ProfileComponent implements OnInit {
         },
             () => {
                 if (this.assetProfileForm.controls["ticker"].value == "") {
-                    alert("A ticker symbol entry is required.")
+                    this.alertSvc.warn("A ticker symbol entry is required.");
                     this.btnGetProfileIsDisabled = true;
                     return;
                 }
@@ -145,7 +148,9 @@ export class ProfileComponent implements OnInit {
             .retry(2)
             .subscribe(profileResponse => {
                 if (profileResponse == null) {
-                    alert("No saved profile was found for: \n" + this.assetProfileForm.controls["ticker"].value + "\n\nPlease check ticker validity.");
+                    this.alertSvc.warn("No saved profile was found for:  " +
+                        "'" + this.assetProfileForm.controls["ticker"].value + "'" +
+                        " Please check ticker validity.");
                     return;
                 } else {
                     this.initializeView(this.mapResponseToModel(profileResponse[0]), false);
@@ -158,8 +163,7 @@ export class ProfileComponent implements OnInit {
             () => {
                 this.btnGetProfileIsDisabled = false;
                 this.btnGetDbProfileIsDisabled = false;
-               
-                alert("Error retreiving existing profile: \network or application error. Please try later.");
+                this.alertSvc.error("Error retreiving existing profile, possible network or application error. Please try again later.");
             }
         ).unsubscribe;
         this.isReadOnlyPayMonthsAndDay = false;
@@ -187,7 +191,7 @@ export class ProfileComponent implements OnInit {
         }
 
         if (!freqAndMonthsReconcile) {
-            alert("Unable to create Profile: \nentered 'div Pay Months' & 'dividend frequency' must reconcile.");
+            this.alertSvc.warn("Unable to create Profile; entered 'div Pay Months' & 'dividend frequency' must reconcile.");
             this.btnNewProfileSubmitted = true;
             this.initializeView(null, true);
             return;
@@ -209,13 +213,17 @@ export class ProfileComponent implements OnInit {
         try {
             dbProfilePost$ = this.profileSvc.saveNewProfile(profileToCreate);
         } catch (e) {
-            alert("Error saving new Profile for : " + profileToCreate.tickerSymbol + "/ndue to " + e.message);
+            this.alertSvc.error("Error saving new Profile for : " +
+                "'" + profileToCreate.tickerSymbol + "'," +
+                " due to : " + e.message);
         }
 
         let posting = dbProfilePost$.pipe(
             tap(newProfileResponse => {
                 if (newProfileResponse) {
-                    alert("New Profile for : \n" + profileToCreate.tickerSymbol + "\n successfully created!");
+                    this.alertSvc.success("New Profile for " +
+                        "'" + profileToCreate.tickerSymbol + "'" +
+                        " successfully created.");
                     this.btnGetProfileIsDisabled = true;
                     this.btnGetDbProfileIsDisabled = true;
                     this.btnCreateProfileIsDisabled = true;
@@ -306,7 +314,7 @@ export class ProfileComponent implements OnInit {
             dbProfileGet$ = this.profileSvc.getProfileDataViaDb(profileToUpdate.tickerSymbol, this.investor.username);
             dbProfilePut$ = this.profileSvc.updateProfile(profileToUpdate);
         } catch (e) {
-            alert("Error obtaining existing Profile for : " + profileToUpdate.tickerSymbol);
+            this.alertSvc.error("Error obtaining existing Profile for : " + "'" + profileToUpdate.tickerSymbol + "'.");
         }
 
         // RxJS : tap() - returned value(s) are untouchable, as opposed to edit/transform capability available via map().
@@ -314,17 +322,20 @@ export class ProfileComponent implements OnInit {
             switchMap(profileInfo => {
                 return dbProfilePut$.pipe(
                         tap(profileUpdate => {
-                            if (profileUpdate) {
-                                alert("Existing Profile for : \n" + profileInfo[0].tickerSymbol + "\n successfully updated!");
-                                this.btnGetProfileIsDisabled = true;
-                                this.btnGetDbProfileIsDisabled = true;
-                                this.btnCreateProfileIsDisabled = true;
-                                this.btnUpdateProfileIsDisabled = true;
-                                this.btnUpdateProfileSubmitted = true;
+                        if (profileUpdate) {
+                            this.alertSvc.success("Existing Profile for " +
+                                "'" + profileInfo[0].tickerSymbol + "'" +
+                                " successfully updated.");
+                            this.btnGetProfileIsDisabled = true;
+                            this.btnGetDbProfileIsDisabled = true;
+                            this.btnCreateProfileIsDisabled = true;
+                            this.btnUpdateProfileIsDisabled = true;
+                            this.btnUpdateProfileSubmitted = true;
                             }
                             else {
-                                // TODO: Logging ?
-                                alert("Error updating existing local Profile for \n" + profileInfo[0].tickerSymbol + "\nRetry later?");
+                                this.alertSvc.error("Error updating existing local Profile at this time for " +
+                                    "'" + profileInfo[0].tickerSymbol + "'." +
+                                    "Please retry later.");
                                 this.btnGetProfileIsDisabled = false;
                                 this.btnGetDbProfileIsDisabled = true;
                                 this.btnCreateProfileIsDisabled = true;

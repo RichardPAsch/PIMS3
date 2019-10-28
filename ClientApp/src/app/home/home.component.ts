@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { FormGroup, Validators, FormControl } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { AuthenticationService } from '../shared/authentication.service';
-// TODO: import { AlertService } from '@/_services';
+import { AlertService } from '../shared/alert.service';
 
 @Component({
     selector: 'app-home',
@@ -13,13 +13,12 @@ import { AuthenticationService } from '../shared/authentication.service';
     
 export class HomeComponent implements OnInit {
 
-    constructor(private router: Router, private authenticationSvc : AuthenticationService) {
-        // TODO: Add as params:   private alertSvc: AlertService
+    constructor(private router: Router, private authenticationSvc: AuthenticationService, private alertSvc: AlertService) {
       
         if (this.authenticationSvc.currentInvestorValue) {
-            alert("Login already exist for: \n" + this.authenticationSvc.currentInvestorValue.firstName
-                                                + " "
-                                                + this.authenticationSvc.currentInvestorValue.lastName);
+            alertSvc.warn("Login already exist for: " +  this.authenticationSvc.currentInvestorValue.firstName 
+                + " "
+                + this.authenticationSvc.currentInvestorValue.lastName) + ".";
             this.router.navigate(['/income-summary']);
         }
     }
@@ -29,14 +28,14 @@ export class HomeComponent implements OnInit {
     loading = false;
     submitted = false;
     returnUrl: string;
-    //loginForm = new FormGroup({
-    //    investorName: new FormControl('rpasch@rpclassics.net', [Validators.required]), 
-    //    password: new FormControl('rich25102', [Validators.required, Validators.minLength(6)]),
-    //});
     loginForm = new FormGroup({
-        investorName: new FormControl('jbrahms@gmail.com', [Validators.required]),
-        password: new FormControl('classical1', [Validators.required, Validators.minLength(6)]),
+        investorName: new FormControl('rpasch@rpclassics.net', [Validators.required]), 
+        password: new FormControl('rich25102', [Validators.required, Validators.minLength(6)]),
     });
+    //loginForm = new FormGroup({
+    //    investorName: new FormControl('jbrahms@gmail.com', [Validators.required]),
+    //    password: new FormControl('classical1', [Validators.required, Validators.minLength(6)]),
+    //});
     investorName: string;
 
     get formFields() { return this.loginForm.controls; }
@@ -50,7 +49,7 @@ export class HomeComponent implements OnInit {
     onSubmit() {
 
         if (this.loginForm.invalid) {
-            alert("Invalid login. \nLogin name and/or password required.");
+            this.alertSvc.warn("Invalid login. Login name and/or password required.");
             this.router.navigate(['/']);
             return;
         }
@@ -60,18 +59,17 @@ export class HomeComponent implements OnInit {
 
         this.authenticationSvc.login(this.formFields.investorName.value, this.formFields.password.value)
             .pipe(first())
-            .subscribe(investorModel =>
+            .subscribe( () =>
             {
-                this.investorName = investorModel.firstName;
                 this.router.navigate(['/income-summary']);
             },
             () => {
-                //this.alertService.error(error);
+                this.alertSvc.error("Error verifying login credentials for: " + "'" + this.formFields.investorName.value + "'" +
+                                    ". Please check entry(ies), or try again later.");
                 this.loading = false;
-                alert("Invalid login credentials; \nplease check name and/or password entry(ies).");
             });
+        
 
-          
     }
 
 }
