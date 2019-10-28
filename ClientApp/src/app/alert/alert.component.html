@@ -1,0 +1,8 @@
+<!--
+    Via bootstrap, '.alert-dismissible' class adds extra padding to the right of the alert,
+    and positions the close icon (&times).
+-->
+<div *ngFor="let alert of alerts" class="{{alertTypeCssClass(alert)}} alert-dismissible">
+    {{alert.message}}
+    <a class="close" (click)="removeAlert(alert)">&times;</a>
+</div>
