@@ -2,7 +2,8 @@ import { Component } from "@angular/core";
 import { FormBuilder, Validators } from '@angular/forms';
 import { DataImportVm } from './data-importVm';
 import { DataImportService } from './data-import.service';
-import { HttpErrorResponse, HttpClient, HttpHandler } from "@angular/common/http";
+import { HttpErrorResponse } from "@angular/common/http";
+import { AlertService } from '../shared/alert.service';
 
 
 /* *********** Debug note: 11.24.18 ******************
@@ -49,7 +50,7 @@ export class DataImportComponent {
   });
   
   
-  constructor(private frmBldr: FormBuilder, private svc: DataImportService) { }; 
+  constructor(private frmBldr: FormBuilder, private svc: DataImportService, private alertSvc: AlertService) { }; 
 
 
   public processImportFile() {
@@ -57,13 +58,13 @@ export class DataImportComponent {
         let recordsProcessed: number;
         let totalProcessed: number;
         
-        if (this.dataImportForm.value.importFilePath == "") {
-            alert("Data import terminated: missing import file path.");
-            return;
+      if (this.dataImportForm.value.importFilePath == "") {
+          this.alertSvc.warn("Data import terminated, due to missing import file path.");
+          return;
         } else {
             this.submittedFile = this.dataImportForm.value.importFilePath.trim();
             if (this.submittedFile.indexOf(':') == -1 && ((this.getFileExtension(this.submittedFile) != "XLSX") || this.getFileExtension(this.submittedFile) != "XLS")) {
-                alert("Data import terminated: invalid file type submitted, please submit data as a spreadsheet (xlsx/xls).");
+                this.alertSvc.warn("Data import terminated; invalid file type submitted. Please submit data using spreadsheet (xlsx/xls) format.");
                 return;
             } else {
                 this.importFileVm.importFilePath = this.dataImportForm.value.importFilePath;
@@ -78,7 +79,7 @@ export class DataImportComponent {
                             if (resp.isRevenueData && resp.recordsSaved > 0) {
                                 recordsProcessed = resp.recordsSaved;
                                 totalProcessed = resp.amountSaved;
-                                alert("Successfully saved  " + recordsProcessed + " XLSX/XLS income records, \nfor a total of $" + totalProcessed);
+                                this.alertSvc.success("Successfully saved  " + recordsProcessed + " XLSX/XLS income records for a total of $" + totalProcessed);
                             }
                         },
                         (err: HttpErrorResponse) => {
@@ -86,10 +87,10 @@ export class DataImportComponent {
                             // Error either an object, or the response itself.
                             if (err.error instanceof Error) {
                                 // Error object containing info.
-                                alert('Error saving import data (network?) due to: ' + err.error.message);
+                                this.alertSvc.error('Error saving import data (network?) due to: ' + err.error.message);
                             } else {
                                 //Backend returns unsuccessful error response codes such as 404, 500 etc.
-                                alert('Error saving Income import data (server?) with status of : ' + err.message);
+                                this.alertSvc.error('Error saving Income import data (server?) with status of: ' + err.message);
                             }
                         });
                 } else {
@@ -99,14 +100,14 @@ export class DataImportComponent {
                         .subscribe(resp => {
                             if (!resp.isRevenueData && resp.recordsSaved > 0) {
                                 recordsProcessed = resp.recordsSaved;
-                                alert("Successfully added portfolio data for \n" + recordsProcessed + " new Position(s):  " + resp.miscMessage);
+                                this.alertSvc.success("Successfully added portfolio data for " + recordsProcessed + " new Position(s):  " + resp.miscMessage);
                             }
                         },
                         (err: HttpErrorResponse) => {
                             if (err.error instanceof Error) {
-                                alert('Error saving import data (network?) due to: ' + err.error.message);
+                                this.alertSvc.error('Error saving new Position import data (network?) due to: ' + err.error.message);
                             } else {
-                                alert('Error saving Position import data (server?) due to :\n ' + err.error.message);
+                                this.alertSvc.error('Error saving new Position import data (server?) due to:  ' + err.error.message);
                             }
                         });
                 }
@@ -115,15 +116,15 @@ export class DataImportComponent {
     }
 
 
-  public cancelImportFile() {
-    alert("in cancelImportFile() with value(s).");
-  }
+    public cancelImportFile() {
+        this.alertSvc.info('Data import cancelled.');
+    }
 
 
-  private getFileExtension(filePath: string) {
-    let submittedFilePath = filePath;
-    return submittedFilePath.substring(submittedFilePath.indexOf(".") + 1).toUpperCase();
-  }
+    private getFileExtension(filePath: string) {
+        let submittedFilePath = filePath;
+        return submittedFilePath.substring(submittedFilePath.indexOf(".") + 1).toUpperCase();
+    }
 
 }
 
