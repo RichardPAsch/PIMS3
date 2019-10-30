@@ -10,7 +10,6 @@ import { IncomeSummaryComponent } from './income-summary/income-summary.componen
 import { DataImportService } from './data-import/data-import.service';
 import { DataImportComponent } from './data-import/data-import.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MessageService } from './message.service';
 import { AgGridModule } from 'ag-grid-angular';
 import { IncomeProjectionsComponent } from './income-projections/income-projections.component';
 import { ProfileService } from './shared/profile.service';
@@ -99,7 +98,7 @@ import { AlertComponent } from './alert/alert.component';
      Providing services at a component level leads to multiple service instances ( one per component ), therefore, we're declaring
      them at the module level.
     */
-    providers: [DataImportService, MessageService, ProfileService,
+    providers: [DataImportService, ProfileService,
                 AuthenticationService, InvestorService, GlobalsService,
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
         { provide: ErrorHandler, useClass: ErrorService },
