@@ -79,7 +79,10 @@ export class DataImportComponent {
                             if (resp.isRevenueData && resp.recordsSaved > 0) {
                                 recordsProcessed = resp.recordsSaved;
                                 totalProcessed = resp.amountSaved;
-                                this.alertSvc.success("Successfully saved  " + recordsProcessed + " XLSX/XLS income records for a total of $" + totalProcessed);
+                                this.alertSvc.success("Successfully saved  "
+                                    + recordsProcessed
+                                    + " XLSX/XLS income record(s) for a total of $"
+                                    + totalProcessed.toFixed(2));
                             }
                         },
                         (err: HttpErrorResponse) => {
@@ -100,7 +103,10 @@ export class DataImportComponent {
                         .subscribe(resp => {
                             if (!resp.isRevenueData && resp.recordsSaved > 0) {
                                 recordsProcessed = resp.recordsSaved;
-                                this.alertSvc.success("Successfully added portfolio data for " + recordsProcessed + " new Position(s):  " + resp.miscMessage);
+                                this.alertSvc.success("Successfully added portfolio data for "
+                                    + recordsProcessed
+                                    + " new Position(s):  "
+                                    + resp.miscMessage);
                             }
                         },
                         (err: HttpErrorResponse) => {
