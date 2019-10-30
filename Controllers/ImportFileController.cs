@@ -3,6 +3,7 @@ using PIMS3.ViewModels;
 using PIMS3.DataAccess.ImportData;
 using PIMS3.Data;
 using Microsoft.AspNetCore.Authorization;
+using Serilog;
 
 namespace PIMS3.Controllers
 {
@@ -43,11 +44,13 @@ namespace PIMS3.Controllers
         [HttpPost("{Id}")]
         public ActionResult<DataImportVm> ProcessImportFile([FromBody] DataImportVm importFile, string Id, bool isRevenue = true)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
+            {
+                Log.Error("Unable to process import file via ProcessImportFile() due to invalid model state for {0}", ModelState);
                 return BadRequest("Invalid model state: " + ModelState);
+            }
 
             var dataAccessComponent = new ImportFileDataProcessing();
-
 
             if (importFile.IsRevenueData)
             {
@@ -62,6 +65,7 @@ namespace PIMS3.Controllers
                     return BadRequest(new { exceptionMessage = "Error processing income import data; please try later.", isRevenueData = true });
                 }
 
+                Log.Information("Revenue import successful for {0} record(s), totaling ${1}.", processedVm.RecordsSaved, processedVm.AmountSaved);
                 return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, amount = processedVm.AmountSaved }, processedVm);
             }
             else  // aka 'Positions' processing.
@@ -74,6 +78,7 @@ namespace PIMS3.Controllers
                 if (processedVm.ExceptionTickers != string.Empty)
                     return BadRequest(new { exceptionTickers = processedVm.ExceptionTickers, isRevenueData = false });
 
+                Log.Information("Position import successful for {0} record(s), representing {1}.", processedVm.RecordsSaved, processedVm.MiscMessage);
                 return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, savedTickers = processedVm.MiscMessage }, processedVm);
             }
 
