@@ -4,8 +4,8 @@ import { DataImportVm } from './data-importVm';
 import { Observable } from 'rxjs';
 import { catchError, map, tap,} from 'rxjs/operators';
 import { of } from 'rxjs/observable/of';
-import { MessageService } from '../message.service';
 import { GlobalsService } from '../shared/globals.service';
+import { AlertService } from '../shared/alert.service';
 
 
 let httpHeaders = new HttpHeaders()
@@ -30,7 +30,7 @@ export class DataImportService {
     Id: string;
     baseUrl: string;
 
-    constructor(private http: HttpClient, globalsSvc: GlobalsService, private messageService: MessageService) {
+    constructor(private http: HttpClient, globalsSvc: GlobalsService, private alertSvc: AlertService) {
         this.baseUrl = globalsSvc.pimsBaseUrl;
         let investor = JSON.parse(sessionStorage.getItem('currentInvestor'));
         this.Id = investor.id;
@@ -57,14 +57,8 @@ export class DataImportService {
 
         let fullUrl = this.baseUrl + '/api/ImportFile/' + this.Id; 
         return this.http.post<DataImportVm>(fullUrl, importFileToProcess, httpOptions)
-            .pipe(
-                tap((processedResults: DataImportVm) => this.log("processed count of "
-                                                                    + processedResults.recordsSaved
-                                                                    + " XLSX recs totaling $"
-                                                                    + processedResults.amountSaved
-                                                                    + " for tickers: "
-                                                                    + processedResults.miscMessage)),
-                catchError(this.handleError<DataImportVm>('postImportFileData'))
+            .pipe(tap(() => console.log("Import data ok.")),
+            catchError(this.handleError<DataImportVm>('postImportFileData'))
         );
     }
 
@@ -80,27 +74,21 @@ export class DataImportService {
 
         if (operation == "postImportFileData") {
             var debugVar = result;
-            
         }
 
         return (error: any): Observable<T> => {
-
+            // 10.30.19 - 'MessageService' deprecated. Errors SHOULD now bubble up to either:
+            //             1) http.error.interceptor, or
+            //             2) error.service, depending upon source of error.
             if (error.error.exceptionTickers.length > 0 && error.error.isRevenueData == true) {
-                alert("Unable to save income, due to the following invalid and/or duplicate submitted Position(s) : \n" + error.error.exceptionTickers);
-                this.log("Missing:" + error.error.exceptionTickers + " at: " + error.url);
+                this.alertSvc.warn("Unable to save income, due to the following invalid and/or duplicate submitted Position(s) : " + "'" + error.error.exceptionTickers + "'");
             }
 
             // POSTing error for Position; unable to fetch Profile via web - bad ticker/unavailable data ?
             if (error.error.isRevenueData == false) {
-                alert("Unable to fetch Profile data for: \n" + error.error.exceptionTickers + " \nCheck ticker validity, or enter Profile manually.");
-                this.log("Error saving Position data for: " + error.error.exceptionTickers + " at: " + error.url);
+                this.alertSvc.warn("Unable to fetch Profile data via web for: " + "'" + error.error.exceptionTickers + "'."
+                    + " Check ticker validity, or enter Profile manually.");
             }
-
-            // TODO: send the error to remote logging infrastructure
-            //console.error(error); // log to console instead
-
-            // TODO: better job of transforming error for user consumption
-            //this.log(`${operation} failed: ${error.message}`);
 
             // Let the app keep running by returning an empty result.
             return of(result as T);
@@ -108,15 +96,9 @@ export class DataImportService {
     }
 
 
-    private log(message: string) {
-        this.messageService.add(`DataImportService: ${message}`);
-    }
-
-
     /* 6.17.19 Test data:
 
             C:\Development\VS2017\PIMS3_Revenue\2019JUN_Revenue_Brahms_Test.xlsx
-
             {
               "amountSaved": 0,
               "exceptionTickers": "",
@@ -125,7 +107,6 @@ export class DataImportService {
               "miscMessage": "",
               "recordsSaved": 0
             }
-
     */
 
    
