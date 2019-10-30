@@ -65,6 +65,7 @@ namespace PIMS3.Controllers
                     return BadRequest(new { exceptionMessage = "Error processing income import data; please try later.", isRevenueData = true });
                 }
 
+                processedVm.AmountSaved = decimal.Parse(string.Format("{0:0.00}", processedVm.AmountSaved));
                 Log.Information("Revenue import successful for {0} record(s), totaling ${1}.", processedVm.RecordsSaved, processedVm.AmountSaved);
                 return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, amount = processedVm.AmountSaved }, processedVm);
             }
