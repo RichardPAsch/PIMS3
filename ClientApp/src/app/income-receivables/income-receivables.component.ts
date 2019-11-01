@@ -3,6 +3,7 @@ import { AgGridNg2 } from 'ag-grid-angular';
 import { IncomeReceivablesService } from '../income-receivables/income-receivables.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Receivable } from '../income-receivables/receivable';
+import { AlertService } from '../shared/alert.service';
 
 @Component({
   selector: 'app-income-receivables',
@@ -11,7 +12,7 @@ import { Receivable } from '../income-receivables/receivable';
 })
 export class IncomeReceivablesComponent implements OnInit {
 
-    constructor(private receivablesSvc: IncomeReceivablesService) {
+    constructor(private receivablesSvc: IncomeReceivablesService, private alertSvc: AlertService) {
     }
 
     @ViewChild('agGridReceivables')
@@ -51,18 +52,19 @@ export class IncomeReceivablesComponent implements OnInit {
                 this.agGridReceivables.api.setRowData(this.mapReceivablesForGrid(responsePositions));
                 this.positionCount = responsePositions.length;
             },
-            (apiErr: HttpErrorResponse) => {
-                if (apiErr.error instanceof Error) {
-                    // Client-side or network error encountered.
-                    alert("Error processing income schedule : \network or application error. Please try later.");
+                (apiErr: HttpErrorResponse) => {
+                    if (apiErr.error instanceof Error) {
+                        this.alertSvc.error("Error processing income schedule, due to possible network error. Please try again later.");
+                    }
+                    else {
+                        //API returns unsuccessful response status codes, e.g., 404, 500 etc.
+                        let truncatedMsgLength = apiErr.error.errorMsg.indexOf(":") - 7;
+                        this.alertSvc.error("Error processing income schedule, due to "
+                            + "'" + apiErr.error.errorMsg.substring(0, truncatedMsgLength) + "'."
+                            + " Please try again later.");
+                    }
                 }
-                else {
-                    //API returns unsuccessful response status codes, e.g., 404, 500 etc.
-                    let truncatedMsgLength = apiErr.error.errorMsg.indexOf(":") - 7;
-                    alert("Error processing income schedule: due to : \n" + apiErr.error.errorMsg.substring(0, truncatedMsgLength) + ".");
-                }
-            }
-        )
+            )
     }
 
     mapReceivablesForGrid(recvdReceivables: any): Receivable[] {
@@ -92,21 +94,23 @@ export class IncomeReceivablesComponent implements OnInit {
             .retry(2)
             .subscribe(updateResponse => {
                 if (updateResponse) {
-                    alert("Successfully marked : " + selectedPositionData.length + " Position(s) as paid.");
+                    this.alertSvc.success("Successfully marked : " + selectedPositionData.length + " position(s) as paid.");
                     // Refresh.
                     this.getReceivables();
                 }
                 else
-                    alert("Error marking Position(s) as payment received, check Position data.");
+                    this.alertSvc.warn("Unable to update position(s) with payment received, please check position(s) data.");
             },
-            (apiError: HttpErrorResponse) => {
-                if (apiError.error instanceof Error)
-                    alert("Error processing Position update(s) : \network or application error. Please try later.");
-                else {
-                    alert("Error processing Position update(s) due to : \n" + apiError.message);
+                (apiError: HttpErrorResponse) => {
+                    if (apiError.error instanceof Error)
+                        this.alertSvc.error("Error processing position update(s), due to possible network error. Please try again later.");
+                    else {
+                        this.alertSvc.error("Error processing position update(s), due to "
+                            + "'" + apiError.message + "'."
+                            + " Please try again later.");
+                    }
                 }
-            }
-        )
+            )
 
     }
 

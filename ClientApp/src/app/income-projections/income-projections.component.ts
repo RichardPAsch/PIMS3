@@ -4,7 +4,7 @@ import { ProfileService } from '../shared/profile.service';
 import { ProjectionProfile } from '../income-projections/projection-profile';
 import { HttpErrorResponse } from '@angular/common/http';
 import 'rxjs/add/operator/retry';
-
+import { AlertService } from '../shared/alert.service';
 
 
 @Component({
@@ -14,7 +14,7 @@ import 'rxjs/add/operator/retry';
 })
 export class IncomeProjectionsComponent implements OnInit {
 
-    constructor(private profileSvc: ProfileService) { }
+    constructor(private profileSvc: ProfileService, private alertSvc: AlertService) { }
 
     // Decorator references the child component inside the template.
     @ViewChild('agGrid')
@@ -52,10 +52,11 @@ export class IncomeProjectionsComponent implements OnInit {
         var selectedData = selectedNodes.map(node => node.data);
                 
 
+        
         for (let gridRow = 0; gridRow < selectedData.length; gridRow++)
         {
             if (selectedData[gridRow].ticker == "" || selectedData[gridRow].capital == 0) {
-                alert("Error processing projection(s): \nmissing 'ticker' and/or 'capital' entry(ies).");
+                this.alertSvc.warn("Unable to process projection(s), please check for missing 'ticker' and / or 'capital' entry(ies).");
                 return;
             } else {
                 // Check for manual entries, bypassing web-based fetched profile data for calculations, e.g., due 
@@ -82,21 +83,21 @@ export class IncomeProjectionsComponent implements OnInit {
                         (apiErr: HttpErrorResponse) => {
                             if (apiErr.error instanceof Error) {
                                 // Client-side or network error encountered.
-                                alert("Error processing projection(s): \network or application error. Please try later.");
+                                this.alertSvc.error("Error processing income projection(s), due to network error. Please try again later.");
                             }
                             else {
                                 //API returns unsuccessful response status codes, e.g., 404, 500 etc.
-                                //let truncatedMsgLength = apiErr.error.errorMsg.indexOf(":") - 7;
-                                alert("Error processing projection(s): due to : \n"
-                                    + apiErr.error.errorMsg
-                                    + "."
-                                    + "\nPlease check ticker validity.");
+                                this.alertSvc.error("Error processing income projection(s) due to "
+                                    + "'" + apiErr.error.errorMsg + "'"
+                                    + ". Please check ticker validity");
                             }
                         }
-                        ); // end subscribe
+                    ) // end subscribe - Unsubscribe() ??
+                    
                 }
             }
         } // end for
+  
     }
 
 

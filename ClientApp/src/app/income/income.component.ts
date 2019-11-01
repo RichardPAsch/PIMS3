@@ -4,6 +4,7 @@ import { IncomeService } from '../income/income.service';
 import { Income } from '../income/income';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CurrencyPipe } from '@angular/common';
+import { AlertService } from '../shared/alert.service';
 
 @Component({
   selector: 'app-income',
@@ -12,7 +13,7 @@ import { CurrencyPipe } from '@angular/common';
 })
 export class IncomeComponent implements OnInit {
 
-    constructor(private incomeSvc: IncomeService) { }
+    constructor(private incomeSvc: IncomeService, private alertSvc: AlertService) { }
 
     @ViewChild('agGridRevenue')
     agGridRevenue: AgGridNg2;
@@ -124,14 +125,16 @@ export class IncomeComponent implements OnInit {
             (apiError: HttpErrorResponse) => {
                 if (apiError.error instanceof Error) {
                     // Client-side or network error encountered.
-                    alert("Error processing income  : \network or application error. Please try later.");
+                    this.alertSvc.error("Error fetching revenue due to possible network error. Please try again later.");
                 }
                 else {
                     //API returns unsuccessful response status codes, e.g., 404, 500 etc.
                     let truncatedMsgLength = apiError.error.errorMsg.indexOf(":") - 7;
-                    alert("Error processing income: due to : \n" + apiError.error.errorMsg.substring(0, truncatedMsgLength) + ".");
+                    this.alertSvc.error("Error fetching revenue due to "
+                        + "'" + apiError.error.errorMsg.substring(0, truncatedMsgLength) + "'."
+                        + " Please try again later.");
                 }
-            });
+            })
 
     }
 
@@ -167,13 +170,15 @@ export class IncomeComponent implements OnInit {
         this.incomeSvc.UpdateIncome(selectedIncomeData)
             .retry(2)
             .subscribe(updateResponse => {
-                alert("Successfully updated " + updateResponse + " record(s).");
+                this.alertSvc.success("Successfully updated "
+                    + updateResponse + " income record(s).");
                 this.fetchRevenue();
             },
             (apiError: HttpErrorResponse) => {
-                alert("Error updating income record(s) due to: " + apiError.message);
+                this.alertSvc.error("Error updating revenue due to "
+                    + "'" + apiError.message + "'. Please try again later.");
             }
-        );
+        )
     }
 
     calculateRecordSum(sourceData: any): number {
