@@ -6,6 +6,7 @@ using PIMS3.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
 using PIMS3.DataAccess.Asset;
+using Serilog;
 
 
 namespace PIMS3.Controllers
@@ -30,6 +31,10 @@ namespace PIMS3.Controllers
             // Bypassing bus logic processing, as there are no business rules to enforce.
             var positionDataAccessComponent = new PositionDataProcessing(_ctx);
             var updatesAreValid = positionDataAccessComponent.UpdatePositionPymtDueFlags(positionIdsToUpdate);
+            if (updatesAreValid)
+            {
+                Log.Information("Payment(s) received/recorded ['PymtDue'-> False] for {0} position(s).", positionIdsToUpdate.Count());
+            }
             return Ok(updatesAreValid);
 
         }
