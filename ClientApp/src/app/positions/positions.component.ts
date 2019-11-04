@@ -3,6 +3,8 @@ import { AgGridNg2 } from 'ag-grid-angular';
 import { Position } from '../positions/position';
 import { PositionsService } from '../positions/positions.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { AlertService } from '../shared/alert.service';
+
 
 @Component({
   selector: 'app-positions',
@@ -11,7 +13,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export class PositionsComponent implements OnInit {
 
-    constructor(private positionSvc: PositionsService) {
+    constructor(private positionSvc: PositionsService, private alertSvc: AlertService) {
 
     }
 
@@ -125,18 +127,18 @@ export class PositionsComponent implements OnInit {
             .retry(2)
             .subscribe(updateResponseCount => {
                 if (Number(updateResponseCount) > 0) {
-                    alert("Successfully updated " + updateResponseCount + " Position(s).");
+                    this.alertSvc.success("Successfully updated " + updateResponseCount + " Position(s).");
                     this.fetchPositions(this.includeInactive);
                 }
                 else
-                    alert("Error updating Position(s).");
+                    this.alertSvc.warn("Unable to update Positions at this time. Please try again later.");
             },
             (apiError: HttpErrorResponse) => {
                 if (apiError.error instanceof Error) {
-                    alert("Error processing Position update(s) : \network or application error. Please try later.");
+                    this.alertSvc.error("Error processing Position update(s), possibly due to network issues. Please try again later.");
                 }
                 else {
-                    alert("Error processing Position update(s) due to : \n" + apiError.message);
+                    this.alertSvc.error("Error processing Position update(s) due to '" + apiError.message + "'." + " Please try again later.");
                 }
             }
             ); // end subscribe()
@@ -153,7 +155,7 @@ export class PositionsComponent implements OnInit {
             .retry(1)
             .subscribe(assetClassesArr => {
                 if (!initializeDropDown)
-                    alert(this.buildAssetClassInfo(assetClassesArr, false));
+                    alert(this.buildAssetClassInfo(assetClassesArr, false));// candidate for AlertService?
                 else 
                     this.buildAssetClassInfo(assetClassesArr, true);
             })
