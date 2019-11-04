@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, Validators, FormControl } from '@angular/forms';
 import { Pims3Validations } from '../shared/pims3-validations';
-import { AuthenticationService } from '../shared/authentication.service';
 import { InvestorService } from '../shared/investor.service';
-import { HttpErrorResponse } from '@angular/common/http';
-import { PasswordResetService } from '../password-reset/password-reset.service';
+import { AlertService } from '../shared/alert.service';
 
 
 @Component({
@@ -16,13 +14,13 @@ export class PasswordResetComponent implements OnInit {
    loading = false;
    submitted = false;
 
-    constructor(private investorSvc: InvestorService, private authSvc: AuthenticationService, private pwrdResetSvc: PasswordResetService) {
+    constructor(private investorSvc: InvestorService, private alertSvc: AlertService) {
     }
 
   ngOnInit() { }
 
   /* Notes:
-     - using Reactive, rather than template-driven forms, thus we create FormControl objects explicitly
+     - using Reactive, rather than template-driven forms, we create FormControl objects explicitly
      - and bind to HTML via 'formControlName' attr.
      - Validators are defined while creating objects of the FormControl, the first parameter is the
      - initial state of the control to be set, i.e '', while the second parameter is ValidatorFn.
@@ -54,15 +52,15 @@ export class PasswordResetComponent implements OnInit {
                   .retry(2)
                   .subscribe(updatedInvestor => {
                       if (updatedInvestor) {
-                          alert("Password successfully updated for\n" + updatedInvestor.firstName + " " + updatedInvestor.lastName);
+                          this.alertSvc.success("Password successfully updated for " + updatedInvestor.firstName + " " + updatedInvestor.lastName);
                       } 
                    },
-                  (apiErr: HttpErrorResponse) => {
-                      alert("Unable to update password due to system error.\n Please retry at a later time.");
+                  () => {
+                      this.alertSvc.error("Error updating password at this time.  Please retry update at a later time.");
                   });
           }
           else {
-              alert("Invalid entry(ies) found for password reset. \nVerify old vs. new, and/or new vs. confirmed password.");
+              this.alertSvc.warn("Invalid entry(ies) found for password reset. Please verify old vs.new entry(ies).");
               return;
           }
       }
