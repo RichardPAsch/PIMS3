@@ -15,7 +15,7 @@ using PIMS3.Helpers;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Serilog;
-using Serilog.Events;
+
 
 namespace PIMS3.Controllers
 {
@@ -98,7 +98,7 @@ namespace PIMS3.Controllers
                 Subject = new ClaimsIdentity(new Claim[] {
                      new Claim(ClaimTypes.Name,  registeredInvestor.InvestorId.ToString())
                 }),
-                Expires = DateTime.Now.AddHours(8), // modified for testing - DateTime.Now.AddMinutes(20),
+                Expires = DateTime.Now.AddDays(1), // modified for testing - DateTime.Now.AddMinutes(20),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
