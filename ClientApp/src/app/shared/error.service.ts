@@ -4,6 +4,8 @@ import { Router } from '@angular/router';
 import { LogException } from '../error-logging/logException';
 import { AuthenticationService } from '../shared/authentication.service';
 import { GlobalsService } from '../shared/globals.service';
+import { AlertService } from '../shared/alert.service';
+
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +14,8 @@ export class ErrorService implements ErrorHandler {
 
     private baseUrl;
 
-    constructor(private http: HttpClient, private injector: Injector, private authenticationSvc: AuthenticationService, globalsSvc: GlobalsService) {
+    constructor(private http: HttpClient, private injector: Injector, private authenticationSvc: AuthenticationService,
+               globalsSvc: GlobalsService, private alertSvc: AlertService) {
         this.baseUrl = globalsSvc.pimsBaseUrl;
     }
 
@@ -39,7 +42,7 @@ export class ErrorService implements ErrorHandler {
             exceptionInfo.source = router.url.substring(1);
             exceptionInfo.investorLogin = this.authenticationSvc.investorLoginEMailName.value;
 
-            alert("Sorry!\nAn error has occurred." + "\n\nYou will automatically be logged out. Please try again later.");
+            this.alertSvc.warn("Sorry! An error has occurred. You will be automatically logged out. Please try again later.");
 
             this.logError(exceptionInfo)
                 .subscribe(result => {
@@ -48,10 +51,10 @@ export class ErrorService implements ErrorHandler {
                     (apiErr: HttpErrorResponse) => {
                         if (apiErr.error instanceof Error) {
                             // Client-side or network error encountered.
-                            alert("Application or network error(s) encountered.");
+                            this.alertSvc.error("An application or network error(s) has  occurred. Please retry later.");
                         }
                         else {
-                            alert("Error logging error(s): due to : \n" + exceptionInfo.message + ".");
+                            this.alertSvc.error("Error logging error(s): due to : '" + exceptionInfo.message + "'.");
                         }
                     }
                 );

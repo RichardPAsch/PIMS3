@@ -6,6 +6,7 @@ import { AuthenticationService } from '../shared/authentication.service';
 import { LogException } from '../error-logging/logException';
 import { ErrorService } from '../shared/error.service';
 import { Router } from '@angular/router';
+import { AlertService } from '../shared/alert.service';
 
 
 @Injectable(
@@ -19,7 +20,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
         and displayed by the component that initiated the request.
     */
 
-    constructor(private authenticationSvc: AuthenticationService, private ErrSvc: ErrorService, private injector: Injector) { }
+    constructor(private authenticationSvc: AuthenticationService, private ErrSvc: ErrorService, private injector: Injector, private alertSvc: AlertService) { }
 
     intercept(request: HttpRequest<any>, nextHdlr: HttpHandler): Observable<HttpEvent<any>> {
 
@@ -56,21 +57,18 @@ export class HttpErrorInterceptor implements HttpInterceptor {
                     // Only the first 125 chars are needed now.
                     exceptionInfo.stackTrace = errorResponse.stack == undefined ? "undefined stack trace" : errorResponse.stack.substring(0, 125);
                     exceptionInfo.source = errorResponse.url;
-                    exceptionInfo.investorLogin = this.authenticationSvc == undefined ? "Unsuccessful attempt" : this.authenticationSvc.investorLoginEMailName.value;
+                    exceptionInfo.investorLogin = this.authenticationSvc == undefined ? "Unsuccessful authentication attempt" : this.authenticationSvc.investorLoginEMailName.value;
 
                     this.ErrSvc.logError(exceptionInfo).subscribe( () => 
                     {
                         // 400 status (authentication error) caught & broadcast via 'home.component.onSubmit().'
                         if (errorResponse.status == 404) {
-                            alert("Sorry!\nAn error occurred accessing data." + "\nYou will automatically be logged out. Please try again later.");
+                            this.alertSvc.warn("Unable to authenticate '" + this.authenticationSvc.investorLoginEMailName.value + "'.  Please try again later.");
                         }
                         
                         this.authenticationSvc.logout();
                         router.navigate(['/']);
                         window.location.reload();
-                    },
-                    (apiError: any) => {
-                        alert("Logging error." + apiError);
                     });
 
                     // The callback for catchError() requires returning a stream of some sort, (e.g., Promise, Array, Observable, etc.) to avoid a TypeError.
@@ -79,8 +77,5 @@ export class HttpErrorInterceptor implements HttpInterceptor {
 
             }))
 
-        
-
-      // see: https://jasonwatmore.com/post/2019/05/17/angular-7-tutorial-part-4-login-form-authentication-service-route-guard#create-jwt-interceptor
     }
 }
