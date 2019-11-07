@@ -29,6 +29,7 @@ import { PasswordResetComponent } from './password-reset/password-reset.componen
 import { ErrorService } from '../app/shared/error.service';
 import { ErrorHandler } from '@angular/core';
 import { AlertComponent } from './alert/alert.component';
+import { BaseUnsubscribeComponent } from './base-unsubscribe/base-unsubscribe.component';
 
 
 /* Notes:
@@ -56,7 +57,8 @@ import { AlertComponent } from './alert/alert.component';
     RegistrationComponent,
     GettingStartedComponent,
     PasswordResetComponent,
-    AlertComponent
+    AlertComponent,
+    BaseUnsubscribeComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -98,7 +100,7 @@ import { AlertComponent } from './alert/alert.component';
      Providing services at a component level leads to multiple service instances ( one per component ), therefore, we're declaring
      them at the module level.
     */
-    providers: [DataImportService, ProfileService,
+    providers: [DataImportService, ProfileService, 
                 AuthenticationService, InvestorService, GlobalsService,
         { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
         { provide: ErrorHandler, useClass: ErrorService },
