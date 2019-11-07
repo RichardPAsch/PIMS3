@@ -1,10 +1,12 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { AgGridNg2 } from 'ag-grid-angular';
 import { ProfileService } from '../shared/profile.service';
 import { ProjectionProfile } from '../income-projections/projection-profile';
 import { HttpErrorResponse } from '@angular/common/http';
 import 'rxjs/add/operator/retry';
 import { AlertService } from '../shared/alert.service';
+import { takeUntil } from 'rxjs/operators';
+import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
 
 @Component({
@@ -12,9 +14,11 @@ import { AlertService } from '../shared/alert.service';
   templateUrl: './income-projections.component.html',
   styleUrls: ['./income-projections.component.css']
 })
-export class IncomeProjectionsComponent implements OnInit {
+export class IncomeProjectionsComponent extends BaseUnsubscribeComponent implements OnInit  {
 
-    constructor(private profileSvc: ProfileService, private alertSvc: AlertService) { }
+    constructor(private profileSvc: ProfileService, private alertSvc: AlertService) {
+        super(); // Enable reference to base class properties and constructor.
+    }
 
     // Decorator references the child component inside the template.
     @ViewChild('agGrid')
@@ -76,6 +80,8 @@ export class IncomeProjectionsComponent implements OnInit {
                 } else {
                     this.profileSvc.getProfileData(selectedData[gridRow].ticker)
                         .retry(2)     // Retrying request in case of transient errors, e.g, slow network, no internet access.
+                        // Ensure no memory leaks via 'BaseUnsubscribeComponent'; 'takeUntil' MUST be last operator within pipe().
+                        .pipe(takeUntil(this.getUnsubscribe()))
                         .subscribe(responseProfile => {
                             profiles.push(this.initializeGridModel(responseProfile, selectedData[gridRow].capital));
                             this.agGrid.api.setRowData(profiles);
@@ -92,12 +98,10 @@ export class IncomeProjectionsComponent implements OnInit {
                                     + ". Please check ticker validity");
                             }
                         }
-                    ) // end subscribe - Unsubscribe() ??
-                    
+                    ) // end subscribe
                 }
             }
         } // end for
-  
     }
 
 
@@ -110,6 +114,12 @@ export class IncomeProjectionsComponent implements OnInit {
             { ticker: "", capital: 0 }
         ];
     }
+
+    // Available via OnDestroy interface & executed upon navigation within the app.
+    //ngOnDestroy() {
+    //    this.unsubscribe$.next();
+    //    this.unsubscribe$.complete();
+    //}
 
 
     initializeGridModel(recvdProfile: any, capitalToInvest: number): ProjectionProfile {
