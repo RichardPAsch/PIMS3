@@ -7,12 +7,14 @@ import { LogException } from '../error-logging/logException';
 import { ErrorService } from '../shared/error.service';
 import { Router } from '@angular/router';
 import { AlertService } from '../shared/alert.service';
+import { takeUntil } from 'rxjs/operators';
+import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
 
 @Injectable(
     { providedIn: 'root' }
 )
-export class HttpErrorInterceptor implements HttpInterceptor {
+export class HttpErrorInterceptor extends BaseUnsubscribeComponent implements HttpInterceptor {
 
     /*
         This Error Interceptor handles failed HTTP requests, e.g., 401 Unauthorized. If a 401, the user is automatically
@@ -20,7 +22,9 @@ export class HttpErrorInterceptor implements HttpInterceptor {
         and displayed by the component that initiated the request.
     */
 
-    constructor(private authenticationSvc: AuthenticationService, private ErrSvc: ErrorService, private injector: Injector, private alertSvc: AlertService) { }
+    constructor(private authenticationSvc: AuthenticationService, private ErrSvc: ErrorService, private injector: Injector, private alertSvc: AlertService) {
+        super();
+    }
 
     intercept(request: HttpRequest<any>, nextHdlr: HttpHandler): Observable<HttpEvent<any>> {
 
@@ -59,17 +63,19 @@ export class HttpErrorInterceptor implements HttpInterceptor {
                     exceptionInfo.source = errorResponse.url;
                     exceptionInfo.investorLogin = this.authenticationSvc == undefined ? "Unsuccessful authentication attempt" : this.authenticationSvc.investorLoginEMailName.value;
 
-                    this.ErrSvc.logError(exceptionInfo).subscribe( () => 
-                    {
-                        // 400 status (authentication error) caught & broadcast via 'home.component.onSubmit().'
-                        if (errorResponse.status == 404) {
-                            this.alertSvc.warn("Unable to authenticate '" + this.authenticationSvc.investorLoginEMailName.value + "'.  Please try again later.");
-                        }
+                    this.ErrSvc.logError(exceptionInfo)
+                        .pipe(takeUntil(this.getUnsubscribe()))
+                        .subscribe(() => 
+                        {
+                            // 400 status (authentication error) caught & broadcast via 'home.component.onSubmit().'
+                            if (errorResponse.status == 404) {
+                                this.alertSvc.warn("Unable to authenticate '" + this.authenticationSvc.investorLoginEMailName.value + "'.  Please try again later.");
+                            }
                         
-                        this.authenticationSvc.logout();
-                        router.navigate(['/']);
-                        window.location.reload();
-                    });
+                            this.authenticationSvc.logout();
+                            router.navigate(['/']);
+                            window.location.reload();
+                        });
 
                     // The callback for catchError() requires returning a stream of some sort, (e.g., Promise, Array, Observable, etc.) to avoid a TypeError.
                     return new Array();

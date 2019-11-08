@@ -4,6 +4,8 @@ import { FormGroup, Validators, FormControl } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { AuthenticationService } from '../shared/authentication.service';
 import { AlertService } from '../shared/alert.service';
+import { takeUntil } from 'rxjs/operators';
+import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
 @Component({
     selector: 'app-home',
@@ -11,10 +13,10 @@ import { AlertService } from '../shared/alert.service';
     styleUrls: ['./home.component.css']
 })
     
-export class HomeComponent implements OnInit {
+export class HomeComponent extends BaseUnsubscribeComponent implements OnInit {
 
     constructor(private router: Router, private authenticationSvc: AuthenticationService, private alertSvc: AlertService) {
-      
+        super();
         if (this.authenticationSvc.currentInvestorValue) {
             alertSvc.warn("Login already exist for: " +  this.authenticationSvc.currentInvestorValue.firstName 
                 + " "
@@ -58,7 +60,7 @@ export class HomeComponent implements OnInit {
         this.loading = true;
 
         this.authenticationSvc.login(this.formFields.investorName.value, this.formFields.password.value)
-            .pipe(first())
+            .pipe(first(), takeUntil(this.getUnsubscribe()))
             .subscribe( () =>
             {
                 this.router.navigate(['/income-summary']);
@@ -68,8 +70,7 @@ export class HomeComponent implements OnInit {
                                     ". Please check entry(ies), or try again later.");
                 this.loading = false;
             });
-        
 
     }
-
+    
 }

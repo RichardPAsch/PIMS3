@@ -7,9 +7,11 @@ import { InvestorService } from '../shared/investor.service';
 import { Pims3Validations } from '../shared/pims3-validations';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AlertService } from '../shared/alert.service';
+import { takeUntil } from 'rxjs/operators';
+import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
-/*  Creates a new investor via the investor service when the registration is submitted. If the investor is already logged in,
-    they are automatically redirected to their 'income summary' page.
+/*  Creates a new investor via the investor service when registration is submitted. If the investor is already logged in,
+    they are automatically redirected to the 'income summary' page.
  */
 
 
@@ -19,13 +21,14 @@ import { AlertService } from '../shared/alert.service';
   styleUrls: ['./registration.component.css']
 })
 
-export class RegistrationComponent implements OnInit {
+export class RegistrationComponent extends BaseUnsubscribeComponent implements OnInit {
 
     loading = false;
     submitted = false;
 
     constructor(private router: Router, private authenticationSvc: AuthenticationService, private investorSvc: InvestorService, private alertSvc: AlertService) {
         // Redirect if already logged in.
+        super();
         if (this.authenticationSvc.currentInvestorValue) {
             this.router.navigate(['/income-summary']);
         }
@@ -55,7 +58,7 @@ export class RegistrationComponent implements OnInit {
         // 'this.registrationForm.value' - For a formGroup, the values of all enabled form controls are encapsulated
         //  into an object and submitted via key:value pairs.
         this.investorSvc.register(this.registrationForm.value)
-            .pipe(first())
+            .pipe(first(), takeUntil(this.getUnsubscribe()))
             .subscribe(registeredInvestor => {
                 this.alertSvc.success('Registration successful for new login : ' + registeredInvestor.loginName);
                 // Leverage authentication service for (nav-menu-component - authentication.service) relationship
@@ -72,7 +75,6 @@ export class RegistrationComponent implements OnInit {
 
                 this.loading = false;
             });
-
     }
 
    

@@ -5,17 +5,20 @@ import { LogException } from '../error-logging/logException';
 import { AuthenticationService } from '../shared/authentication.service';
 import { GlobalsService } from '../shared/globals.service';
 import { AlertService } from '../shared/alert.service';
+import { takeUntil } from 'rxjs/operators';
+import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class ErrorService implements ErrorHandler {
+export class ErrorService extends BaseUnsubscribeComponent implements ErrorHandler {
 
     private baseUrl;
 
     constructor(private http: HttpClient, private injector: Injector, private authenticationSvc: AuthenticationService,
-               globalsSvc: GlobalsService, private alertSvc: AlertService) {
+        globalsSvc: GlobalsService, private alertSvc: AlertService) {
+        super();
         this.baseUrl = globalsSvc.pimsBaseUrl;
     }
 
@@ -45,6 +48,7 @@ export class ErrorService implements ErrorHandler {
             this.alertSvc.warn("Sorry! An error has occurred. You will be automatically logged out. Please try again later.");
 
             this.logError(exceptionInfo)
+                .pipe(takeUntil(this.getUnsubscribe()))
                 .subscribe(result => {
                     console.log(result)
                 },

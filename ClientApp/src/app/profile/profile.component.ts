@@ -6,7 +6,8 @@ import { tap, switchMap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 import { Pims3Validations } from '../shared/pims3-validations';
 import { AlertService } from '../shared/alert.service';
-
+import { takeUntil } from 'rxjs/operators';
+import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
 @Component({
   selector: 'app-profile',
@@ -14,9 +15,10 @@ import { AlertService } from '../shared/alert.service';
   styleUrls: ['./profile.component.css']
 })
 
-export class ProfileComponent implements OnInit {
+export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit {
 
     constructor(private profileSvc: ProfileService, private alertSvc: AlertService) {
+        super();
         this.investor = JSON.parse(sessionStorage.getItem('currentInvestor')); 
     }
 
@@ -93,7 +95,9 @@ export class ProfileComponent implements OnInit {
 
         // If no Profile info found for entered ticker, an 'error' condition will be generated upon subscribing, thus prompting the investor
         // for creation of a custom Profile.
-        combined.subscribe(profileAndDivInfoArr => {
+        combined
+            .pipe(takeUntil(this.getUnsubscribe()))
+            .subscribe(profileAndDivInfoArr => {
             let profileElement: any = profileAndDivInfoArr[0];
             // Scenario may arise where we have a valid ticker, but with incomplete or non-existent pricing info: (profileAndDivInfoArr[1]).
             if (profileElement.tickerSymbol == null || profileAndDivInfoArr[1] == null) {
@@ -137,15 +141,14 @@ export class ProfileComponent implements OnInit {
                 this.btnGetProfileIsDisabled = true;
                 this.btnGetDbProfileIsDisabled = true;
             }
-
         );
-      
     }
 
 
     getDbProfile(): void {
         this.profileSvc.getProfileDataViaDb(this.assetProfileForm.controls["ticker"].value, this.investor.username)
             .retry(2)
+            .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(profileResponse => {
                 if (profileResponse == null) {
                     this.alertSvc.warn("No saved profile was found for:  " +
@@ -160,12 +163,12 @@ export class ProfileComponent implements OnInit {
                     this.btnGetDbProfileIsDisabled = true;
                 }
             },
-            () => {
-                this.btnGetProfileIsDisabled = false;
-                this.btnGetDbProfileIsDisabled = false;
-                this.alertSvc.error("Error retreiving existing profile, possible network or application error. Please try again later.");
-            }
-        ).unsubscribe;
+                () => {
+                    this.btnGetProfileIsDisabled = false;
+                    this.btnGetDbProfileIsDisabled = false;
+                    this.alertSvc.error("Error retreiving existing profile, possible network or application error. Please try again later.");
+                }
+            );
         this.isReadOnlyPayMonthsAndDay = false;
     }
 
@@ -239,7 +242,7 @@ export class ProfileComponent implements OnInit {
             })
         );
 
-        posting.subscribe();
+        posting.pipe(takeUntil(this.getUnsubscribe())).subscribe();
     }
 
        
@@ -349,11 +352,8 @@ export class ProfileComponent implements OnInit {
             })
         );
 
-        combined.subscribe();
+        combined.pipe(takeUntil(this.getUnsubscribe())).subscribe();
     }
-
-
     
-
 
 }
