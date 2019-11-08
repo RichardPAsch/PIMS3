@@ -3,6 +3,8 @@ import 'rxjs/add/operator/retry';
 import { AgGridNg2 } from 'ag-grid-angular';
 import { IncomeSummaryService } from '../income-summary/income-summary.service';
 import { IncomeSummary } from '../income-summary/income-summary';
+import { takeUntil } from 'rxjs/operators';
+import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
 
 @Component({
@@ -11,7 +13,8 @@ import { IncomeSummary } from '../income-summary/income-summary';
   styleUrls: ['./income-summary.component.css']
 })
 
-export class IncomeSummaryComponent implements OnInit {
+export class IncomeSummaryComponent extends BaseUnsubscribeComponent implements OnInit {
+
     private currentDate: Date = new Date();
     private currentYear: number = this.currentDate.getFullYear();
     public currentYearHeading: number = this.currentYear;
@@ -19,9 +22,10 @@ export class IncomeSummaryComponent implements OnInit {
     public incomeSummaryTotal: any;
     
 
-
     constructor(private incomeSummarySvc: IncomeSummaryService)
-    { }
+    {
+        super();
+    }
 
 
     @ViewChild('agGridIncomeSummary')
@@ -57,6 +61,7 @@ export class IncomeSummaryComponent implements OnInit {
     processIncomeSummary(backDatedYears: number = 0) {
         this.incomeSummarySvc.BuildIncomeSummary(backDatedYears)
             .retry(2)
+            .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(summaryResults => {
                 let mappedSummaryResults = this.mapIncomeSummaryForGrid(summaryResults);
                 this.agGridIncomeSummary.api.setRowData(mappedSummaryResults);

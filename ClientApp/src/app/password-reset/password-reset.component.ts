@@ -3,6 +3,8 @@ import { FormGroup, Validators, FormControl } from '@angular/forms';
 import { Pims3Validations } from '../shared/pims3-validations';
 import { InvestorService } from '../shared/investor.service';
 import { AlertService } from '../shared/alert.service';
+import { takeUntil } from 'rxjs/operators';
+import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
 
 @Component({
@@ -10,11 +12,12 @@ import { AlertService } from '../shared/alert.service';
   templateUrl: './password-reset.component.html',
   styleUrls: ['./password-reset.component.css']
 })
-export class PasswordResetComponent implements OnInit {
+export class PasswordResetComponent extends BaseUnsubscribeComponent implements OnInit {
    loading = false;
    submitted = false;
 
     constructor(private investorSvc: InvestorService, private alertSvc: AlertService) {
+        super();
     }
 
   ngOnInit() { }
@@ -50,6 +53,7 @@ export class PasswordResetComponent implements OnInit {
               // OldPassword verified, via 'InvestorController.cs', before updated to new value.
               this.investorSvc.updateLogin(loggedInvestor.username, fieldValues.oldPassword, fieldValues.newPassword)
                   .retry(2)
+                  .pipe(takeUntil(this.getUnsubscribe()))
                   .subscribe(updatedInvestor => {
                       if (updatedInvestor) {
                           this.alertSvc.success("Password successfully updated for " + updatedInvestor.firstName + " " + updatedInvestor.lastName);

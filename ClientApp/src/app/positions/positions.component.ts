@@ -4,6 +4,8 @@ import { Position } from '../positions/position';
 import { PositionsService } from '../positions/positions.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AlertService } from '../shared/alert.service';
+import { takeUntil } from 'rxjs/operators';
+import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
 
 @Component({
@@ -11,10 +13,10 @@ import { AlertService } from '../shared/alert.service';
   templateUrl: './positions.component.html',
   styleUrls: ['./positions.component.css']
 })
-export class PositionsComponent implements OnInit {
+export class PositionsComponent extends BaseUnsubscribeComponent implements OnInit {
 
     constructor(private positionSvc: PositionsService, private alertSvc: AlertService) {
-
+        super();
     }
 
     positionCount: number;
@@ -67,6 +69,7 @@ export class PositionsComponent implements OnInit {
 
         this.positionSvc.BuildPositions(doWeIncludeInactiveRecs)
             .retry(1)
+            .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(positionsResponse => {
                 this.agGridPositions.api.setRowData(this.mapResponseToGrid(positionsResponse));
                 this.positionCount = positionsResponse.length;
@@ -125,6 +128,7 @@ export class PositionsComponent implements OnInit {
         
         this.positionSvc.UpdateEditedPositions(editedPositions)
             .retry(2)
+            .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(updateResponseCount => {
                 if (Number(updateResponseCount) > 0) {
                     this.alertSvc.success("Successfully updated " + updateResponseCount + " Position(s).");
@@ -153,6 +157,7 @@ export class PositionsComponent implements OnInit {
     processAssetClassDescriptions(initializeDropDown: boolean): void {
         this.positionSvc.GetAssetClassDescAndCode()
             .retry(1)
+            .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(assetClassesArr => {
                 if (!initializeDropDown)
                     alert(this.buildAssetClassInfo(assetClassesArr, false));// candidate for AlertService?

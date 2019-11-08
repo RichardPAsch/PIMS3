@@ -4,15 +4,18 @@ import { IncomeReceivablesService } from '../income-receivables/income-receivabl
 import { HttpErrorResponse } from '@angular/common/http';
 import { Receivable } from '../income-receivables/receivable';
 import { AlertService } from '../shared/alert.service';
+import { takeUntil } from 'rxjs/operators';
+import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
 @Component({
   selector: 'app-income-receivables',
   templateUrl: './income-receivables.component.html',
   styleUrls: ['./income-receivables.component.css']
 })
-export class IncomeReceivablesComponent implements OnInit {
+export class IncomeReceivablesComponent extends BaseUnsubscribeComponent implements OnInit {
 
     constructor(private receivablesSvc: IncomeReceivablesService, private alertSvc: AlertService) {
+        super();
     }
 
     @ViewChild('agGridReceivables')
@@ -48,6 +51,7 @@ export class IncomeReceivablesComponent implements OnInit {
     public getReceivables() {
         this.receivablesSvc.BuildIncomeReceivables()
             .retry(2)
+            .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(responsePositions => {
                 this.agGridReceivables.api.setRowData(this.mapReceivablesForGrid(responsePositions));
                 this.positionCount = responsePositions.length;
@@ -92,6 +96,7 @@ export class IncomeReceivablesComponent implements OnInit {
 
         this.receivablesSvc.UpdateIncomeReceivables(selectedPositionData)
             .retry(2)
+            .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(updateResponse => {
                 if (updateResponse) {
                     this.alertSvc.success("Successfully marked : " + selectedPositionData.length + " position(s) as paid.");

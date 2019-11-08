@@ -5,15 +5,19 @@ import { Income } from '../income/income';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CurrencyPipe } from '@angular/common';
 import { AlertService } from '../shared/alert.service';
+import { takeUntil } from 'rxjs/operators';
+import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
 @Component({
   selector: 'app-income',
   templateUrl: './income.component.html',
   styleUrls: ['./income.component.css']
 })
-export class IncomeComponent implements OnInit {
+export class IncomeComponent extends BaseUnsubscribeComponent implements OnInit {
 
-    constructor(private incomeSvc: IncomeService, private alertSvc: AlertService) { }
+    constructor(private incomeSvc: IncomeService, private alertSvc: AlertService) {
+        super();
+    }
 
     @ViewChild('agGridRevenue')
     agGridRevenue: AgGridNg2;
@@ -115,6 +119,7 @@ export class IncomeComponent implements OnInit {
     fetchRevenue(): any {
         this.incomeSvc.GetRevenue(this.yearsOfIncomeToDisplay)
             .retry(2)
+            .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(incomeResponse => {
                 this.incomeRecordCount = incomeResponse.length;
                 // Can't use 'reduce' on type string ?? / incomeResponse.reduce((sum, current) => sum + current.total, 0);
@@ -169,6 +174,7 @@ export class IncomeComponent implements OnInit {
 
         this.incomeSvc.UpdateIncome(selectedIncomeData)
             .retry(2)
+            .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(updateResponse => {
                 this.alertSvc.success("Successfully updated "
                     + updateResponse + " income record(s).");

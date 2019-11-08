@@ -4,7 +4,8 @@ import { DataImportVm } from './data-importVm';
 import { DataImportService } from './data-import.service';
 import { HttpErrorResponse } from "@angular/common/http";
 import { AlertService } from '../shared/alert.service';
-
+import { takeUntil } from 'rxjs/operators';
+import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
 /* *********** Debug note: 11.24.18 ******************
  * Experiment with 1.ng build (** src edits not reflected via running npm start ***) &
@@ -22,7 +23,7 @@ import { AlertService } from '../shared/alert.service';
 })
 
 
-export class DataImportComponent {
+export class DataImportComponent extends BaseUnsubscribeComponent {
     private importFileVm: DataImportVm = {
         importFilePath: "",
         isRevenueData: true,
@@ -50,7 +51,9 @@ export class DataImportComponent {
   });
   
   
-  constructor(private frmBldr: FormBuilder, private svc: DataImportService, private alertSvc: AlertService) { }; 
+  constructor(private frmBldr: FormBuilder, private svc: DataImportService, private alertSvc: AlertService) {
+      super();
+  }; 
 
 
   public processImportFile() {
@@ -75,6 +78,7 @@ export class DataImportComponent {
                 if (this.importFileVm.isRevenueData) {
 
                     this.svc.postImportFileData(this.importFileVm)
+                        .pipe(takeUntil(this.getUnsubscribe()))
                         .subscribe(resp => {
                             if (resp.isRevenueData && resp.recordsSaved > 0) {
                                 recordsProcessed = resp.recordsSaved;
@@ -100,6 +104,7 @@ export class DataImportComponent {
                     // New Position import data.
                     // sample: C:\Development\VS2017\PIMS3_TestData\Asset_Files\Portfolio_Positions_Dec_21_Test1_MissingTicker.xlsx
                     this.svc.postImportFileData(this.importFileVm)
+                        .pipe(takeUntil(this.getUnsubscribe()))
                         .subscribe(resp => {
                             if (!resp.isRevenueData && resp.recordsSaved > 0) {
                                 recordsProcessed = resp.recordsSaved;

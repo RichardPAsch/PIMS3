@@ -2,6 +2,8 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Alert, AlertType } from '../alert/alert';
 import { AlertService } from '../shared/alert.service';
+import { takeUntil } from 'rxjs/operators';
+import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
 
 @Component({
@@ -10,12 +12,14 @@ import { AlertService } from '../shared/alert.service';
   styleUrls: ['./alert.component.css']
 })
 
-export class AlertComponent implements OnInit, OnDestroy {
+export class AlertComponent extends BaseUnsubscribeComponent implements OnInit, OnDestroy {
     /* Controls adding/removing alerts in the template, and maintains an array of alerts that are rendered by the component template.  */
     alerts: Alert[] = [];
     subscription: Subscription;
 
-    constructor(private alertService: AlertService) { }
+    constructor(private alertService: AlertService) {
+        super();
+    }
 
     // ngOnInit() subscribes to the Observable returned from the alertService.onAlert() method;
     // this enables the alert component to be notified whenever an alert message is sent to the alert service
@@ -23,6 +27,7 @@ export class AlertComponent implements OnInit, OnDestroy {
     // tells the alert component to clear the alerts array.
     ngOnInit() {
         this.subscription = this.alertService.onAlert()
+            .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(alert => {
                 if (!alert.message) {
                     this.alerts = [];
@@ -42,7 +47,8 @@ export class AlertComponent implements OnInit, OnDestroy {
     }
 
     alertTypeCssClass(alert: Alert) {
-        // Returns bootstrap class for UI, depending upon type of alert needed.
+
+        // Return appropriate UI bootstrap class, based on alert type needed.
         if (alert == null)
             return;
 
@@ -56,9 +62,6 @@ export class AlertComponent implements OnInit, OnDestroy {
             case AlertType.Warning:
                 return 'alert alert-warning';
         }
-
-
-
     }
 
 }
