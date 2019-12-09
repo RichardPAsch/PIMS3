@@ -18,7 +18,7 @@ export class IncomeReceivablesComponent extends BaseUnsubscribeComponent impleme
         super();
     }
 
-    @ViewChild('agGridReceivables')
+    @ViewChild('agGridReceivables', { static: false })
     agGridReceivables: AgGridNg2;
 
     public currentMonth: string;

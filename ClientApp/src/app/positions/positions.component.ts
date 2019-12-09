@@ -23,7 +23,7 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
     includeInactive: boolean = false;
     assetClassDropDownCodes = new Array<string>();
 
-    @ViewChild('agGridPositions')
+    @ViewChild('agGridPositions', {static: false})
     agGridPositions: AgGridNg2;
 
     ngOnInit() {
