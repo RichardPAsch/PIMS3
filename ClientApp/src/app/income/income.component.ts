@@ -19,7 +19,7 @@ export class IncomeComponent extends BaseUnsubscribeComponent implements OnInit 
         super();
     }
 
-    @ViewChild('agGridRevenue')
+    @ViewChild('agGridRevenue', { static: false })
     agGridRevenue: AgGridNg2;
 
     yearsOfIncomeToDisplay: number = 0;
