@@ -21,7 +21,7 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
     }
 
     // Decorator references the child component inside the template.
-    @ViewChild('agGrid', { static: false })
+    @ViewChild('agGrid')
     agGrid: AgGridNg2;
 
     
