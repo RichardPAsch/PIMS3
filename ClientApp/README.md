@@ -1,5 +1,5 @@
 
-## PIMS3 path:  C:\Development\VS2017\PIMS3_BkUp2\PIMS3\ClientApp
+## PIMS3 path:  C:\Development\VS2017\PIMS3\ClientApp
 
 # AngularSpa:
 
