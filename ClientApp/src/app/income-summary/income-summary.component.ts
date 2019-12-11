@@ -28,7 +28,7 @@ export class IncomeSummaryComponent extends BaseUnsubscribeComponent implements 
     }
 
 
-    @ViewChild('agGridIncomeSummary')
+    @ViewChild('agGridIncomeSummary', { static: false })
     agGridIncomeSummary: AgGridNg2;
 
 
@@ -94,6 +94,7 @@ export class IncomeSummaryComponent extends BaseUnsubscribeComponent implements 
         } else
             return null;
     }
+
 
 }
 
