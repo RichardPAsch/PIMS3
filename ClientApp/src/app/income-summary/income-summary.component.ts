@@ -94,8 +94,7 @@ export class IncomeSummaryComponent extends BaseUnsubscribeComponent implements 
         } else
             return null;
     }
-
-
+    
 }
 
   
