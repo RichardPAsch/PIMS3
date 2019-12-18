@@ -54,8 +54,6 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
         let profiles = new Array<ProjectionProfile>();
         var selectedNodes = this.agGrid.api.getSelectedNodes();
         var selectedData = selectedNodes.map(node => node.data);
-                
-
         
         for (let gridRow = 0; gridRow < selectedData.length; gridRow++)
         {
@@ -93,9 +91,10 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
                             }
                             else {
                                 //API returns unsuccessful response status codes, e.g., 404, 500 etc.
-                                this.alertSvc.error("Error processing income projection(s) due to "
-                                    + "'" + apiErr.error.errorMsg + "'"
-                                    + ". Please check ticker validity");
+                                let ticker: string = selectedData[gridRow].ticker;
+                                this.alertSvc.warn("Unable to process income projection for '" + ticker.toUpperCase() + "'" + " due to :"
+                                    + "'" + apiErr + "'"
+                                    + ". Please check ticker validity.");
                             }
                         }
                     ) // end subscribe
@@ -115,13 +114,7 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
         ];
     }
 
-    // Available via OnDestroy interface & executed upon navigation within the app.
-    //ngOnDestroy() {
-    //    this.unsubscribe$.next();
-    //    this.unsubscribe$.complete();
-    //}
-
-
+   
     initializeGridModel(recvdProfile: any, capitalToInvest: number): ProjectionProfile {
 
         // Using specifically created 'ProjectionProfile' to accommodate projectedIncome for grid purposes, as
