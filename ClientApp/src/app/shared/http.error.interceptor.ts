@@ -38,7 +38,7 @@ export class HttpErrorInterceptor extends BaseUnsubscribeComponent implements Ht
                 if (errorResponse.status === 400) {
                     // May result from data access error, or an anticipated response/status when generating a custom profile e.g., as in
                     // 'profile.component.getProfile()'.
-                    return throwError("No info found for submitted ticker -> custom Profile");
+                    return throwError("No profile info found for submitted ticker.");
                 }
 
                 if (errorResponse.status === 401) {
