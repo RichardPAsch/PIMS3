@@ -48,7 +48,6 @@ namespace PIMS3.Controllers
             }
             else
             {
-                Log.Warning("No web Profile data found [ProfileController.GetProfile()] for {0}; custom Profile creation?", tickerProfileToFetch);
                 return BadRequest(new { warningMsg = "No web Profile data found." }); // status: 400.
             }
         }
