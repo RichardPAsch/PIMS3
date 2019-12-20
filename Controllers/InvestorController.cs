@@ -86,7 +86,6 @@ namespace PIMS3.Controllers
 
             Investor registeredInvestor = _investorSvc.Authenticate(newInvestor.LoginName, newInvestor.Password);
 
-            // TODO: log results ?
             if (registeredInvestor == null)
                 return BadRequest(new { message = "Unable to validate registration; please check login name and/or password." });
 
