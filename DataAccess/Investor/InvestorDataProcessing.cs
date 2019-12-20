@@ -7,7 +7,7 @@ namespace PIMS3.DataAccess.Investor
     public class InvestorDataProcessing
     {
         private readonly PIMS3Context _ctx;
-        //private readonly ILogger<IncomeRepository> _logger;
+
 
         public InvestorDataProcessing(PIMS3Context ctx) {
             _ctx = ctx;
