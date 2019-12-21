@@ -39,7 +39,7 @@ export class RegistrationComponent extends BaseUnsubscribeComponent implements O
     registrationForm = new FormGroup({
         firstName: new FormControl('', [Validators.required]),
         lastName: new FormControl('', [Validators.required]),
-        loginName: new FormControl('', [Validators.required]),
+        loginName: new FormControl('', [Validators.required, Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$")]), // email pattern
         password: new FormControl('', [Validators.required, Validators.minLength(6), Pims3Validations.passwordValidator()]),
     });
 
@@ -50,6 +50,7 @@ export class RegistrationComponent extends BaseUnsubscribeComponent implements O
         this.submitted = true;
 
         if (this.registrationForm.invalid) {
+            this.alertSvc.warn('Unable to process registration; please correct noted entry(ies).');
             return;
         }
 
@@ -66,12 +67,12 @@ export class RegistrationComponent extends BaseUnsubscribeComponent implements O
                 this.authenticationSvc.register();
                 this.router.navigate(['/']);
             },
-            (apiError: HttpErrorResponse) => {
-                if (apiError.error instanceof Error) {
-                    this.alertSvc.error('Error completing registration; possible network issue due to: ' + apiError.error.message);
-                } else {
-                    this.alertSvc.warn('Unable to complete registration: possible duplicate login name or system error. Retry using an alternative login. ');
-                }
+            (apiError: string) => {
+                if (apiError === "Duplicate registration found.")
+                    this.alertSvc.warn('Unable to complete registration; duplicate registration ("username") found. Please recheck entry.');
+                 else {
+                    this.alertSvc.error('Error completing registration; possible network issue. Please retry later.');
+                 }
 
                 this.loading = false;
             });
