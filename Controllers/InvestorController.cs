@@ -128,8 +128,15 @@ namespace PIMS3.Controllers
         [Route("Register")]
         public IActionResult RegisterInvestor([FromBody] InvestorVm investorToRegister)
         {
-            Investor mappedInvestor = MapToEntity(investorToRegister);
+            Investor duplicateInvestor = _investorSvc.GetByLogin(investorToRegister.LoginName.Trim());
 
+            if (duplicateInvestor != null)
+            {
+                return BadRequest(new { message = "Duplicate registration." });
+            }
+
+
+            Investor mappedInvestor = MapToEntity(investorToRegister);
             try
             {
                 _investorSvc.Create(mappedInvestor, investorToRegister.Password);
@@ -140,7 +147,6 @@ namespace PIMS3.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-            
         }
          
 
