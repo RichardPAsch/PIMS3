@@ -15,8 +15,8 @@
                         <span class="glyphicon glyphicon-user"></span>
                     </span>
                     <input type="text" class="form-control" placeholder="account first name" formControlName="firstName" [ngClass]="{'isInValid': submitted && formFields.firstName.errors}">
-                    <div *ngIf="submitted && formFields.firstName.errors" class="invalid-feedback">
-                        <div *ngIf="formFields.firstName.required">First Name is required</div>
+                    <div *ngIf="submitted && formFields.firstName.errors" class="text-danger">
+                        <div *ngIf="formFields.firstName.errors.required">First Name is required</div>
                     </div>
                 </div>
             </div>
@@ -29,8 +29,8 @@
                         <span class="glyphicon glyphicon-user"></span>
                     </span>
                     <input type="text" class="form-control" placeholder="account last name" formControlName="lastName" [ngClass]="{'isInValid': submitted && formFields.lastName.errors}">
-                    <div *ngIf="submitted && formFields.lastName.errors" class="invalid-feedback">
-                        <div *ngIf="formFields.lastName.required">Last Name is required</div>
+                    <div *ngIf="submitted && formFields.lastName.errors" class="text-danger">
+                        <div *ngIf="formFields.lastName.errors.required">Last Name is required</div>
                     </div>
                 </div>
             </div>
@@ -42,9 +42,13 @@
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-user"></span>
                     </span>
-                    <input type="text" class="form-control" placeholder="Email" formControlName="loginName" [ngClass]="{'isInValid': submitted && formFields.loginName.errors}">
-                    <div *ngIf="submitted && formFields.loginName.errors" class="invalid-feedback">
-                        <div *ngIf="formFields.loginName.required">Login name is required</div>
+                    <input type="email" class="form-control" placeholder="Email" formControlName="loginName" [ngClass]="{'isInValid': submitted && formFields.loginName.errors}">
+                    <div *ngIf="submitted && formFields.loginName.errors" class="text-danger">
+                        <div *ngIf="formFields.loginName.errors.required">Login name is required</div>
+                    </div>
+                    <div *ngIf="submitted && formFields.loginName.errors" class="text-danger">
+                        <!--The question mark(?) is a safe navigation operator, protecting against NULL properties-->
+                        <div *ngIf="formFields.loginName.errors?.pattern">User name must be in email format</div>
                     </div>
                 </div>
             </div>
@@ -57,8 +61,8 @@
                         <span class="glyphicon glyphicon-lock"></span>
                     </span>
                     <input type="password" id="pwrd" placeholder="6 char minimum" class="form-control" formControlName="password" [ngClass]="{'isInValid': submitted && formFields.password.errors}">
-                    <div *ngIf="submitted && formFields.password.errors" class="invalid-feedback">
-                        <div *ngIf="formFields.password.required">Password is required</div>
+                    <div *ngIf="submitted && formFields.password.errors" class="text-danger">
+                        <div *ngIf="formFields.password.errors.required">Password is required</div>
                         <div *ngIf="formFields.password.errors.minLength">Password requires at least 6 characters</div>
                         <div id="divPwrd" *ngIf="formFields.password.errors.pwrd">
                             <hr/>Weak password. At minimum, ensure at least one
@@ -76,7 +80,7 @@
 
             <section>
                 <div class="col-sm-4">
-                    <button style="width:205px;" [disabled]="loading" class="btn">Register</button>
+                    <button id="btnRegistration" style="width:205px;" [disabled]="loading" class="btn">Register</button>
                 </div>
                 <div class="col-sm-2">
                     <a routerLink='/' class="btn btn-link">Cancel</a>
