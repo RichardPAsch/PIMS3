@@ -35,10 +35,14 @@ export class HttpErrorInterceptor extends BaseUnsubscribeComponent implements Ht
         return nextHdlr.handle(request)
             .pipe(catchError(errorResponse => {
 
-                if (errorResponse.status === 400) {
+                let responseText: string = errorResponse.error.message;
+                if (errorResponse.status === 400 && responseText.indexOf("Duplicate registration") < 0) {
                     // May result from data access error, or an anticipated response/status when generating a custom profile e.g., as in
                     // 'profile.component.getProfile()'.
                     return throwError("No profile info found for submitted ticker.");
+                }
+                else {
+                    return throwError("Duplicate registration found.");
                 }
 
                 if (errorResponse.status === 401) {
