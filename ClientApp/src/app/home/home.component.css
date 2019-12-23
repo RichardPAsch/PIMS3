@@ -26,7 +26,8 @@ label {
     padding-top: 8px;
 }
 .jumbotron {
-    margin-top: 50px;
+    /* 'Home - Login'  */
+    margin-top: -19px;  
     margin-bottom: 0;
     width: 800px;
 }
