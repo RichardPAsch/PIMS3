@@ -17,3 +17,7 @@
     background-color: #66a3ff;
     color: white
 }
+body > app-root > div > div > div.col-sm-9.body-content{
+    /* Aligns top of EACH page (of menu) with menu top. */
+    padding-top: 69px;
+}
