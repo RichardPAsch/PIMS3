@@ -31,7 +31,9 @@ export class IncomeReceivablesComponent extends BaseUnsubscribeComponent impleme
 
     columnDefs = [
         { headerName: "Ticker", field: "tickerSymbol", sortable: true, filter: true, checkboxSelection: true, width: 100, resizable: true },
-        { headerName: "Account", field: "accountTypeDesc", width: 100, sortable: true },
+        { headerName: "Account", field: "accountTypeDesc", width: 100, sortable: true, filter: true, resizable: true,
+             filterParams: { applyButton: true, clearButton: true, apply: true }
+        },
         { headerName: "Div. Day", field: "dividendPayDay", width: 100, type: "numericColumn", sortable: true, filter: true, resizable: true,
             filterParams: { applyButton: true, clearButton: true, apply: true }
         },
