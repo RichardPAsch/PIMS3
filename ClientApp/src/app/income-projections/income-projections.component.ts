@@ -26,7 +26,7 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
 
     
     columnDefs = [
-        { headerName: "Ticker", field: "ticker", sortable: true, filter: true, checkboxSelection: true, width: 100 },
+        { headerName: "Ticker", field: "ticker", sortable: true, filter: true, checkboxSelection: true, width: 100, valueFormatter: upperCaseFormatter },
         { headerName: "Capital ($)", field: "capital", width: 110, type: "numericColumn" },
         { headerName: "Price( $)", field: "unitPrice", width: 100, type: "numericColumn" },
         {
@@ -58,10 +58,10 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
         for (let gridRow = 0; gridRow < selectedData.length; gridRow++)
         {
             if (selectedData[gridRow].ticker == "" || selectedData[gridRow].capital == 0) {
-                this.alertSvc.warn("Unable to process projection(s), please check for missing 'ticker' and / or 'capital' entry(ies).");
+                this.alertSvc.warn("Unable to process projection(s), please check for missing minimum data: 'ticker' and / or 'capital' entry(ies).");
                 return;
             } else {
-                // Check for manual entries, bypassing web-based fetched profile data for calculations, e.g., due 
+                // Check for manual entries, bypassing web-based fetched profile data for calculations, e.g., perhaps due 
                 // to no, or incomplete data available via web service.
                 if (selectedData[gridRow].unitPrice > 0 && selectedData[gridRow].dividendRate > 0) {
                     // Calculate projection based on submitted grid entries.
@@ -121,12 +121,12 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
         // income projection is not a 'Profile.cs' attribute.
         let profileRecord = new ProjectionProfile();
         profileRecord.ticker = recvdProfile.tickerSymbol;
-        profileRecord.ticker = profileRecord.ticker.toUpperCase();
         profileRecord.capital = capitalToInvest;
         profileRecord.unitPrice = recvdProfile.unitPrice;
         profileRecord.dividendRate = recvdProfile.dividendRate;
         profileRecord.dividendYield = recvdProfile.dividendYield;
-        profileRecord.dividendFreq = recvdProfile.dividendFreq;
+        // dividendFreq == undefined in manual override scenarios.
+        profileRecord.dividendFreq = recvdProfile.dividendFreq == undefined ? "M" : recvdProfile.dividendFreq;
 
         let calculatedIncome = ((capitalToInvest / profileRecord.unitPrice) * profileRecord.dividendRate);
 
@@ -149,3 +149,9 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
     };
     
 }
+
+function upperCaseFormatter(valueToFormat) {
+    return valueToFormat.data.ticker.toUpperCase();
+}
+
+
