@@ -96,6 +96,11 @@ export class IncomeReceivablesComponent extends BaseUnsubscribeComponent impleme
     public processPositionUpdates() {
 
         var selectedNodes = this.agGridReceivables.api.getSelectedNodes();
+        if (selectedNodes.length == 0) {
+            this.alertSvc.warn("Unable to process; no Position(s) marked for updating. Please select one or more Positions.");
+            return;
+        }
+
         var selectedPositionData = selectedNodes.map(node => node.data.positionId);
 
         this.receivablesSvc.UpdateIncomeReceivables(selectedPositionData)
