@@ -97,6 +97,22 @@ namespace PIMS3.Controllers
         }
 
 
+        [HttpDelete("")]
+        public ActionResult<bool> RemoveIncome([FromQuery] string[] incomeId)
+        {
+            // Note: 'incomeId' arg MUST match any/all idParams.keys() from caller: 'income.service.ts.DeleteIncome()'.
+
+            IncomeDataProcessing incomeDataAccessComponent = new IncomeDataProcessing(_ctx);
+            int toBeDeletedCount = incomeId.Length;
+            int recordsRemovedCount = incomeDataAccessComponent.DeleteRevenue(incomeId);
+
+            if (recordsRemovedCount == toBeDeletedCount)
+                return true;
+            else
+                return false;
+        }
+
+
 
         #region Helpers
 
