@@ -2,9 +2,10 @@
     - Portfolio Revenue -
 </header>
 <ul>
-    <li>'Date Recvd' & 'Amount' columns may be edited to reflect corrections.</li>
+    <li>'Date Recvd', 'Amount', & 'Div.Freq' columns may be edited to reflect corrections.</li>
     <li>All columns, except <em>'Amount'</em>, may be filtered - with resulting updated tallies shown.</li>
     <li>Select [x] ticker(s) to mark for update(s), prior to submitting via "Update Income".</li>
+    <li>Press [CTRL+SHIFT] to edit multiple records simultaneously.</li>
     <li>Income record <em>count</em> : &nbsp;<strong>{{incomeRecordCount}}</strong></li>
     <li>Income record <em>total</em> : &nbsp;<strong>{{incomeRecordTotal | currency : 'USD'}}</strong></li>
 </ul>
@@ -25,9 +26,12 @@
                      [rowData]="rowData"
                      [columnDefs]="columnDefs"
                      (filterChanged)="onFilterChanged($event)"
+                     (cellValueChanged)="onCellValueChanged($event)"
+                     (selectionChanged)="onSelectionChanged($event)"
                      rowSelection="multiple">
     </ag-grid-angular>
 </p>
 <p>
-    <button id="btnRevenue" class="btn" (click)="processEditedRevenue()">Update Income</button>
+    <button id="btnRevenue" class="btn" (click)="processEditedRevenue()">Update Income</button>&nbsp;&nbsp;
+    <button id="btnDeleteRevenue" [disabled]="btnDeleteIsDisabled" disabled class="btn" (click)="deleteRevenue()">Delete</button>
 </p>
