@@ -89,5 +89,22 @@ namespace PIMS3.DataAccess.IncomeData
 
             return updateCount;
         }
+
+        public int DeleteRevenue(string[] revenueToBeDeleted) // return an Observable<int> ?
+        {
+            var revenueToDeleteListing = new List<Income>();
+
+            for (int i = 0; i < revenueToBeDeleted.Length; i++)
+            {
+                revenueToDeleteListing.Add(new Income
+                {
+                    IncomeId = revenueToBeDeleted.ElementAt(i)
+                });
+            }
+
+            _ctx.RemoveRange(revenueToDeleteListing);
+            return _ctx.SaveChanges();
+        }
+
     }
 }
