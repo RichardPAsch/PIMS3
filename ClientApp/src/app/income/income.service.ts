@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { GlobalsService } from '../shared/globals.service';
 
@@ -27,5 +27,17 @@ export class IncomeService {
     {
         let webApi = this.baseUrl + "/api/Income/";
         return this.http.put<any>(webApi, editedRevenue);
+    }
+
+    DeleteIncome(incomeIds: any[]): Observable<any>
+    {
+        let webApi = this.baseUrl + "/api/Income";
+        let idParams = new HttpParams();
+        incomeIds.forEach(id => {
+            idParams = idParams.append('incomeId', id)
+        });
+
+        //let keys = idParams.keys();
+        return this.http.delete(webApi, { params: idParams });
     }
 }
