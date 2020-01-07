@@ -26,6 +26,9 @@ export class IncomeComponent extends BaseUnsubscribeComponent implements OnInit 
     incomeRecordCount: number;       // tally after possible filtering.
     incomeRecordTotal: number | CurrencyPipe;
     initialRecordCount: number = 0;  // initial tally w/o filtering, e.g., page load.
+    hasEditsMade: boolean = false;
+    btnDeleteIsDisabled: boolean = true;
+
 
     ngOnInit() {
         this.fetchRevenue();
@@ -40,11 +43,15 @@ export class IncomeComponent extends BaseUnsubscribeComponent implements OnInit 
                 apply: true
             }
         },
-        { headerName: "Div.Freq.", field: "dividendFreq", width: 97, resizable: true, filter: true, sortable: true,
+        { headerName: "Div.Freq.", field: "dividendFreq", width: 97, resizable: true, filter: true, sortable: true, editable: true,
             filterParams: {
                 applyButton: true,
                 clearButton: true,
                 apply: true
+            },
+            cellEditor: "agPopupSelectCellEditor",
+            cellEditorParams: {
+                values: ["A", "S", "Q", "M"]
             }
         },
         { headerName: "Account", field: "accountTypeDesc", width: 92, resizable: true, sortable: true, filter: "agTextColumnFilter",
@@ -87,6 +94,48 @@ export class IncomeComponent extends BaseUnsubscribeComponent implements OnInit 
     ];
 
     rowData: any;
+
+    onCellValueChanged() {
+        this.hasEditsMade = true;
+        this.btnDeleteIsDisabled = this.hasEditsMade;
+    }
+
+    onSelectionChanged() {
+        // Toggle "Delete" button.
+        if (this.agGridRevenue.api.getSelectedNodes().length >= 1 && this.hasEditsMade == false) {
+            this.btnDeleteIsDisabled = false;
+        } else {
+            this.btnDeleteIsDisabled = true;
+            this.hasEditsMade = false;
+        }
+    }
+
+    deleteRevenue() {
+        var selectedNodes = this.agGridRevenue.api.getSelectedNodes();
+        var selectedIncomeData = selectedNodes.map(node => node.data);
+
+        if (!this.hasEditsMade) {
+            // Income record(s) selected for removal only, without edits.
+            let incomeIds: Array<string> = [];
+            for (let i = 0; i < selectedIncomeData.length; i++) {
+                incomeIds.push(selectedIncomeData[i].incomeId);
+            }
+
+            this.incomeSvc.DeleteIncome(incomeIds)
+                .retry(2)
+                .pipe(takeUntil(this.getUnsubscribe()))
+                .subscribe(deleteResponse => {
+                    this.alertSvc.success("Successfully deleted "
+                        + incomeIds.length + " income record(s).");
+                    this.fetchRevenue();
+                },
+                    (apiError: HttpErrorResponse) => {
+                        this.alertSvc.error("Error deleting revenue due to "
+                            + "'" + apiError.message + "'. Please try again later.");
+                    }
+                )
+        }
+    }
     
     onFilterChanged() {
 
@@ -114,8 +163,7 @@ export class IncomeComponent extends BaseUnsubscribeComponent implements OnInit 
                 this.fetchRevenue();
         }
     }
-
-
+    
     fetchRevenue(): any {
         this.incomeSvc.GetRevenue(this.yearsOfIncomeToDisplay)
             .retry(2)
@@ -170,8 +218,12 @@ export class IncomeComponent extends BaseUnsubscribeComponent implements OnInit 
     processEditedRevenue() {
 
         var selectedNodes = this.agGridRevenue.api.getSelectedNodes();
-        var selectedIncomeData = selectedNodes.map(node => node.data);
+        if (selectedNodes.length == 0) {
+            this.alertSvc.warn("Unable to process; please select one or more income records prior to 'Update Income'.");
+            return;
+        }
 
+        var selectedIncomeData = selectedNodes.map(node => node.data);
         this.incomeSvc.UpdateIncome(selectedIncomeData)
             .retry(2)
             .pipe(takeUntil(this.getUnsubscribe()))
@@ -180,11 +232,11 @@ export class IncomeComponent extends BaseUnsubscribeComponent implements OnInit 
                     + updateResponse + " income record(s).");
                 this.fetchRevenue();
             },
-            (apiError: HttpErrorResponse) => {
-                this.alertSvc.error("Error updating revenue due to "
-                    + "'" + apiError.message + "'. Please try again later.");
-            }
-        )
+                (apiError: HttpErrorResponse) => {
+                    this.alertSvc.error("Error updating revenue due to "
+                        + "'" + apiError.message + "'. Please try again later.");
+                }
+            )
     }
 
     calculateRecordSum(sourceData: any): number {
