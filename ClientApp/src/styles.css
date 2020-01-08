@@ -14,7 +14,7 @@
     padding-top: 40px;
 }
 #btnLogin, #btnProjections, #btnReceivables, #btnRevenue, #btnPositions, #btnPwrdReset, #btnRegistration, #btnDeleteRevenue {
-    background-color: #66a3ff;
+    background-color: #66A3FF;
     color: white
 }
 body > app-root > div > div > div.col-sm-9.body-content{
