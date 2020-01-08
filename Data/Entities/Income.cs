@@ -9,9 +9,6 @@ namespace PIMS3.Data.Entities
         [Required]
         public string IncomeId { get; set; }
 
-        //[Required]
-        //public Position Position { get; set; }
-
        [Required]
        public string PositionId { get; set; }
         
