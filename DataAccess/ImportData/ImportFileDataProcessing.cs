@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using PIMS3.DataAccess.Profile;
 using PIMS3.DataAccess.Position;
+using Serilog;
 
 
 namespace PIMS3.DataAccess.ImportData
@@ -125,8 +126,8 @@ namespace PIMS3.DataAccess.ImportData
                     }
                     catch (Exception ex)
                     {
-                        // Add 'Exception data' to model?
-                        var err = ex.InnerException;
+                        Exception err = ex.InnerException;
+                        Log.Error("Error persisting Profile(s)/Asset(s) to database within ImportFileDataProcessing.SaveAssets() due to {0}", err.Message);
                         return null;
                     }
                 }
