@@ -22,6 +22,9 @@ export class HttpErrorInterceptor extends BaseUnsubscribeComponent implements Ht
         and displayed by the component that initiated the request.
     */
 
+    // Workaround for multiple 'return' statements within intercept().
+    returnedThrowErrorMsg: string = "";
+
     constructor(private authenticationSvc: AuthenticationService, private ErrSvc: ErrorService, private injector: Injector, private alertSvc: AlertService) {
         super();
     }
@@ -32,6 +35,7 @@ export class HttpErrorInterceptor extends BaseUnsubscribeComponent implements Ht
         // If a 401, we'll reload the application, which will redirect to the login page.
         // The error message is extracted from either 1) the error response object, or 2) defaults to the response status text, if there is no error message.
         // We'll throw an error with the error, so it can be handled by the calling component.
+ 
         return nextHdlr.handle(request)
             .pipe(catchError(errorResponse => {
 
@@ -39,18 +43,21 @@ export class HttpErrorInterceptor extends BaseUnsubscribeComponent implements Ht
                 if (errorResponse.status === 400 && responseText.indexOf("Duplicate registration") < 0) {
                     // May result from data access error, or an anticipated response/status when generating a custom profile e.g., as in
                     // 'profile.component.getProfile()'.
-                    return throwError("No profile info found for submitted ticker.");
+                    //return throwError("No profile info found for submitted ticker.");
+                    this.returnedThrowErrorMsg = "No profile info found for submitted ticker.";
                 }
                 else {
-                    return throwError("Duplicate registration found.");
+                    //return throwError("Duplicate registration found.");
+                    this.returnedThrowErrorMsg = "Duplicate registration found.";
                 }
 
                 if (errorResponse.status === 401) {
                     this.authenticationSvc.logout();
                     location.reload(true);
 
-                    let error = errorResponse.message || errorResponse.statusText;
-                    return throwError(error);
+                    //let error = errorResponse.message || errorResponse.statusText;
+                    //return throwError(error);
+                    this.returnedThrowErrorMsg = "Unable to authenticate login credentials.";
                 }
 
                 if (errorResponse.status === 404 || errorResponse.status === 500) {
@@ -84,6 +91,10 @@ export class HttpErrorInterceptor extends BaseUnsubscribeComponent implements Ht
                     // The callback for catchError() requires returning a stream of some sort, (e.g., Promise, Array, Observable, etc.) to avoid a TypeError.
                     return new Array();
                 }
+
+
+                if (this.returnedThrowErrorMsg.length > 0)
+                    return throwError(this.returnedThrowErrorMsg);
 
             }))
 
