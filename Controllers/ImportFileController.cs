@@ -73,7 +73,10 @@ namespace PIMS3.Controllers
             {
                 processedVm = dataAccessComponent.SaveAssets(importFile, _dbCtx, Id);
                 if (processedVm == null)
+                {
+                    Log.Error("Error saving new Position(s) within ImportFileController.ProcessImportFile().");
                     return BadRequest(new { exceptionMessage = "Error saving new Position(s).", isRevenueData = false });
+                }
 
                 // Returned customized anonymous object to be data-import.service catchError().
                 if (processedVm.ExceptionTickers != string.Empty)
