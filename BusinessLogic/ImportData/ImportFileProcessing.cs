@@ -13,6 +13,7 @@ using PIMS3.DataAccess.Profile;
 using PIMS3.DataAccess.Account;
 using System.Globalization;
 using PIMS3.DataAccess.IncomeData;
+using Serilog;
 
 namespace PIMS3.BusinessLogic.ImportData
 {
@@ -25,7 +26,7 @@ namespace PIMS3.BusinessLogic.ImportData
         private readonly PIMS3Context _ctx;
         private static string _assetsNotAddedListing = string.Empty;
         private string assetIdForPosition = string.Empty;
-        private readonly InvestorSvc _investorSvc;
+        private InvestorSvc _investorSvc;
 
 
         public ImportFileProcessing(DataImportVm viewModel, PIMS3Context ctx, InvestorSvc investorSvc)
@@ -140,7 +141,11 @@ namespace PIMS3.BusinessLogic.ImportData
             }
             catch (Exception ex)
             {
-                var debugError = ex.Message;
+                if(ex.Message.Length > 0 )
+                    Log.Error("Error found within ImportFileProcessing.ParseRevenueSpreadsheetForIncomeRecords(), due to {0}.", ex.Message);
+                else
+                    Log.Error("Error found within ImportFileProcessing.ParseRevenueSpreadsheetForIncomeRecords().");
+
                 return null;
             }
         }
@@ -157,15 +162,15 @@ namespace PIMS3.BusinessLogic.ImportData
 
             try
             {
-                var lastTickerProcessed = string.Empty;
+                string lastTickerProcessed = string.Empty;
                 var importFile = new FileInfo(filePath);
 
                 using (var package = new ExcelPackage(importFile))
                 {
-                    var workSheet = package.Workbook.Worksheets[0];
-                    var totalRows = workSheet.Dimension.End.Row;
-                    var totalColumns = workSheet.Dimension.End.Column;
-                    var newAsset = new AssetCreationVm();
+                    ExcelWorksheet workSheet = package.Workbook.Worksheets[0];
+                    int totalRows = workSheet.Dimension.End.Row;
+                    int totalColumns = workSheet.Dimension.End.Column;
+                    AssetCreationVm newAsset = new AssetCreationVm();
 
                     // Iterate XLS/CSV, ignoring column headings (row 1).
                     for (var rowNum = 2; rowNum <= totalRows; rowNum++)
@@ -193,11 +198,13 @@ namespace PIMS3.BusinessLogic.ImportData
                             {
                                 lastTickerProcessed = enumerableCells.ElementAt(1).Trim().ToUpper();
 
-                                // Standard web-derived Profile (via 3rd party) database search.
+                                // Do we first have a standard web-derived Profile (via 3rd party) record in our database?
                                 profilePersisted = profileDataAccessComponent.FetchDbProfile(enumerableCells.ElementAt(1).Trim(), "");
-                                if (!profilePersisted.Any())
+                                if (profilePersisted == null)
                                 {
-                                    // Customized Profile (via 3rd party) database search.
+                                    // Do we secondly have a Customized Profile (via 3rd party) record in our database?
+                                    // Check for lost _investorSvc reference.
+                                    if(_investorSvc == null) { _investorSvc = new InvestorSvc(_ctx); };
                                     Investor currentInvestor = _investorSvc.GetById(id);
                                     profilePersisted = profileDataAccessComponent.FetchDbProfile(enumerableCells.ElementAt(1).Trim(), currentInvestor.LoginName);
                                 }
@@ -284,7 +291,7 @@ namespace PIMS3.BusinessLogic.ImportData
                                         {
                                             if (asset.Positions.Count == 0)
                                             {
-                                                // TODO: Log error.
+                                                Log.Error("Error creating new Position(s) for assetsToCreateList in ImportFileProcessing.ParsePortfolioSpreadsheetForAssetRecords().");
                                                 return null;
                                             }
                                         };
@@ -311,8 +318,11 @@ namespace PIMS3.BusinessLogic.ImportData
             }
             catch(Exception ex)
             {
-                // TODO: Log exception.
-                var debug = ex.Message;
+                if (ex.Message.Length > 0)
+                    Log.Error("Error found within ImportFileProcessing.ParsePortfolioSpreadsheetForAssetRecords(), due to {0}.", ex.Message);
+                else
+                    Log.Error("Error found within ImportFileProcessing.ParsePortfolioSpreadsheetForAssetRecords().");
+
                 return null;
             }
 
