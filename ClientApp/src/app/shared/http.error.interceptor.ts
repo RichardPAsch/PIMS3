@@ -43,11 +43,9 @@ export class HttpErrorInterceptor extends BaseUnsubscribeComponent implements Ht
                 if (errorResponse.status === 400 && responseText.indexOf("Duplicate registration") < 0) {
                     // May result from data access error, or an anticipated response/status when generating a custom profile e.g., as in
                     // 'profile.component.getProfile()'.
-                    //return throwError("No profile info found for submitted ticker.");
                     this.returnedThrowErrorMsg = "No profile info found for submitted ticker.";
                 }
                 else {
-                    //return throwError("Duplicate registration found.");
                     this.returnedThrowErrorMsg = "Duplicate registration found.";
                 }
 
@@ -55,8 +53,6 @@ export class HttpErrorInterceptor extends BaseUnsubscribeComponent implements Ht
                     this.authenticationSvc.logout();
                     location.reload(true);
 
-                    //let error = errorResponse.message || errorResponse.statusText;
-                    //return throwError(error);
                     this.returnedThrowErrorMsg = "Unable to authenticate login credentials.";
                 }
 
@@ -88,14 +84,11 @@ export class HttpErrorInterceptor extends BaseUnsubscribeComponent implements Ht
                             window.location.reload();
                         });
 
-                    // The callback for catchError() requires returning a stream of some sort, (e.g., Promise, Array, Observable, etc.) to avoid a TypeError.
                     return new Array();
                 }
 
-
                 if (this.returnedThrowErrorMsg.length > 0)
                     return throwError(this.returnedThrowErrorMsg);
-
             }))
 
     }
