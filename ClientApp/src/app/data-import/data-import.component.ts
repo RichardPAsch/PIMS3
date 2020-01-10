@@ -53,78 +53,72 @@ export class DataImportComponent extends BaseUnsubscribeComponent {
   
   constructor(private frmBldr: FormBuilder, private svc: DataImportService, private alertSvc: AlertService) {
       super();
-  }; 
+    };
 
 
+   
   public processImportFile() {
 
-        let recordsProcessed: number;
-        let totalProcessed: number;
-        
-      if (this.dataImportForm.value.importFilePath == "") {
-          this.alertSvc.warn("Data import terminated, due to missing import file path.");
+      let recordsProcessed: number;
+      let totalProcessed: number;
+
+      this.submittedFile = this.dataImportForm.value.importFilePath.trim();
+      if (this.getFileExtension(this.submittedFile) != "XLSX" && this.getFileExtension(this.submittedFile) != "XLS") {
+          this.alertSvc.warn("Data import aborted; invalid file type submitted.");
           return;
-        } else {
-            this.submittedFile = this.dataImportForm.value.importFilePath.trim();
-            if (this.submittedFile.indexOf(':') == -1 && ((this.getFileExtension(this.submittedFile) != "XLSX") || this.getFileExtension(this.submittedFile) != "XLS")) {
-                this.alertSvc.warn("Data import terminated; invalid file type submitted. Please submit data using spreadsheet (xlsx/xls) format.");
-                return;
-            } else {
-                this.importFileVm.importFilePath = this.dataImportForm.value.importFilePath;
-                this.importFileVm.isRevenueData = this.dataImportForm.value.importDataType.importType === "revenue" ? true : false;
+      } else {
+          this.importFileVm.importFilePath = this.dataImportForm.value.importFilePath;
+          this.importFileVm.isRevenueData = this.dataImportForm.value.importDataType.importType === "revenue" ? true : false;
 
-                // Backend API logic to handle processing import file type.
-                // ** BASE_URL defined in main.ts **
-                if (this.importFileVm.isRevenueData) {
-
-                    this.svc.postImportFileData(this.importFileVm)
-                        .pipe(takeUntil(this.getUnsubscribe()))
-                        .subscribe(resp => {
-                            if (resp.isRevenueData && resp.recordsSaved > 0) {
-                                recordsProcessed = resp.recordsSaved;
-                                totalProcessed = resp.amountSaved;
-                                this.alertSvc.success("Successfully saved  "
-                                    + recordsProcessed
-                                    + " XLSX/XLS income record(s) for a total of $"
-                                    + totalProcessed.toFixed(2));
-                            }
-                        },
-                        (err: HttpErrorResponse) => {
-                            // 'Observable' response stream error or failure may result from 1) Http request, or 2) parsing of response.
-                            // Error either an object, or the response itself.
-                            if (err.error instanceof Error) {
-                                // Error object containing info.
-                                this.alertSvc.error('Error saving import data (network?) due to: ' + err.error.message);
-                            } else {
-                                //Backend returns unsuccessful error response codes such as 404, 500 etc.
-                                this.alertSvc.error('Error saving Income import data (server?) with status of: ' + err.message);
-                            }
-                        });
-                } else {
-                    // New Position import data.
-                    // sample: C:\Development\VS2017\PIMS3_TestData\Asset_Files\Portfolio_Positions_Dec_21_Test1_MissingTicker.xlsx
-                    this.svc.postImportFileData(this.importFileVm)
-                        .pipe(takeUntil(this.getUnsubscribe()))
-                        .subscribe(resp => {
-                            if (!resp.isRevenueData && resp.recordsSaved > 0) {
-                                recordsProcessed = resp.recordsSaved;
-                                this.alertSvc.success("Successfully added portfolio data for "
-                                    + recordsProcessed
-                                    + " new Position(s):  "
-                                    + resp.miscMessage);
-                            }
-                        },
-                        (err: HttpErrorResponse) => {
-                            if (err.error instanceof Error) {
-                                this.alertSvc.error('Error saving new Position import data (network?) due to: ' + err.error.message);
-                            } else {
-                                this.alertSvc.error('Error saving new Position import data (server?) due to:  ' + err.error.message);
-                            }
-                        });
-                }
-            }
-        }
-    }
+          // Backend API logic to handle processing import file type.  ** BASE_URL defined in main.ts **
+          if (this.importFileVm.isRevenueData) {
+              this.svc.postImportFileData(this.importFileVm)
+                  .pipe(takeUntil(this.getUnsubscribe()))
+                  .subscribe(resp => {
+                      if (resp.isRevenueData && resp.recordsSaved > 0) {
+                          recordsProcessed = resp.recordsSaved;
+                          totalProcessed = resp.amountSaved;
+                          this.alertSvc.success("Successfully saved  "
+                              + recordsProcessed
+                              + " XLSX/XLS income record(s) for a total of $"
+                              + totalProcessed.toFixed(2));
+                      }
+                  },
+                    (err: HttpErrorResponse) => {
+                        // 'Observable' response stream error or failure may result from 1) Http request, or 2) parsing of response.
+                        // Error either an object, or the response itself.
+                        if (err.error instanceof Error) {
+                            // Error object containing info.
+                            this.alertSvc.error('Error saving import data (network?) due to: ' + err.error.message);
+                        } else {
+                            //Backend returns unsuccessful error response codes such as 404, 500 etc.
+                            this.alertSvc.error('Error saving Income import data (server?) with status of: ' + err.message);
+                        }
+                    });
+          } else {
+              // New Position import data.
+              // sample: C:\Development\VS2017\PIMS3_TestData\Asset_Files\MPW_Addition.xlsx
+              this.svc.postImportFileData(this.importFileVm)
+                  .pipe(takeUntil(this.getUnsubscribe()))
+                  .subscribe(resp => {
+                      if (!resp.isRevenueData && resp.recordsSaved > 0) {
+                          recordsProcessed = resp.recordsSaved;
+                          this.alertSvc.success("Successfully added portfolio data for "
+                              + recordsProcessed
+                              + " new Position(s):  "
+                              + resp.miscMessage);
+                      }
+                  },
+                    (err: HttpErrorResponse) => {
+                        if (err.error instanceof Error) {
+                            this.alertSvc.error('Error saving new Position import data (network?) due to: ' + err.error.message);
+                        } else {
+                            this.alertSvc.error('Error saving new Position import data (server?) due to:  ' + err.error.message);
+                        }
+                    });
+          }
+      } 
+  }
 
 
     public cancelImportFile() {
@@ -133,6 +127,7 @@ export class DataImportComponent extends BaseUnsubscribeComponent {
 
 
     private getFileExtension(filePath: string) {
+
         let submittedFilePath = filePath;
         return submittedFilePath.substring(submittedFilePath.indexOf(".") + 1).toUpperCase();
     }
