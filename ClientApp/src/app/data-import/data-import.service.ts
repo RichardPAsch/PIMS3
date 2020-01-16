@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DataImportVm } from './data-importVm';
 import { Observable } from 'rxjs';
@@ -44,9 +44,10 @@ export class DataImportService {
     */
 
     postImportFileData(importFileToProcess: DataImportVm): Observable<DataImportVm> {
-
-        return this.http.post<DataImportVm>(this.webApi, importFileToProcess, httpOptions);
+        
+        return this.http.post<DataImportVm>(this.webApi, importFileToProcess, httpOptions); 
     }
+
 
     
     /* 6.17.19 Test data:
