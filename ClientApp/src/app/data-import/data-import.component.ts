@@ -80,19 +80,20 @@ export class DataImportComponent extends BaseUnsubscribeComponent {
                           totalProcessed = resp.amountSaved;
                           this.alertSvc.success("Successfully saved  "
                               + recordsProcessed
-                              + " XLSX/XLS income record(s) for a total of $"
+                              + " XLSX/XLS income record(s) for a TOTAL of $"
                               + totalProcessed.toFixed(2));
                       }
                   },
-                    (err: HttpErrorResponse) => {
+                    (err: any) => {
                         // 'Observable' response stream error or failure may result from 1) Http request, or 2) parsing of response.
                         // Error either an object, or the response itself.
                         if (err.error instanceof Error) {
                             // Error object containing info.
-                            this.alertSvc.error('Error saving import data (network?) due to: ' + err.error.message);
+                            this.alertSvc.error('Error saving revenue import data (network?) due to: ' + err.error.message);
                         } else {
                             //Backend returns unsuccessful error response codes such as 404, 500 etc.
-                            this.alertSvc.error('Error saving Income import data (server?) with status of: ' + err.message);
+                            this.alertSvc.warn('Unable to save imported revenue data. Please check that the xlsx/xls file format is correct, ' +
+                                                                                    ' and / or that the submitted file path is valid.');
                         }
                     });
           } else {
