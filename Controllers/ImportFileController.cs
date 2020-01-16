@@ -59,10 +59,16 @@ namespace PIMS3.Controllers
                 // UI to interpret updated Vm attributes.
                 if (processedVm.RecordsSaved == 0)
                 {
+                    // Possible invalid file path or bad network connectivity.
+                    if (!string.IsNullOrEmpty(processedVm.MiscMessage)) {
+                        Log.Warning("Aborted in ImportFileController.ProcessImportFile() due to {0} for {1}.", processedVm.MiscMessage.Trim(),
+                                                                                                               processedVm.ImportFilePath.Trim());
+
+                        return BadRequest(new { exceptionMessage = processedVm.MiscMessage.Trim(), isRevenueData = true });
+                    }
+
                     if (importFile.ExceptionTickers != string.Empty)
                         return BadRequest(new { exceptionTickers = processedVm.ExceptionTickers });
-
-                    return BadRequest(new { exceptionMessage = "Error processing income import data; please try later.", isRevenueData = true });
                 }
 
                 processedVm.AmountSaved = decimal.Parse(string.Format("{0:0.00}", processedVm.AmountSaved));
