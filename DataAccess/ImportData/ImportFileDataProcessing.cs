@@ -43,7 +43,8 @@ namespace PIMS3.DataAccess.ImportData
 
                 if (revenueListingToSave == null)
                 {
-                    importVmToUpdate.ExceptionTickers = _exceptionTickers;
+                    importVmToUpdate.MiscMessage = "Unable to save revenue. Invalid xlsx format, bad xlsx file path, or network connectivity ";
+                    importVmToUpdate.ExceptionTickers = _exceptionTickers.Length > 0 ? _exceptionTickers : "";
                     return importVmToUpdate;
                 }
                 else
