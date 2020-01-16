@@ -55,9 +55,9 @@ namespace PIMS3.BusinessLogic.ImportData
 
         public IEnumerable<Data.Entities.Income> ParseRevenueSpreadsheetForIncomeRecords(string filePath, ImportFileDataProcessing dataAccessComponent, string loggedInvestorId)
         {
-            var newIncomeListing = new List<Data.Entities.Income>();
-            var incomeDataAccessComponent = new IncomeDataProcessing(_ctx);
-            var assetDataAccessComponent = new DataAccess.Asset.AssetData(_ctx);
+            List<Data.Entities.Income> newIncomeListing = new List<Data.Entities.Income>();
+            IncomeDataProcessing incomeDataAccessComponent = new IncomeDataProcessing(_ctx);
+            DataAccess.Asset.AssetData assetDataAccessComponent = new DataAccess.Asset.AssetData(_ctx);
             IQueryable<string> fetchedPositionId;
 
             try
@@ -66,9 +66,9 @@ namespace PIMS3.BusinessLogic.ImportData
 
                 using (var package = new ExcelPackage(importFile))
                 {
-                    var workSheet = package.Workbook.Worksheets[0];
-                    var totalRows = workSheet.Dimension.End.Row;
-                    var totalColumns = workSheet.Dimension.End.Column;
+                    ExcelWorksheet workSheet = package.Workbook.Worksheets[0];
+                    int totalRows = workSheet.Dimension.End.Row;
+                    int totalColumns = workSheet.Dimension.End.Column;
                     _xlsTickerSymbolsOmitted = string.Empty;
                     
                     for (var rowNum = 2; rowNum <= totalRows; rowNum++)
@@ -98,7 +98,7 @@ namespace PIMS3.BusinessLogic.ImportData
                         fetchedPositionId = assetDataAccessComponent.FetchPositionId(loggedInvestorId, xlsTicker, xlsAccount).AsQueryable();
 
                         // Checking PositionId rather than asset is sufficient.
-                        // Validate either a bad ticker symbol, or no account was found to be affiliated with this position/asset in question.
+                        // Validate either a bad ticker symbol, or that no account was affiliated with this position/asset in question.
                         if (!fetchedPositionId.Any())
                         {
                             if (_xlsTickerSymbolsOmitted == string.Empty)
@@ -142,7 +142,7 @@ namespace PIMS3.BusinessLogic.ImportData
             catch (Exception ex)
             {
                 if(ex.Message.Length > 0 )
-                    Log.Error("Error found within ImportFileProcessing.ParseRevenueSpreadsheetForIncomeRecords(), due to {0}.", ex.Message);
+                    Log.Error("Invalid xlsx format, or bad file path found within ImportFileProcessing.ParseRevenueSpreadsheetForIncomeRecords(), due to {0}.", ex.Message);
                 else
                     Log.Error("Error found within ImportFileProcessing.ParseRevenueSpreadsheetForIncomeRecords().");
 
