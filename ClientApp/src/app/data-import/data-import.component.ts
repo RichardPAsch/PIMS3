@@ -92,8 +92,9 @@ export class DataImportComponent extends BaseUnsubscribeComponent {
                             this.alertSvc.error('Error saving revenue import data (network?) due to: ' + err.error.message);
                         } else {
                             //Backend returns unsuccessful error response codes such as 404, 500 etc.
-                            this.alertSvc.warn('Unable to save imported revenue data. Please check that the xlsx/xls file format is correct, ' +
-                                                                                    ' and / or that the submitted file path is valid.');
+                            this.alertSvc.warn('Unable to save submitted XLS/XLSX revenue data. Please check file 1) columns are correct & ordered, ' +
+                                ' 2) path is valid, OR ' +
+                                ' 3) ticker symbols match with appropriate account(s).');
                         }
                     });
           } else {
