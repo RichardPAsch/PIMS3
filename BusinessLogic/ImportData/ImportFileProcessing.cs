@@ -74,12 +74,12 @@ namespace PIMS3.BusinessLogic.ImportData
                     for (var rowNum = 2; rowNum <= totalRows; rowNum++)
                     {
                         // Validate XLS
-                        var headerRow = workSheet.Cells[1, 1, rowNum, totalColumns].Select(c => c.Value == null ? string.Empty : c.Value.ToString());
+                        IEnumerable<string> headerRow = workSheet.Cells[1, 1, rowNum, totalColumns].Select(c => c.Value == null ? string.Empty : c.Value.ToString());
                         if (!ValidateFileAttributes(true, headerRow) || !ValidateFileType(filePath))
                             return null;
 
-                        var row = workSheet.Cells[rowNum, 1, rowNum, totalColumns].Select(c => c.Value == null ? string.Empty : c.Value.ToString());
-                        var enumerableCells = row as string[] ?? row.ToArray();
+                        IEnumerable<string> row = workSheet.Cells[rowNum, 1, rowNum, totalColumns].Select(c => c.Value == null ? string.Empty : c.Value.ToString());
+                        string[] enumerableCells = row as string[] ?? row.ToArray();
 
                         // 'totalRows' may yield inaccurate results; we'll test for last record, e.g., 'enumerableCells[0] ('Recvd Date').
                         if (!enumerableCells.Any() || enumerableCells[0] == "")
@@ -98,7 +98,7 @@ namespace PIMS3.BusinessLogic.ImportData
                         fetchedPositionId = assetDataAccessComponent.FetchPositionId(loggedInvestorId, xlsTicker, xlsAccount).AsQueryable();
 
                         // Checking PositionId rather than asset is sufficient.
-                        // Validate either a bad ticker symbol, or that no account was affiliated with this position/asset in question.
+                        // Validate either a bad ticker symbol, or that no account was affiliated with the position/asset in question.
                         if (!fetchedPositionId.Any())
                         {
                             if (_xlsTickerSymbolsOmitted == string.Empty)
@@ -136,7 +136,15 @@ namespace PIMS3.BusinessLogic.ImportData
                         _totalXlsIncomeRecordsToSave += 1;
                         newIncomeRecord = null;
                     } // for
+
+                    if(_xlsTickerSymbolsOmitted.Length > 0)
+                    {
+                        _viewModel.ExceptionTickers = _xlsTickerSymbolsOmitted;
+                        Log.Warning("Invalid XLS/XLSX position(s) found, revenue import aborted for {0}.", _xlsTickerSymbolsOmitted);
+                    }
+                   
                     return newIncomeListing;
+
                 } // using
             }
             catch (Exception ex)
@@ -328,8 +336,7 @@ namespace PIMS3.BusinessLogic.ImportData
 
             return assetsToCreateList;
         }
-
-
+        
         
         public bool ValidateFileAttributes(bool containsRevenueData, IEnumerable<string> xlsRow)
         {
