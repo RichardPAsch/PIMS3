@@ -40,10 +40,13 @@ namespace PIMS3.DataAccess.ImportData
             {
                 revenueListingToSave = busLayerComponent.ParseRevenueSpreadsheetForIncomeRecords(importVmToUpdate.ImportFilePath.Trim(), this, investorId);
 
-                if (revenueListingToSave == null)
+                if (revenueListingToSave == null || revenueListingToSave.Count() == 0)
                 {
-                    importVmToUpdate.MiscMessage = "Error saving revenue. Invalid xlsx format, bad xlsx file path, or faulty network connectivity. ";
-                    importVmToUpdate.ExceptionTickers = _exceptionTickers.Length > 0 ? _exceptionTickers : "";
+                    if(!string.IsNullOrEmpty(importVmToUpdate.ExceptionTickers))
+                        importVmToUpdate.MiscMessage = "Error saving revenue for " + importVmToUpdate.ExceptionTickers + ". Check position(s).";
+                    else
+                        importVmToUpdate.MiscMessage = "Error saving revenue. Invalid xlsx format, bad xlsx file path, or faulty network connectivity. ";
+
                     return importVmToUpdate;
                 }
                 else
@@ -255,7 +258,6 @@ namespace PIMS3.DataAccess.ImportData
             }
             return idsForUpdating.ToArray();
         }
-
 
     }
    
