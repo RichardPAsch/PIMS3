@@ -63,12 +63,17 @@ namespace PIMS3.Controllers
                     if (!string.IsNullOrEmpty(processedVm.MiscMessage)) {
                         Log.Warning("Aborted in ImportFileController.ProcessImportFile() due to {0} for {1}.", processedVm.MiscMessage.Trim(),
                                                                                                                processedVm.ImportFilePath.Trim());
-
                         return BadRequest(new { exceptionMessage = processedVm.MiscMessage.Trim(), isRevenueData = true });
+
+                    } else if (importFile.ExceptionTickers != string.Empty)  {
+                        return BadRequest(new { exceptionTickers = processedVm.ExceptionTickers });
+                    }
+                    else {
+                        return BadRequest(new { exceptionMessage = "Unable to persist revenue"});
                     }
 
-                    if (importFile.ExceptionTickers != string.Empty)
-                        return BadRequest(new { exceptionTickers = processedVm.ExceptionTickers });
+                    //if (importFile.ExceptionTickers != string.Empty)
+                    //    return BadRequest(new { exceptionTickers = processedVm.ExceptionTickers });
                 }
 
                 processedVm.AmountSaved = decimal.Parse(string.Format("{0:0.00}", processedVm.AmountSaved));
