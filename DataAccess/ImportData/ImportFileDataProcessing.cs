@@ -39,11 +39,10 @@ namespace PIMS3.DataAccess.ImportData
             if (busLayerComponent.ValidateVm())
             {
                 revenueListingToSave = busLayerComponent.ParseRevenueSpreadsheetForIncomeRecords(importVmToUpdate.ImportFilePath.Trim(), this, investorId);
-                
 
                 if (revenueListingToSave == null)
                 {
-                    importVmToUpdate.MiscMessage = "Unable to save revenue. Invalid xlsx format, bad xlsx file path, or network connectivity ";
+                    importVmToUpdate.MiscMessage = "Error saving revenue. Invalid xlsx format, bad xlsx file path, or faulty network connectivity. ";
                     importVmToUpdate.ExceptionTickers = _exceptionTickers.Length > 0 ? _exceptionTickers : "";
                     return importVmToUpdate;
                 }
