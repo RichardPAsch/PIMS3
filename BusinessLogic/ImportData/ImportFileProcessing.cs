@@ -62,7 +62,7 @@ namespace PIMS3.BusinessLogic.ImportData
 
             try
             {
-                var importFile = new FileInfo(filePath);
+                FileInfo importFile = new FileInfo(filePath);
 
                 using (var package = new ExcelPackage(importFile))
                 {
@@ -91,9 +91,9 @@ namespace PIMS3.BusinessLogic.ImportData
                             }
                             return newIncomeListing;
                         }
-                        
-                        var xlsTicker = enumerableCells.ElementAt(3).Trim();
-                        var xlsAccount = CommonSvc.ParseAccountTypeFromDescription(enumerableCells.ElementAt(1).Trim());
+
+                        string xlsTicker = enumerableCells.ElementAt(3).Trim();
+                        string xlsAccount = CommonSvc.ParseAccountTypeFromDescription(enumerableCells.ElementAt(1).Trim());
                        
                         fetchedPositionId = assetDataAccessComponent.FetchPositionId(loggedInvestorId, xlsTicker, xlsAccount).AsQueryable();
 
@@ -123,7 +123,7 @@ namespace PIMS3.BusinessLogic.ImportData
                         if (_xlsTickerSymbolsOmitted != string.Empty)
                             _viewModel.ExceptionTickers = _xlsTickerSymbolsOmitted;
 
-                        var newIncomeRecord = new Data.Entities.Income
+                        Data.Entities.Income newIncomeRecord = new Data.Entities.Income
                         {
                             IncomeId = Guid.NewGuid().ToString(),
                             PositionId = fetchedPositionId.First().ToString(),
@@ -173,7 +173,7 @@ namespace PIMS3.BusinessLogic.ImportData
                 string lastTickerProcessed = string.Empty;
                 var importFile = new FileInfo(filePath);
 
-                using (var package = new ExcelPackage(importFile))
+                using (ExcelPackage package = new ExcelPackage(importFile))
                 {
                     ExcelWorksheet workSheet = package.Workbook.Worksheets[0];
                     int totalRows = workSheet.Dimension.End.Row;
