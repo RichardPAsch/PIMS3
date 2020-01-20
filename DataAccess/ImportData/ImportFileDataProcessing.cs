@@ -24,7 +24,6 @@ namespace PIMS3.DataAccess.ImportData
         IEnumerable<AssetCreationVm> assetListingToSave = null;
         private ProfileDataProcessing profileDataAccessComponent;
 
-
         public ImportFileDataProcessing()
         {
         }
@@ -87,9 +86,13 @@ namespace PIMS3.DataAccess.ImportData
             {
                 assetListingToSave = busLogicComponent.ParsePortfolioSpreadsheetForAssetRecords(importVmToSave.ImportFilePath.Trim(), this, id);
 
-                if (assetListingToSave == null)
+                if (assetListingToSave == null || assetListingToSave.Count() == 0)
                 {
-                    importVmToSave.ExceptionTickers = _exceptionTickers;
+                    if (!string.IsNullOrEmpty(importVmToSave.ExceptionTickers))
+                        importVmToSave.MiscMessage = "Error saving position(s) for " + importVmToSave.ExceptionTickers + ". Check position(s)";
+                    else
+                        importVmToSave.MiscMessage = "Error saving position(s). Invalid xlsx format, bad xlsx file path, or faulty network connectivity. ";
+
                     return importVmToSave;
                 }
                 else
