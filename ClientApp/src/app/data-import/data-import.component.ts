@@ -92,9 +92,7 @@ export class DataImportComponent extends BaseUnsubscribeComponent {
                             this.alertSvc.error('Error saving revenue import data (network?) due to: ' + err.error.message);
                         } else {
                             //Backend returns unsuccessful error response codes such as 404, 500 etc.
-                            this.alertSvc.warn('Unable to save submitted XLS/XLSX revenue data. Please check file 1) columns are correct & ordered, ' +
-                                ' 2) path is valid, OR ' +
-                                ' 3) ticker symbols match with appropriate account(s).');
+                            this.alertSvc.warn(this.buildAlertMessage(true));
                         }
                     });
           } else {
@@ -115,7 +113,7 @@ export class DataImportComponent extends BaseUnsubscribeComponent {
                         if (err.error instanceof Error) {
                             this.alertSvc.error('Error saving new Position import data (network?) due to: ' + err.error.message);
                         } else {
-                            this.alertSvc.error('Error saving new Position import data (server?) due to:  ' + err.error.message);
+                            this.alertSvc.warn(this.buildAlertMessage(false));
                         }
                     });
           }
@@ -132,6 +130,16 @@ export class DataImportComponent extends BaseUnsubscribeComponent {
 
         let submittedFilePath = filePath;
         return submittedFilePath.substring(submittedFilePath.indexOf(".") + 1).toUpperCase();
+    }
+
+
+    private buildAlertMessage(isRevenueData: boolean): string {
+
+        let msgContext: string = isRevenueData ? 'revenue' : 'position';
+        return 'Unable to save submitted XLS/XLSX ' + msgContext + ' data. Please check file ' +
+            ' 1) columns are correct & ordered, ' +
+            ' 2) path is valid, OR ' +
+            ' 3) ticker symbols match appropriate account(s).';
     }
 
 }
