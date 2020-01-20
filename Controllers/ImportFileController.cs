@@ -61,7 +61,7 @@ namespace PIMS3.Controllers
                 {
                     // Possible invalid file path or bad network connectivity.
                     if (!string.IsNullOrEmpty(processedVm.MiscMessage)) {
-                        Log.Warning("Aborted in ImportFileController.ProcessImportFile() due to {0} for {1}.", processedVm.MiscMessage.Trim(),
+                        Log.Warning("Aborted in ImportFileController.ProcessImportFile() due to {0} in {1}.", processedVm.MiscMessage.Trim(),
                                                                                                                processedVm.ImportFilePath.Trim());
                         return BadRequest(new { exceptionMessage = processedVm.MiscMessage.Trim(), isRevenueData = true });
 
@@ -71,21 +71,18 @@ namespace PIMS3.Controllers
                     else {
                         return BadRequest(new { exceptionMessage = "Unable to persist revenue"});
                     }
-
-                    //if (importFile.ExceptionTickers != string.Empty)
-                    //    return BadRequest(new { exceptionTickers = processedVm.ExceptionTickers });
                 }
 
                 processedVm.AmountSaved = decimal.Parse(string.Format("{0:0.00}", processedVm.AmountSaved));
                 Log.Information("Revenue import successful for {0} record(s), totaling ${1}.", processedVm.RecordsSaved, processedVm.AmountSaved);
                 return CreatedAtAction("ProcessImportFile", new { count = processedVm.RecordsSaved, amount = processedVm.AmountSaved }, processedVm);
             }
-            else  // aka 'Positions' processing.
+            else  // aka 'Positions' (Asset) processing.
             {
                 processedVm = dataAccessComponent.SaveAssets(importFile, _dbCtx, Id);
-                if (processedVm == null)
+                if (processedVm.RecordsSaved == 0)
                 {
-                    Log.Error("Error saving new Position(s) within ImportFileController.ProcessImportFile().");
+                    Log.Error("ImportFileController.ProcessImportFile() : {0}", processedVm.MiscMessage.Trim());
                     return BadRequest(new { exceptionMessage = "Error saving new Position(s).", isRevenueData = false });
                 }
 
