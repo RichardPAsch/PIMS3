@@ -41,10 +41,10 @@ namespace PIMS3.DataAccess.ImportData
 
                 if (revenueListingToSave == null || revenueListingToSave.Count() == 0)
                 {
-                    if(!string.IsNullOrEmpty(importVmToUpdate.ExceptionTickers))
+                    if (!string.IsNullOrEmpty(importVmToUpdate.ExceptionTickers))
                         importVmToUpdate.MiscMessage = "Error saving revenue for " + importVmToUpdate.ExceptionTickers + ". Check position(s).";
                     else
-                        importVmToUpdate.MiscMessage = "Error saving revenue. Invalid xlsx format, bad xlsx file path, or faulty network connectivity. ";
+                        importVmToUpdate.MiscMessage = BuildLogMessage("revenue");
 
                     return importVmToUpdate;
                 }
@@ -91,7 +91,7 @@ namespace PIMS3.DataAccess.ImportData
                     if (!string.IsNullOrEmpty(importVmToSave.ExceptionTickers))
                         importVmToSave.MiscMessage = "Error saving position(s) for " + importVmToSave.ExceptionTickers + ". Check position(s)";
                     else
-                        importVmToSave.MiscMessage = "Error saving position(s). Invalid xlsx format, bad xlsx file path, or faulty network connectivity. ";
+                        importVmToSave.MiscMessage = BuildLogMessage("position(s)");
 
                     return importVmToSave;
                 }
@@ -260,6 +260,12 @@ namespace PIMS3.DataAccess.ImportData
                 idsForUpdating.Add(incomeRec.PositionId);
             }
             return idsForUpdating.ToArray();
+        }
+
+
+        private string BuildLogMessage(string msgContext)
+        {
+            return string.Format("Error saving {0}. Bad data import xlsx format (columns, data), xlsx file path, or faulty network connectivity.", msgContext);
         }
 
     }
