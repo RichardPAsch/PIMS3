@@ -3,6 +3,7 @@ using System.Linq;
 using PIMS3.ViewModels;
 using System.Collections.Generic;
 using System;
+using Serilog;
 
 
 namespace PIMS3.DataAccess.Position
@@ -141,8 +142,10 @@ namespace PIMS3.DataAccess.Position
             var positionsToUpdateListing = new List<Data.Entities.Position>();
             var updateCount = 0;
 
-            foreach (var pos in editedPositionsAbridged)
+            foreach (PositionsForEditVm pos in editedPositionsAbridged)
+            {
                 positionsToUpdateListing.Add(_ctx.Position.Where(p => p.PositionId == pos.PositionId).First());
+            }
 
             positionsToUpdateListing.OrderBy(p => p.PositionId);
             editedPositionsAbridged.OrderBy(p => p.PositionId);
@@ -160,12 +163,22 @@ namespace PIMS3.DataAccess.Position
                     }
                 }
 
+                try
+                {
+                   // _ctx = null;  // TESTING only
+                    _ctx.UpdateRange(positionsToUpdateListing);
+                    updateCount = _ctx.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Error updating Position(s) via PositionDataProcessing.UpdatePositions(), due to {0}", ex.Message);
+                    return updateCount;
+                }
                 _ctx.UpdateRange(positionsToUpdateListing);
                 updateCount = _ctx.SaveChanges();
             }
 
             return updateCount;
-
         }
 
 
