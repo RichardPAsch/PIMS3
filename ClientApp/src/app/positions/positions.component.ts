@@ -34,7 +34,7 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
     columnDefs = [
         { headerName: "Ticker", field: "tickerSymbol", sortable: true, filter: true, checkboxSelection: true, width: 98, resizable: true, editable: true },
         { headerName: "Description", field: "tickerDescription", width: 160, resizable: true },
-        { headerName: "Account", field: "accountTypeDesc", width: 92, editable: true, resizable: true, filter: true },
+        { headerName: "Account", field: "accountTypeDesc", width: 92, editable: true, resizable: true, filter: true, sortable: true },
         { headerName: "Status", field: "status", width: 77, sortable: true, resizable: true, editable: true,
             cellEditor: "agPopupSelectCellEditor",
             cellEditorParams: {
@@ -113,6 +113,11 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
         var selectedPositionEdits = selectedNodes.map(node => node.data);
         let editedPositions = new Array<Position>();
 
+        if (selectedPositionEdits.length == 0) {
+            this.alertSvc.info("Unable to process; please select 1 or more Positions for updating.");
+            return;
+        }
+
         for (let pos = 0; pos < selectedPositionEdits.length; pos++) {
                         
             let editedPosition = new Position();
@@ -134,18 +139,10 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
                     this.alertSvc.success("Successfully updated " + updateResponseCount + " Position(s).");
                     this.fetchPositions(this.includeInactive);
                 }
-                else
-                    this.alertSvc.warn("Unable to update Positions at this time. Please try again later.");
-            },
-            (apiError: HttpErrorResponse) => {
-                if (apiError.error instanceof Error) {
-                    this.alertSvc.error("Error processing Position update(s), possibly due to network issues. Please try again later.");
-                }
                 else {
-                    this.alertSvc.error("Error processing Position update(s) due to '" + apiError.message + "'." + " Please try again later.");
+                    this.alertSvc.error("Unable to process Position update(s) at this time. Possible connectivity issue(s). Please try again later.");
                 }
-            }
-            ); // end subscribe()
+            }); // end subscribe()
 
     }
 
@@ -161,9 +158,9 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
             .subscribe(assetClassesArr => {
                 if (!initializeDropDown)
                     alert(this.buildAssetClassInfo(assetClassesArr, false));// candidate for AlertService?
-                else 
+                else
                     this.buildAssetClassInfo(assetClassesArr, true);
-            })
+            });
     }
 
 
