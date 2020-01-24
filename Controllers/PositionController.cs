@@ -16,7 +16,7 @@ namespace PIMS3.Controllers
     [Authorize]
     public class PositionController : ControllerBase
     {
-        private readonly PIMS3Context _ctx;
+        private readonly PIMS3Context _ctx;  
 
         public PositionController(PIMS3Context ctx)
         {
@@ -29,14 +29,13 @@ namespace PIMS3.Controllers
         {
             // Pending updates for user-selected Position ids marked as having received income.
             // Bypassing bus logic processing, as there are no business rules to enforce.
-            var positionDataAccessComponent = new PositionDataProcessing(_ctx);
-            var updatesAreValid = positionDataAccessComponent.UpdatePositionPymtDueFlags(positionIdsToUpdate);
+            PositionDataProcessing positionDataAccessComponent = new PositionDataProcessing(_ctx);
+            bool updatesAreValid = positionDataAccessComponent.UpdatePositionPymtDueFlags(positionIdsToUpdate);
             if (updatesAreValid)
             {
                 Log.Information("Payment(s) received/recorded ['PymtDue'-> False] for {0} position(s).", positionIdsToUpdate.Count());
             }
             return Ok(updatesAreValid);
-
         }
 
 
@@ -51,11 +50,17 @@ namespace PIMS3.Controllers
 
 
         [HttpPut("UpdateEditedPositions")]
-        public ActionResult<int> UpdateEditedPositions([FromBody] dynamic[] positionEdits)
+        public ActionResult UpdateEditedPositions([FromBody] dynamic[] positionEdits)
         {
             int recordsUpdatedCount = 0;
             PositionDataProcessing positionDataAccessComponent = new PositionDataProcessing(_ctx);
-            var positionsUpdated = positionDataAccessComponent.UpdatePositions(MapToVm(positionEdits));
+            int positionsUpdated = positionDataAccessComponent.UpdatePositions(MapToVm(positionEdits));
+
+            // TODO: 'return BadRequest();' - results in calling above UpdatePositions(MapToVm(positionEdits) again ?
+            if (positionsUpdated == 0)
+            {
+                return Ok(recordsUpdatedCount);  
+            }
 
             // Update referenced 'Asset' table should asset class have been modified.
             string fetchedAssetId = positionDataAccessComponent.FetchAssetId(positionEdits.First().positionId.Value);
