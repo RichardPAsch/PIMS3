@@ -37,4 +37,10 @@ export class PositionsService {
         let webApi = this.baseUrl + "/api/AssetClasses";
         return this.http.get<string>(webApi);
     }
+
+
+    GetAccountTypes(): Observable<string[]> {
+        let webApi = this.baseUrl + "/api/AccountTypes";
+        return this.http.get<string[]>(webApi);
+    }
 }
