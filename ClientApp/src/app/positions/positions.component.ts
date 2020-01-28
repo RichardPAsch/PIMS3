@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { AgGridNg2 } from 'ag-grid-angular';
 import { Position } from '../positions/position';
 import { PositionsService } from '../positions/positions.service';
-import { HttpErrorResponse } from '@angular/common/http';
+//import { HttpErrorResponse } from '@angular/common/http';
 import { AlertService } from '../shared/alert.service';
 import { takeUntil } from 'rxjs/operators';
 import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
@@ -22,6 +22,7 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
     positionCount: number;
     includeInactive: boolean = false;
     assetClassDropDownCodes = new Array<string>();
+    acctTypeDropDownCodes = new Array<string>();
 
     @ViewChild('agGridPositions', {static: false})
     agGridPositions: AgGridNg2;
@@ -29,12 +30,18 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
     ngOnInit() {
         this.fetchPositions(false);
         this.processAssetClassDescriptions(true);
+        this.processAccountTypesInfo();
     }
 
     columnDefs = [
         { headerName: "Ticker", field: "tickerSymbol", sortable: true, filter: true, checkboxSelection: true, width: 98, resizable: true, editable: true },
         { headerName: "Description", field: "tickerDescription", width: 160, resizable: true },
-        { headerName: "Account", field: "accountTypeDesc", width: 92, editable: true, resizable: true, filter: true, sortable: true },
+        { headerName: "Account", field: "accountTypeDesc", width: 92, editable: true, resizable: true, filter: true, sortable: true,
+            cellEditor: "agPopupSelectCellEditor",
+            cellEditorParams: {
+                values: this.acctTypeDropDownCodes
+            }
+        },
         { headerName: "Status", field: "status", width: 77, sortable: true, resizable: true, editable: true,
             cellEditor: "agPopupSelectCellEditor",
             cellEditorParams: {
@@ -75,8 +82,7 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
                 this.positionCount = positionsResponse.length;
             });
     }
-
-
+    
     mapResponseToGrid(responseData: any): Position[] {
 
         //let mappedPositions: Position[];
@@ -105,8 +111,7 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
 
         return mappedPositions;
     }
-
-
+    
     processEditedPositions() {
 
         var selectedNodes = this.agGridPositions.api.getSelectedNodes();
@@ -127,6 +132,7 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
             editedPosition.status = selectedPositionEdits[pos].status;
             editedPosition.pymtDue = selectedPositionEdits[pos].pymtDue;
             editedPosition.assetClass = selectedPositionEdits[pos].assetClass;
+            editedPosition.accountTypeDesc = selectedPositionEdits[pos].accountTypeDesc;
 
             editedPositions.push(editedPosition);
         }
@@ -145,8 +151,7 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
             }); // end subscribe()
 
     }
-
-
+    
     processInactiveData(includeInactive: any) {
         this.fetchPositions(includeInactive);
     }
@@ -156,14 +161,10 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
             .retry(1)
             .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(assetClassesArr => {
-                if (!initializeDropDown)
-                    alert(this.buildAssetClassInfo(assetClassesArr, false));// candidate for AlertService?
-                else
-                    this.buildAssetClassInfo(assetClassesArr, true);
+                this.buildAssetClassInfo(assetClassesArr, true);
             });
     }
-
-
+    
     buildAssetClassInfo(assetClassesData: any, forDropDownUse: boolean): string {
 
         if (!forDropDownUse) {
@@ -178,6 +179,24 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
             }
             return;
         }
+    }
+    
+    processAccountTypesInfo(): void {
+
+        this.positionSvc.GetAccountTypes()
+            .retry(1)
+            .pipe(takeUntil(this.getUnsubscribe()))
+            .subscribe(acctsResp => {
+                this.buildAccountTypesInfo(acctsResp)
+            });
+    }
+
+    buildAccountTypesInfo(acctTypes: any): string {
+
+        for (let i = 1; i < acctTypes.length; i++) {
+            this.acctTypeDropDownCodes.push(acctTypes[i]);
+        }
+        return;
     }
 
 }
