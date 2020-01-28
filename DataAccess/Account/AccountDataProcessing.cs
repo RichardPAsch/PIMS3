@@ -17,13 +17,16 @@ namespace PIMS3.DataAccess.Account
             return _ctx.AccountType.Where(a => a.AccountTypeDesc.Trim() == acctDesc.Trim())
                                    .Select(a => a.AccountTypeId)
                                    .AsQueryable();
-
         }
-
-
         
-
-
+        public IQueryable<string> GetAllAccountTypes()
+        {
+            return  _ctx.AccountType
+                       .Where(a => a.AccountTypeDesc != "Select...")
+                       .Select(at => at.AccountTypeDesc)
+                       .OrderBy(at => at)
+                       .AsQueryable();
+        }
 
     }
 }
