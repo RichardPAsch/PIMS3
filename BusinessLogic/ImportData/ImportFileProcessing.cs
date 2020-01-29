@@ -378,8 +378,8 @@ namespace PIMS3.BusinessLogic.ImportData
             {
                 newPosition = new Position
                 {
-                    PositionId = Guid.NewGuid().ToString(), 
-                    AccountTypeId = acctDataAccessComponent.GetAccountTypeId(currentRow.ElementAt(0)).First().ToString().Trim(), 
+                    PositionId = Guid.NewGuid().ToString(),
+                    AccountTypeId = acctDataAccessComponent.GetAccountTypeId(currentRow.ElementAt(0)),
                     AssetId = assetIdForPosition,
                     Fees = 0M, 
                     LastUpdate = DateTime.Now, 
@@ -391,7 +391,7 @@ namespace PIMS3.BusinessLogic.ImportData
             }
             catch (Exception)
             {
-                // TODO: Log error msg.
+                Log.Error("Error creating Position within ImportFileProcessing.InitializePositions().");
                 return null;
             }
 
