@@ -12,13 +12,13 @@ namespace PIMS3.DataAccess.Account
             _ctx = ctx;
         }
 
-        public IQueryable<string> GetAccountTypeId(string acctDesc)
+        public string GetAccountTypeId(string acctDesc)
         {
             return _ctx.AccountType.Where(a => a.AccountTypeDesc.Trim() == acctDesc.Trim())
                                    .Select(a => a.AccountTypeId)
-                                   .AsQueryable();
+                                   .First();
         }
-        
+
         public IQueryable<string> GetAllAccountTypes()
         {
             return  _ctx.AccountType
