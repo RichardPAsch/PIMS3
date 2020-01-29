@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PIMS3.DataAccess.Asset;
 using Serilog;
+using PIMS3.DataAccess.Account;
 
 
 namespace PIMS3.Controllers
@@ -79,14 +80,17 @@ namespace PIMS3.Controllers
         private PositionsForEditVm[] MapToVm(dynamic[] sourcePositions)
         {
             List<PositionsForEditVm> posVms = new List<PositionsForEditVm>();
-
-            for(var i =0; i < sourcePositions.Length; i++)
+            AccountDataProcessing accountDataAccessComponent = new AccountDataProcessing(_ctx);
+                       
+            for (var i = 0; i < sourcePositions.Length; i++)
             {
                 var updatedPos = new PositionsForEditVm
                 {
                     PositionId = sourcePositions[i].positionId.Value,
                     Status = sourcePositions[i].status.Value,
                     AssetClass = sourcePositions[i].assetClass.Value,
+                    Account = sourcePositions[i].accountTypeDesc.Value,
+                    AccountTypeId = accountDataAccessComponent.GetAccountTypeId(sourcePositions[i].accountTypeDesc.Value),
                     // Any change in 'PymtDue' results in true/false cast as a string -- not a boolean.
                     PymtDue = sourcePositions[i].pymtDue.Value.GetType() == typeof(string)
                                             ? bool.Parse(sourcePositions[i].pymtDue.Value)
