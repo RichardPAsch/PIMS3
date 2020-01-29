@@ -139,8 +139,8 @@ namespace PIMS3.DataAccess.Position
         public int UpdatePositions(PositionsForEditVm[] editedPositionsAbridged)
         {
             // Persist 'PymtDue' and/or 'Status' edit(s).
-            var positionsToUpdateListing = new List<Data.Entities.Position>();
-            var updateCount = 0;
+            List<Data.Entities.Position> positionsToUpdateListing = new List<Data.Entities.Position>();
+            int updateCount = 0;
 
             foreach (PositionsForEditVm pos in editedPositionsAbridged)
             {
@@ -160,12 +160,12 @@ namespace PIMS3.DataAccess.Position
                         position.PymtDue = editedPositionsAbridged.First().PymtDue;
                         position.Status = editedPositionsAbridged.First().Status;
                         position.LastUpdate = DateTime.Now;
+                        position.AccountTypeId = editedPositionsAbridged.First().AccountTypeId;
                     }
                 }
 
                 try
                 {
-                   // _ctx = null;  // TESTING only
                     _ctx.UpdateRange(positionsToUpdateListing);
                     updateCount = _ctx.SaveChanges();
                 }
