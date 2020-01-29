@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { AgGridNg2 } from 'ag-grid-angular';
 import { Position } from '../positions/position';
 import { PositionsService } from '../positions/positions.service';
-//import { HttpErrorResponse } from '@angular/common/http';
 import { AlertService } from '../shared/alert.service';
 import { takeUntil } from 'rxjs/operators';
 import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
