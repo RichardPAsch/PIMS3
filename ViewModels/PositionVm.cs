@@ -52,5 +52,7 @@ namespace PIMS3.ViewModels
 
         public bool PymtDue { get; set; }
 
+        public string AccountTypeId { get; set; }
+
     }
 }
