@@ -9,6 +9,7 @@ import { AlertService } from '../shared/alert.service';
 import { takeUntil } from 'rxjs/operators';
 import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
+
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
@@ -180,13 +181,33 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
     }
 
 
+    checkForDuplicates(): void {
+
+        this.profileSvc.getProfileDataViaDb(this.assetProfileForm.controls["ticker"].value, this.investor.username)
+            .retry(2)
+            .pipe(takeUntil(this.getUnsubscribe()))
+            .subscribe(isDuplicate => {
+                if (isDuplicate) {
+                    this.alertSvc.warn("Custom profile creation aborted; duplicate entry found for : '" + this.assetProfileForm.controls["ticker"].value + "'");
+                    return;
+                } else {
+                    this.createProfile();
+                }
+            },
+                () => {
+                    this.alertSvc.error("Unable to check for duplicate profile entry. Please try again later.");
+                    return;
+                }
+            );
+    }
+
+
     createProfile(): void {
 
         // Method applicable to creating a custom Profile.
         let dbProfilePost$;
         let freqAndMonthsReconcile: boolean;
-
-
+      
         if (this.assetProfileForm.invalid) {
             return;
         }
