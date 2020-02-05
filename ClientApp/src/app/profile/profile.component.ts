@@ -274,7 +274,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
         } catch (e) {
             this.alertSvc.error("Error obtaining existing Profile for : " + "'" + profileToUpdate.tickerSymbol + "'.");
         }
-        // btnNewProfileSubmitted formFields.tickerDesc.invalid && (formFields.tickerDesc.dirty)
+
         // RxJS : tap() - returned value(s) are untouchable, as opposed to edit/transform capability available via map().
         let combined = dbProfileGet$.pipe(
             switchMap(profileInfo => {
