@@ -65,7 +65,7 @@ namespace PIMS3.Controllers
             }
             catch 
             {
-                Log.Error("Error searching Db profile for {0}", ticker);
+                Log.Warning("No Db profile found for {0}; expected outcome if duplicate profile check, otherwise potential error in ProfileController.GetProfile().", ticker);
                 return BadRequest(new { errorMsg = "Error fetching custom Profile." });
             }
         }
