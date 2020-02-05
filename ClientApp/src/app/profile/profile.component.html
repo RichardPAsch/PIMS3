@@ -148,7 +148,7 @@
                             <button id="btnUpdateProfile" style="width: 130px;" (click)="updateProfile()" [disabled]="btnUpdateProfileIsDisabled" class="btn">
                                 Update Profile
                             </button>
-                            <button id="btnNewProfile" (click)="createProfile()" [disabled]="btnCreateProfileIsDisabled" class="btn">
+                            <button id="btnNewProfile" (click)="checkForDuplicates()" [disabled]="btnCreateProfileIsDisabled" class="btn">
                                 Create Profile
                             </button>
                         </span>
