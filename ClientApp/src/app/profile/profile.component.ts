@@ -22,6 +22,10 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
         this.investor = JSON.parse(sessionStorage.getItem('currentInvestor')); 
     }
 
+    // For simplicity, we'll default 'divPayMonths' to '1' (vs '0') upon initialization, to avoid an invalid assetProfileForm  
+    // that would result from Pims3Validations.divPayMonthsValidator(). Validation normally performed via
+    // Pims3Validations.areDivMonthsAndDivFrequencyReconciled() prior to persistence.
+    defaultTickerDesc: string = "NYSE description - 50 characters max.";
     investor: any;
     date1 = new Date();
     currentDateTime: string;
@@ -77,6 +81,9 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
             this.btnGetDbProfileIsDisabled = false;
             this.btnCreateProfileIsDisabled = true;
             this.isReadOnly = false;
+        } else {
+            this.btnGetProfileIsDisabled = true;
+            this.btnGetDbProfileIsDisabled = true;
         }
     }
 
@@ -179,6 +186,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
         let dbProfilePost$;
         let freqAndMonthsReconcile: boolean;
 
+
         if (this.assetProfileForm.invalid) {
             return;
         }
@@ -245,61 +253,8 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
         posting.pipe(takeUntil(this.getUnsubscribe())).subscribe();
     }
 
-       
-    mapResponseToModel(webProfile: any): Profile {
 
-        /* available response fields:
-             * dividendFreq,dividendMonths,dividendPayDay,dividendRate,dividendYield,earningsPerShare,tickerDescription,
-             * tickerSymbol,unitPrice,peRatio,exDividendDate
-        */
-        let profileModel = new Profile();
-        profileModel.tickerSymbol = webProfile.tickerSymbol;
-        profileModel.tickerDesc = webProfile.tickerDescription;
-        profileModel.divFreq = webProfile.dividendFreq == "NA" || webProfile.dividendFreq == ""
-            ? "NA"
-            : webProfile.dividendFreq;
-
-        if (profileModel.divFreq != "M") {
-            profileModel.divPayMonths = webProfile.dividendMonths == "0" || webProfile.dividendMonths == ""
-                ? "0"
-                : webProfile.dividendMonths;
-        }
-        else
-            profileModel.divPayMonths = "N/A";
-
-        profileModel.divPayDay = webProfile.dividendPayDay;
-        profileModel.divYield = webProfile.dividendYield;
-        profileModel.EPS = webProfile.earningsPerShare;
-        profileModel.unitPrice = webProfile.unitPrice;
-        profileModel.PE_ratio = webProfile.peRatio == null
-            ? 0
-            : webProfile.peRatio;
-        profileModel.divRate = webProfile.dividendRate;
-
-        return profileModel;
-    }
-
-
-    initializeView(profileData: Profile, refresh: boolean): void {
-
-        this.assetProfileForm.setValue({
-            ticker: refresh ? '' : profileData.tickerSymbol,
-            tickerDesc: refresh ? '' : profileData.tickerDesc,
-            divRate: refresh ? 0 : profileData.divRate,
-            divYield: refresh ? 0 : profileData.divYield,
-            divFreq: refresh ? '' : profileData.divFreq,
-            peRatio: refresh ? 0 : profileData.PE_ratio,
-            eps: refresh ? 0 : profileData.EPS,
-            unitPrice: refresh ? 0 : profileData.unitPrice,
-            divPayMonths: refresh ? '' : profileData.divPayMonths,
-            divPayDay: refresh ? '' : profileData.divPayDay
-        });
-
-        this.btnUpdateProfileIsDisabled = refresh ? true : false;
-    }
-
-
-    updateProfile(): void { 
+    updateProfile(): void {
 
         let profileToUpdate = new Profile();
         let dbProfileGet$;
@@ -319,12 +274,12 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
         } catch (e) {
             this.alertSvc.error("Error obtaining existing Profile for : " + "'" + profileToUpdate.tickerSymbol + "'.");
         }
-
+        // btnNewProfileSubmitted formFields.tickerDesc.invalid && (formFields.tickerDesc.dirty)
         // RxJS : tap() - returned value(s) are untouchable, as opposed to edit/transform capability available via map().
         let combined = dbProfileGet$.pipe(
             switchMap(profileInfo => {
                 return dbProfilePut$.pipe(
-                        tap(profileUpdate => {
+                    tap(profileUpdate => {
                         if (profileUpdate) {
                             this.alertSvc.success("Existing Profile for " +
                                 "'" + profileInfo[0].tickerSymbol + "'" +
@@ -334,26 +289,85 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
                             this.btnCreateProfileIsDisabled = true;
                             this.btnUpdateProfileIsDisabled = true;
                             this.btnUpdateProfileSubmitted = true;
-                            }
-                            else {
-                                this.alertSvc.error("Error updating existing local Profile at this time for " +
-                                    "'" + profileInfo[0].tickerSymbol + "'." +
-                                    "Please retry later.");
-                                this.btnGetProfileIsDisabled = false;
-                                this.btnGetDbProfileIsDisabled = true;
-                                this.btnCreateProfileIsDisabled = true;
-                                this.btnUpdateProfileIsDisabled = true;
-                                this.btnUpdateProfileSubmitted = false;
-                            }
-                            this.initializeView(null, true);
+                        }
+                        else {
+                            this.alertSvc.error("Error updating existing local Profile at this time for " +
+                                "'" + profileInfo[0].tickerSymbol + "'." +
+                                "Please retry later.");
+                            this.btnGetProfileIsDisabled = false;
+                            this.btnGetDbProfileIsDisabled = true;
+                            this.btnCreateProfileIsDisabled = true;
                             this.btnUpdateProfileIsDisabled = true;
-                        })
-                   );
+                            this.btnUpdateProfileSubmitted = false;
+                        }
+                        this.initializeView(null, true);
+                        this.btnUpdateProfileIsDisabled = true;
+                    })
+                );
             })
         );
 
         combined.pipe(takeUntil(this.getUnsubscribe())).subscribe();
     }
+
+       
+    mapResponseToModel(webProfile: any): Profile {
+
+        /* available response fields:
+             * dividendFreq,dividendMonths,dividendPayDay,dividendRate,dividendYield,earningsPerShare,tickerDescription,
+             * tickerSymbol,unitPrice,peRatio,exDividendDate
+        */
+        let profileModel = new Profile();
+        profileModel.tickerSymbol = webProfile.tickerSymbol;
+        profileModel.tickerDesc = webProfile.tickerDescription;
+        profileModel.divFreq = webProfile.dividendFreq == "NA" || webProfile.dividendFreq == ""
+            ? "NA"
+            : webProfile.dividendFreq;
+
+        if (profileModel.divFreq != "M") {
+            profileModel.divPayMonths = webProfile.dividendMonths == "0" || webProfile.dividendMonths == ""
+                ? "0"
+                : webProfile.dividendMonths;
+        }
+        else {
+            // String value ascertains this attribute has not been overlooked.
+            profileModel.divPayMonths = "N/A";
+        }
+            
+
+        profileModel.divPayDay = webProfile.dividendPayDay;
+        profileModel.divYield = webProfile.dividendYield;
+        profileModel.EPS = webProfile.earningsPerShare;
+        profileModel.unitPrice = webProfile.unitPrice;
+        profileModel.PE_ratio = webProfile.peRatio == null
+            ? 0
+            : webProfile.peRatio;
+        profileModel.divRate = webProfile.dividendRate;
+
+        return profileModel;
+    }
+
+
+    initializeView(profileData: Profile, refresh: boolean): void {
+
+        this.assetProfileForm.setValue({
+            ticker: refresh ? '' : profileData.tickerSymbol,
+            tickerDesc: refresh ? this.defaultTickerDesc : profileData.tickerDesc,
+            divRate: refresh ? 0 : profileData.divRate,
+            divYield: refresh ? 0 : profileData.divYield,
+            divFreq: refresh ? '' : profileData.divFreq,
+            peRatio: refresh ? 0 : profileData.PE_ratio,
+            eps: refresh ? 0 : profileData.EPS,
+            unitPrice: refresh ? 0 : profileData.unitPrice,
+            divPayMonths: refresh ? '' : profileData.divPayMonths,
+            divPayDay: refresh ? '' : profileData.divPayDay
+        });
+
+        this.btnUpdateProfileIsDisabled = refresh ? true : false;
+    }
+
+
+  
     
 
 }
