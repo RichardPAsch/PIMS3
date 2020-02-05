@@ -142,6 +142,7 @@ export class Pims3Validations {
         return isValidMonths;
     }
 
+
     private static validatePassword(pwrd: string): boolean {
 
         let hasLower = false;
@@ -180,10 +181,7 @@ export class Pims3Validations {
     }
 
 
-    
-
-
-    
+        
 
 
     // ** Example1 from https://codinglatte.com/posts/angular/angular-building-custom-validators/
