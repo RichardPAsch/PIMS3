@@ -132,10 +132,12 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
             editedPosition.pymtDue = selectedPositionEdits[pos].pymtDue;
             editedPosition.assetClass = selectedPositionEdits[pos].assetClass;
             editedPosition.accountTypeDesc = selectedPositionEdits[pos].accountTypeDesc;
+            editedPosition.tickerSymbol = selectedPositionEdits[pos].tickerSymbol;
 
             editedPositions.push(editedPosition);
         }
-        
+
+        let test = 2;
         this.positionSvc.UpdateEditedPositions(editedPositions)
             .retry(2)
             .pipe(takeUntil(this.getUnsubscribe()))
