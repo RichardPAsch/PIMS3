@@ -56,11 +56,24 @@ namespace PIMS3.Controllers
             int recordsUpdatedCount = 0;
             PositionDataProcessing positionDataAccessComponent = new PositionDataProcessing(_ctx);
             int positionsUpdated = positionDataAccessComponent.UpdatePositions(MapToVm(positionEdits));
+            string positionTickerSymbolsUpdated = string.Empty;
 
             // TODO: 'return BadRequest();' - results in calling above UpdatePositions(MapToVm(positionEdits) again ?
             if (positionsUpdated == 0)
             {
                 return Ok(recordsUpdatedCount);  
+            }
+            else
+            {
+                for(var i = 0; i < positionEdits.Length; i++)
+                {
+                    if (positionTickerSymbolsUpdated.Length == 0)
+                        positionTickerSymbolsUpdated = positionEdits[i].tickerSymbol.Value;
+                    else
+                        positionTickerSymbolsUpdated += ", " + positionEdits[i].tickerSymbol.Value;
+                }
+
+                Log.Information("Position(s) successfuly updated for {0}", positionTickerSymbolsUpdated);
             }
 
             // Update referenced 'Asset' table should asset class have been modified.
