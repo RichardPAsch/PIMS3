@@ -34,7 +34,7 @@ namespace PIMS3.Controllers
             bool updatesAreValid = positionDataAccessComponent.UpdatePositionPymtDueFlags(positionIdsToUpdate);
             if (updatesAreValid)
             {
-                Log.Information("Payment(s) received/recorded ['PymtDue'-> False] for {0} position(s).", positionIdsToUpdate.Count());
+                Log.Information("Payment(s) received & marked as paid ('PymtDue': False) for {0} position(s).", positionIdsToUpdate.Count());
             }
             return Ok(updatesAreValid);
         }
