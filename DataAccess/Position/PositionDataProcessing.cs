@@ -4,6 +4,7 @@ using PIMS3.ViewModels;
 using System.Collections.Generic;
 using System;
 using Serilog;
+using PIMS3.Data.Entities;
 
 
 namespace PIMS3.DataAccess.Position
@@ -11,6 +12,7 @@ namespace PIMS3.DataAccess.Position
     public class PositionDataProcessing
     {
         private PIMS3Context _ctx;
+        private int recordsSaved = 0;
 
         public PositionDataProcessing(PIMS3Context ctx)
         {
@@ -67,10 +69,10 @@ namespace PIMS3.DataAccess.Position
 
         public IQueryable<IncomeReceivablesVm> GetPositionsForIncomeReceivables(string investorId)
         {
-            var positions = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId
-                                                 &&  p.Status == "A" 
-                                                 && (p.PymtDue == null || p.PymtDue == true))
-                                         .AsQueryable();
+            IQueryable<Data.Entities.Position> positions = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId
+                                                                                 &&  p.Status == "A" 
+                                                                                 && (p.PymtDue == null || p.PymtDue == true))
+                                                                         .AsQueryable();
 
             var assets = _ctx.Asset.Select(a => a);
 
@@ -90,6 +92,24 @@ namespace PIMS3.DataAccess.Position
                            .OrderBy(data => data.DividendFreq)
                            .ThenBy(data => data.TickerSymbol)
                            .AsQueryable();
+        }
+
+
+        public IQueryable<DelinquentIncome> GetPositionsWithOverdueIncome(string investorId, string monthToCheck)
+        {
+            return _ctx.DelinquentIncome.Where(p => p.InvestorId == investorId && p.MonthDue == monthToCheck)
+                                        .OrderByDescending(p => p.MonthDue)
+                                        .ThenBy(p => p.TickerSymbol)
+                                        .AsQueryable();
+        }
+
+
+        public bool SavePositionsWithOverdueIncome(List<DelinquentIncome> delinquentPositions)
+        {
+            _ctx.AddRange(delinquentPositions);
+            recordsSaved = _ctx.SaveChanges();
+
+            return recordsSaved > 0 ? true : false;
         }
 
 
