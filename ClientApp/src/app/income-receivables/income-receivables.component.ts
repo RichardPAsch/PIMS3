@@ -31,13 +31,14 @@ export class IncomeReceivablesComponent extends BaseUnsubscribeComponent impleme
 
     columnDefs = [
         { headerName: "Ticker", field: "tickerSymbol", sortable: true, filter: true, checkboxSelection: true, width: 100, resizable: true },
+        { headerName: "Month Due", field: "monthDue", sortable: true, filter: true, width: 110, resizable: true },
         { headerName: "Account", field: "accountTypeDesc", width: 100, sortable: true, filter: true, resizable: true,
              filterParams: { applyButton: true, clearButton: true, apply: true }
         },
-        { headerName: "Div. Day", field: "dividendPayDay", width: 100, type: "numericColumn", sortable: true, filter: true, resizable: true,
+        { headerName: "Div. Day", field: "dividendPayDay", width: 90, type: "numericColumn", sortable: true, filter: true, resizable: true,
             filterParams: { applyButton: true, clearButton: true, apply: true }
         },
-        { headerName: "Div. Freq.", field: "dividendFreq", width: 100, sortable: true },
+        { headerName: "Div. Freq.", field: "dividendFreq", width: 90, sortable: true },
         { headerName: "PositionId.", field: "positionId", width: 100, hide: true },
     ];
 
@@ -80,8 +81,10 @@ export class IncomeReceivablesComponent extends BaseUnsubscribeComponent impleme
         let mappedReceivables = new Array<Receivable>();
         for (let idx = 0; idx < recvdReceivables.length; idx++) {
             let modelRecord = new Receivable();
+
             modelRecord.positionId = recvdReceivables[idx].positionId;
             modelRecord.tickerSymbol = recvdReceivables[idx].tickerSymbol;
+            modelRecord.monthDue = recvdReceivables[idx].monthDue;
             modelRecord.accountTypeDesc = recvdReceivables[idx].accountTypeDesc;
             modelRecord.dividendPayDay = recvdReceivables[idx].dividendPayDay;
             modelRecord.dividendFreq = recvdReceivables[idx].dividendFreq;
