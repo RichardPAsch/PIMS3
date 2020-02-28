@@ -11,7 +11,7 @@ namespace PIMS3.BusinessLogic.PositionData
     public class PositionProcessing
     {
         private Data.PIMS3Context _ctx;
-        private IQueryable<DelinquentIncome> savedDelinquentPositions;
+        private IQueryable<DelinquentIncome> savedDelinquentPositions = new List<DelinquentIncome>().AsQueryable();
 
         public PositionProcessing(Data.PIMS3Context ctx)
         {
@@ -69,11 +69,11 @@ namespace PIMS3.BusinessLogic.PositionData
 
             // Capture & persist any delinquent income receivables on the first business day of EACH MONTH; this allows 
             // for back-dated income payments to be displayed and acted upon.
+            savedDelinquentPositions = positionDataAccessComponent.GetPositionsWithOverdueIncome(investor, CalculateDelinquentMonth());
             if (tickersWithIncomeDue.Count >= 1 && DateTime.Now.Day <= 3 && 
                 (DateTime.Now.DayOfWeek.ToString() != "Saturday" && DateTime.Now.DayOfWeek.ToString() != "Sunday"))
             {
                 // Table already initialized with investors' delinquent payments?
-                savedDelinquentPositions = positionDataAccessComponent.GetPositionsWithOverdueIncome(investor, CalculateDelinquentMonth());
                 if (!savedDelinquentPositions.Any())
                 {
                     List<DelinquentIncome> currentOverduePositionIncomes = new List<DelinquentIncome>();
@@ -97,7 +97,7 @@ namespace PIMS3.BusinessLogic.PositionData
             }
 
             // Append any delinquencies to current 'tickersWithIncomeDue', for display.
-            if (savedDelinquentPositions.Any())
+            if (savedDelinquentPositions.Any()) 
             {
                 List<DelinquentIncome> delinquencies = savedDelinquentPositions.ToList();
                 tickersWithIncomeDue = MapAndAddOverduePositionsToCurrentPositions(delinquencies, tickersWithIncomeDue);
