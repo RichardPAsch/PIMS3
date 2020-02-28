@@ -22,6 +22,7 @@ namespace PIMS3.Data
         public DbSet<Position> Position { get; set; }
         public DbSet<AccountType> AccountType { get; set; }
         public DbSet<AssetClass> AssetClass { get; set; }
+        public DbSet<DelinquentIncome> DelinquentIncome { get; set; }
 
 
         // Note: May not need to include child DbSets (of parent-child relations) if we're not DIRECTLY
@@ -67,7 +68,10 @@ namespace PIMS3.Data
             modelBuilder.Entity<AssetClass>()
               .HasIndex(ac => ac.AssetId)
               .IsUnique(false);
-           
+            modelBuilder.Entity<DelinquentIncome>()
+                .HasKey(di => new { di.PositionId, di.MonthDue });  // composite PK 
+
+
 
 
             // Define necessary mappings for unconventional Db types, to avoid EF Core model validation errors.
@@ -114,6 +118,7 @@ namespace PIMS3.Data
                         .HasOne(ai => ai.Asset)
                         .WithMany(a => a.AssetInvestors)
                         .HasForeignKey(ai => ai.InvestorId);
+           
 
         }
 
@@ -122,7 +127,7 @@ namespace PIMS3.Data
         //       quering against the child table(s). Otherwise, using parent entity for DbSet should suffice.
 
 
-        public DbSet<PIMS3.Data.Entities.AssetInvestor> AssetInvestor { get; set; }
+        public DbSet<AssetInvestor> AssetInvestor { get; set; }
 
 
     }
