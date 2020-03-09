@@ -44,6 +44,11 @@ namespace PIMS3.DataAccess.Position
                 positionsToUpdate.Add(_ctx.Position.Where(p => p.PositionId == id).FirstOrDefault());
             }
 
+            // BusLogic here?
+            // First capture all unpaid Positions ('PymtDue = true') for populating 'DelinquentIncomes' table.
+            // Received positionIds reflect eligible positions, from XLSX processing. Looking for still marked 'PymtDue = true'
+            // ids, signifying no monies have yet been received.
+
             // Update Positions.
             if(positionsToUpdate.Count() == positionIds.Length)
             {
@@ -70,8 +75,8 @@ namespace PIMS3.DataAccess.Position
         public IQueryable<IncomeReceivablesVm> GetPositionsForIncomeReceivables(string investorId)
         {
             IQueryable<Data.Entities.Position> positions = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investorId
-                                                                                 &&  p.Status == "A" 
-                                                                                 && (p.PymtDue == null || p.PymtDue == true))
+                                                                                &&  p.Status == "A" 
+                                                                                && (p.PymtDue == null || p.PymtDue == true))
                                                                          .AsQueryable();
 
             var assets = _ctx.Asset.Select(a => a);
@@ -82,6 +87,7 @@ namespace PIMS3.DataAccess.Position
                 PositionId = positionData.PositionId,
                 TickerSymbol = assetData.Profile.TickerSymbol,
                 AccountTypeDesc = positionData.AccountType.AccountTypeDesc,
+                // MonthDue = assetData.
                 DividendPayDay = assetData.Profile.DividendPayDay,
                 DividendFreq = assetData.Profile.DividendFreq,
                 DividendMonths = assetData.Profile.DividendMonths
@@ -94,9 +100,10 @@ namespace PIMS3.DataAccess.Position
                            .AsQueryable();
         }
 
-
-        public IQueryable<DelinquentIncome> GetPositionsWithOverdueIncome(string investorId, string monthToCheck)
+        
+        public IQueryable<DelinquentIncome> GetDelinquentRecords(string investorId, string monthToCheck)
         {
+            // Positions with delinquent payments.
             return _ctx.DelinquentIncome.Where(p => p.InvestorId == investorId && p.MonthDue == monthToCheck)
                                         .OrderByDescending(p => p.MonthDue)
                                         .ThenBy(p => p.TickerSymbol)
