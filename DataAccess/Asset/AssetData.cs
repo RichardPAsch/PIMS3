@@ -22,7 +22,7 @@ namespace PIMS3.DataAccess.Asset
             {
                 return _ctx.Asset.Where(a => a.InvestorId == investorId.Trim() && a.Profile.TickerSymbol == tickerSymbol.Trim())
                                  .SelectMany(a => a.Positions)
-                                 .Where(p => p.AccountType.AccountTypeDesc == account.Trim())
+                                 .Where(p => p.AccountType.AccountTypeDesc == account.Trim() && p.Status == "A")
                                  .Select(p => p.PositionId)
                                  .AsQueryable();
             }
