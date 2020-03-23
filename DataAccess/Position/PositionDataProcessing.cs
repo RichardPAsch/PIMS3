@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System;
 using Serilog;
 using PIMS3.Data.Entities;
+using PIMS3.BusinessLogic.PositionData;
 
 
 namespace PIMS3.DataAccess.Position
@@ -34,8 +35,10 @@ namespace PIMS3.DataAccess.Position
 
         public bool UpdatePositionPymtDueFlags(string[] positionIds, bool? isRecorded = null)
         {
+            // Received positionIds may reflect eligible positions to update, as a result of data-import XLSX revenue processing.
             var updatesAreOk = false;
-            var positionsToUpdate = new List<Data.Entities.Position>();
+            List<Data.Entities.Position> positionsToUpdate = new List<Data.Entities.Position>();
+            List<IncomeReceivablesVm> delinquentPositions = new List<IncomeReceivablesVm>();
             var positionsUpdated = 0;
 
             // Get matching Positions.
@@ -44,18 +47,18 @@ namespace PIMS3.DataAccess.Position
                 positionsToUpdate.Add(_ctx.Position.Where(p => p.PositionId == id).FirstOrDefault());
             }
 
-            // BusLogic here?
-            // First capture all unpaid Positions ('PymtDue = true') for populating 'DelinquentIncomes' table.
-            // Received positionIds reflect eligible positions, from XLSX processing. Looking for still marked 'PymtDue = true'
-            // ids, signifying no monies have yet been received.
-
+            // If months' end, capture any unpaid Positions ('PymtDue : true') for populating 'DelinquentIncomes' table.
+            // Any delinquencies found for a Position, will render that Position still as 'PymtDue: true'.
+            PositionProcessing positionProcessingBusLogic = new PositionProcessing(_ctx);
+            positionProcessingBusLogic.GetPositionsWithIncomeDue(FetchInvestorId(positionIds));
+            
             // Update Positions.
-            if(positionsToUpdate.Count() == positionIds.Length)
+            if (positionsToUpdate.Count() == positionIds.Length)
             {
                 foreach(var position in positionsToUpdate)
                 {
                     // isRecorded: null/false - income received, but not yet recorded.
-                    // isRecorded: true - income received & recorded, & now eligible for next receivable.
+                    // isRecorded: true - income received & recorded, & now eligible for next receivable cycle.
                     // position.PymtDue = false;
                     position.PymtDue = isRecorded == null ? false : true;
                     position.LastUpdate = DateTime.Now;
@@ -101,7 +104,7 @@ namespace PIMS3.DataAccess.Position
         }
 
         
-        public IQueryable<DelinquentIncome> GetDelinquentRecords(string investorId, string monthToCheck)
+        public IQueryable<DelinquentIncome> GetSavedDelinquentRecords(string investorId, string monthToCheck)
         {
             // Positions with delinquent payments.
             return _ctx.DelinquentIncome.Where(p => p.InvestorId == investorId && p.MonthDue == monthToCheck)
@@ -232,6 +235,16 @@ namespace PIMS3.DataAccess.Position
                            .ToString();
             }
 
+        }
+
+
+        private string FetchInvestorId(string[] recvdPositionIds)
+        {
+            IQueryable<Data.Entities.Position> positionFound = _ctx.Position.Where(p => p.PositionId == recvdPositionIds.First());
+            string assetIdFound = FetchAssetId(positionFound.First().PositionId);
+            IQueryable <Data.Entities.Asset> asset = _ctx.Asset.Where(a => a.AssetId == assetIdFound);
+
+            return asset.First().InvestorId;
         }
 
     }
