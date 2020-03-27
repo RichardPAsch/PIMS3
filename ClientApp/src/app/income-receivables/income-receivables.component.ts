@@ -98,25 +98,26 @@ export class IncomeReceivablesComponent extends BaseUnsubscribeComponent impleme
 
     public processPositionUpdates() {
 
-        var selectedNodes = this.agGridReceivables.api.getSelectedNodes();
-        if (selectedNodes.length == 0) {
-            this.alertSvc.warn("Unable to process; no Position(s) marked for updating. Please select one or more Positions.");
+        // Capture all data, positionId, monthDue, etc., pertaining to selection(s).
+        var selectedRows = this.agGridReceivables.api.getSelectedRows(); 
+        
+        if (selectedRows.length == 0) {
+            this.alertSvc.warn("Unable to process. Please select one or more Positions to be updated.");
             return;
         }
 
-        var selectedPositionData = selectedNodes.map(node => node.data.positionId);
-
-        this.receivablesSvc.UpdateIncomeReceivables(selectedPositionData)
+        this.receivablesSvc.UpdateIncomeReceivables(selectedRows) 
             .retry(2)
             .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(updateResponse => {
                 if (updateResponse) {
-                    this.alertSvc.success("Successfully marked : " + selectedPositionData.length + " position(s) as paid.");
+                    this.alertSvc.success("Successfully marked : " + selectedRows.length + " position(s) as paid.");
                     // Refresh.
                     this.getReceivables();
                 }
                 else
-                    this.alertSvc.warn("Unable to update position(s) with payment received, please check position(s) data.");
+                    this.alertSvc.warn("Unable to update position(s) with payment received; please check position(s) data, " +
+                        "and / or that there are no delinquent outstanding income receipts for positions selected.");
             },
                 (apiError: HttpErrorResponse) => {
                     if (apiError.error instanceof Error)
@@ -128,7 +129,6 @@ export class IncomeReceivablesComponent extends BaseUnsubscribeComponent impleme
                     }
                 }
             )
-
     }
 
 
