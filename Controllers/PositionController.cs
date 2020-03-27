@@ -24,17 +24,21 @@ namespace PIMS3.Controllers
             _ctx = ctx;
         }
 
-
-        [HttpPut("{positionIdsToUpdate}")]
-        public ActionResult UpdatePymtDueFlags([FromBody] string[] positionIdsToUpdate)
+        
+        [HttpPut("{positionsToUpdate}")]
+        public ActionResult UpdatePymtDueFlags([FromBody] List<PositionsForPaymentDueVm> positionsToUpdate)
         {
             // Pending updates for user-selected Position ids marked as having received income.
             // Bypassing bus logic processing, as there are no business rules to enforce.
             PositionDataProcessing positionDataAccessComponent = new PositionDataProcessing(_ctx);
-            bool updatesAreValid = positionDataAccessComponent.UpdatePositionPymtDueFlags(positionIdsToUpdate);
+            bool updatesAreValid = positionDataAccessComponent.UpdatePositionPymtDueFlags(positionsToUpdate);
             if (updatesAreValid)
             {
-                Log.Information("Payment(s) received & marked as paid ('PymtDue': False) for {0} position(s).", positionIdsToUpdate.Count());
+                Log.Information("Payment(s) received & marked as paid ('PymtDue': False) for {0} position(s).", positionsToUpdate.Count());
+            }
+            else
+            {
+                Log.Warning("Payment(s) received processing aborted; one or more delinquencies found for positionId(s) being processed via PositionController.UpdatePymtDueFlags().");
             }
             return Ok(updatesAreValid);
         }
