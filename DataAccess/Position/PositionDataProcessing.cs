@@ -5,13 +5,14 @@ using System.Collections.Generic;
 using System;
 using Serilog;
 using PIMS3.Data.Entities;
-using PIMS3.BusinessLogic.PositionData;
 
 
 namespace PIMS3.DataAccess.Position
 {
     public class PositionDataProcessing
     {
+        // TODO: REFACTOR !!
+
         private PIMS3Context _ctx;
         private int recordsSaved = 0;
 
@@ -33,45 +34,157 @@ namespace PIMS3.DataAccess.Position
         }
 
 
-        public bool UpdatePositionPymtDueFlags(string[] positionIds, bool? isRecorded = null)
+        public bool UpdatePositionPymtDueFlags(List<PositionsForPaymentDueVm> sourcePositionsInfo, bool isRecorded = false)
         {
-            // Received positionIds may reflect eligible positions to update, as a result of data-import XLSX revenue processing.
-            var updatesAreOk = false;
-            List<Data.Entities.Position> positionsToUpdate = new List<Data.Entities.Position>();
-            List<IncomeReceivablesVm> delinquentPositions = new List<IncomeReceivablesVm>();
-            var positionsUpdated = 0;
+            // -----------------------------------------
+            // This should be refactored into BL layer!!
+            // -----------------------------------------
 
-            // Get matching Positions.
-            foreach (var id in positionIds)
-            {
-                positionsToUpdate.Add(_ctx.Position.Where(p => p.PositionId == id).FirstOrDefault());
-            }
+            // Received sourcePositionsInfo may contain either:
+            //  1. data-imported month-end XLSX revenue processed Position Ids, OR
+            //  2. selected 'Income Due' Positions marked for pending payment processing; selection(s) may also include * delinquent positions *.
+            bool updatesAreOk = false;
+            List<Data.Entities.Position> targetPositionsToUpdate = new List<Data.Entities.Position>();
+            IList<DelinquentIncome> delinquentPositions = new List<DelinquentIncome>();
+            int positionsUpdated = 0;
 
-            // If months' end, capture any unpaid Positions ('PymtDue : true') for populating 'DelinquentIncomes' table.
-            // Any delinquencies found for a Position, will render that Position still as 'PymtDue: true'.
-            PositionProcessing positionProcessingBusLogic = new PositionProcessing(_ctx);
-            positionProcessingBusLogic.GetPositionsWithIncomeDue(FetchInvestorId(positionIds));
-            
-            // Update Positions.
-            if (positionsToUpdate.Count() == positionIds.Length)
+            // Context of processing.
+            // isRecorded: false - income received, but not yet recorded, e.g., processing payment(s) via 'Income Due'.
+            // isRecorded: true  - income received & recorded/saved, and is now eligible for next receivable cycle, e.g., XLSX via 'Data Import'.
+            if (!isRecorded)
             {
-                foreach(var position in positionsToUpdate)
+                // Any delinquent records will appear first.
+                var sourcePositionsInfoSorted = sourcePositionsInfo.OrderBy(p => p.TickerSymbol).ThenBy(p => p.MonthDue);
+                foreach (var selectedPosition in sourcePositionsInfoSorted)
                 {
-                    // isRecorded: null/false - income received, but not yet recorded.
-                    // isRecorded: true - income received & recorded, & now eligible for next receivable cycle.
-                    // position.PymtDue = false;
-                    position.PymtDue = isRecorded == null ? false : true;
-                    position.LastUpdate = DateTime.Now;
+                    // If selected Position is overdue, then -> delete from 'DelinquentIncome' table.
+                    if (int.Parse(selectedPosition.MonthDue) < DateTime.Now.Month)
+                    {
+                        DelinquentIncome delinquentIncomeToDelete = new DelinquentIncome
+                        {
+                            PositionId = selectedPosition.PositionId,
+                            TickerSymbol = selectedPosition.TickerSymbol,
+                            MonthDue = selectedPosition.MonthDue,
+                            InvestorId = FetchInvestorId(selectedPosition.PositionId)
+                        };
+                        // If we have *duplicate* selected PositionIds, e.g., 1 current & 1 delinquent, then delete the delinquent record 
+                        // first, so that 'DelinquentIncome' table is updated real-time. 
+                        int duplicatePositionIdCount = sourcePositionsInfoSorted.Where(di => di.PositionId == selectedPosition.PositionId).Count();
+                        if(duplicatePositionIdCount == 1)
+                            delinquentPositions.Add(delinquentIncomeToDelete);
+                        else
+                        {
+                            IList<DelinquentIncome> tempDelinquentPositions = new List<DelinquentIncome>
+                            {
+                                delinquentIncomeToDelete
+                            };
+                            RemoveDelinquency(tempDelinquentPositions);
+                        }
+                    }
+                    else
+                    {
+                        // Mark Position(s) as paid, if no outstanding delinquencies.
+                        IList<DelinquentIncome> delinquentPositionsFound = _ctx.DelinquentIncome.Where(d => d.PositionId == selectedPosition.PositionId).ToList();
+                        if (!delinquentPositionsFound.Any())
+                        {
+                            Data.Entities.Position targetPositionToUpdate = _ctx.Position.Where(p => p.PositionId == selectedPosition.PositionId).First();
+                            targetPositionToUpdate.PymtDue = false;
+                            targetPositionToUpdate.LastUpdate = DateTime.Now;
+
+                            targetPositionsToUpdate.Add(targetPositionToUpdate);
+                        }
+                    }
                 }
 
-                _ctx.UpdateRange(positionsToUpdate);
-                positionsUpdated = _ctx.SaveChanges();
+                if (delinquentPositions.Any())
+                    updatesAreOk = RemoveDelinquency(delinquentPositions);
 
-                if(positionsUpdated == positionsToUpdate.Count())
-                    updatesAreOk = true;
+                if (targetPositionsToUpdate.Any())
+                    updatesAreOk = UpdateTargetPositions(targetPositionsToUpdate);
+            }
+            else
+            {
+                string currentInvestorId = FetchInvestorId(sourcePositionsInfo.First().PositionId);
+                delinquentPositions = GetSavedDelinquentRecords(currentInvestorId, "");
+
+                // Loop thru each XLSX position within the month-end collection & determine if it's eligible for updating its' 'PymtDue' flag.
+                foreach (var xlsxPosition in sourcePositionsInfo)
+                {
+                    IList<DelinquentIncome> foundDelinquentPosition = delinquentPositions.Where(p => p.PositionId == xlsxPosition.PositionId).ToList();
+                    if (foundDelinquentPosition != null)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        Data.Entities.Position positionToUpdate = _ctx.Position.Where(p => p.PositionId == xlsxPosition.PositionId).First();
+                        positionToUpdate.PymtDue = true;
+                        positionToUpdate.LastUpdate = DateTime.Now;
+
+                        targetPositionsToUpdate.Add(positionToUpdate);
+                    }
+                }
+
+                if(targetPositionsToUpdate.Count() >= 1)
+                {
+                    _ctx.AddRange(targetPositionsToUpdate);
+                    positionsUpdated = _ctx.SaveChanges();
+
+                    if (positionsUpdated == sourcePositionsInfo.Count())
+                        updatesAreOk = true;
+                }
             }
 
             return updatesAreOk;
+
+
+
+            /* ======= orig code =============
+            // Get matching Positions.
+            //foreach (var position in sourcePositionsInfo)
+            //{
+            //    JObject positionIdInfo = JObject.Parse(position.ToString());
+            //    string currentPosId = positionIdInfo["positionId"].ToString().Trim();
+            //    targetPositionsToUpdate.Add(_ctx.Position.Where(p => p.PositionId == currentPosId).FirstOrDefault());
+            //}
+
+            // If months' end, capture any unpaid Positions ('PymtDue : true') for populating 'DelinquentIncomes' table.
+            // Any delinquencies still found for a Position, will mark that Position as 'PymtDue: true'.
+            PositionProcessing positionProcessingBusLogic = new PositionProcessing(_ctx);
+            string currInvestorId = FetchInvestorId(targetPositionsToUpdate.First().PositionId);
+            delinquentPositions = GetSavedDelinquentRecords(currInvestorId, null);
+            
+            // Update Positions, where appropriate.
+            if (targetPositionsToUpdate.Count() == sourcePositionsInfo.Count)
+            {
+                //bool delinquencyRemoved;
+                foreach(Data.Entities.Position position in targetPositionsToUpdate)
+                {
+                    // Omit position update if any outstanding overdue payments found. 
+                    IQueryable<DelinquentIncome> delinquentPositionsFound = delinquentPositions.Where(p => p.PositionId == position.PositionId);
+                    if(delinquentPositionsFound.Count() >= 1)
+                    {
+                       // delinquencyRemoved = RemoveDelinquency(delinquentPositionsFound.First());
+                        //position.PymtDue = (delinquentPositionsFound.Count() == 1 && delinquencyRemoved) ? false : true;
+                    }
+                    else
+                    {
+                        // position.PymtDue = false;
+                        //position.PymtDue = isRecorded == null ? false : true;
+                        position.PymtDue = isRecorded;
+                    }
+                    position.LastUpdate = DateTime.Now;
+                }
+                
+                //_ctx.UpdateRange(targetPositionsToUpdate);
+                //positionsUpdated = _ctx.SaveChanges();
+
+                //if(positionsUpdated == targetPositionsToUpdate.Count())
+                //    updatesAreOk = true;
+            }
+            return updatesAreOk;
+            === end orig code ==== */
+
         }
 
 
@@ -104,13 +217,25 @@ namespace PIMS3.DataAccess.Position
         }
 
         
-        public IQueryable<DelinquentIncome> GetSavedDelinquentRecords(string investorId, string monthToCheck)
+        public IList<DelinquentIncome> GetSavedDelinquentRecords(string investorId, string monthToCheck = "")
         {
             // Positions with delinquent payments.
-            return _ctx.DelinquentIncome.Where(p => p.InvestorId == investorId && p.MonthDue == monthToCheck)
+            if (string.IsNullOrEmpty(monthToCheck))
+            {
+                return _ctx.DelinquentIncome.Where(p => p.InvestorId == investorId)
                                         .OrderByDescending(p => p.MonthDue)
                                         .ThenBy(p => p.TickerSymbol)
-                                        .AsQueryable();
+                                        .ToList();
+                                        //.AsQueryable();
+            }
+            else
+            {
+                return _ctx.DelinquentIncome.Where(p => p.InvestorId == investorId && p.MonthDue == monthToCheck)
+                                       .OrderByDescending(p => p.MonthDue)
+                                       .ThenBy(p => p.TickerSymbol)
+                                       .ToList();
+                                       //.AsQueryable();
+            }
         }
 
 
@@ -238,13 +363,30 @@ namespace PIMS3.DataAccess.Position
         }
 
 
-        private string FetchInvestorId(string[] recvdPositionIds)
+        private string FetchInvestorId(string recvdPositionId)
         {
-            IQueryable<Data.Entities.Position> positionFound = _ctx.Position.Where(p => p.PositionId == recvdPositionIds.First());
+            IQueryable<Data.Entities.Position> positionFound = _ctx.Position.Where(p => p.PositionId == recvdPositionId);
             string assetIdFound = FetchAssetId(positionFound.First().PositionId);
             IQueryable <Data.Entities.Asset> asset = _ctx.Asset.Where(a => a.AssetId == assetIdFound);
 
             return asset.First().InvestorId;
+        }
+
+
+        private bool RemoveDelinquency(IList<DelinquentIncome> delinquenciesToRemove)
+        {
+            int recordsRemoved = 0;
+            _ctx.RemoveRange(delinquenciesToRemove);
+            recordsRemoved = _ctx.SaveChanges();
+            return recordsRemoved == 1 ? true : false;
+        }
+
+
+        private bool UpdateTargetPositions(List<Data.Entities.Position> positionsToUpdate)
+        {
+            _ctx.UpdateRange(positionsToUpdate);
+            int positionsUpdated = _ctx.SaveChanges();
+            return positionsUpdated >= 1 ? true : false;
         }
 
     }
