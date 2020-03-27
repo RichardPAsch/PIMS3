@@ -32,10 +32,10 @@ export class IncomeReceivablesService {
         return this.http.get<string>(webApiUri);
     }
 
-    UpdateIncomeReceivables(positionIdsToUpdate: any[]): Observable<any> {
+    UpdateIncomeReceivables(positionsToUpdate: any[]): Observable<any> {
 
         let webApiUri = this.baseUrl + "/api/Position/UpdatePymtDueFlags/";
-        return this.http.put<any>(webApiUri, positionIdsToUpdate);
+        return this.http.put<any>(webApiUri, positionsToUpdate);
 
     }
 }
