@@ -55,4 +55,15 @@ namespace PIMS3.ViewModels
         public string AccountTypeId { get; set; }
 
     }
+
+    public class PositionsForPaymentDueVm
+    {
+        public string PositionId { get; set; }
+
+        public string MonthDue { get; set; }
+
+        public string TickerSymbol { get; set; }
+
+        public string InvestorId { get; set; }
+    }
 }
