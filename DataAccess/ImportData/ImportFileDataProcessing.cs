@@ -7,6 +7,7 @@ using System.Linq;
 using PIMS3.DataAccess.Profile;
 using PIMS3.DataAccess.Position;
 using Serilog;
+using PIMS3.Data.Entities;
 
 
 namespace PIMS3.DataAccess.ImportData
@@ -31,9 +32,13 @@ namespace PIMS3.DataAccess.ImportData
 
         public DataImportVm SaveRevenue(DataImportVm importVmToUpdate, PIMS3Context _ctx, string investorId)
         {
-            ImportFileProcessing busLayerComponent = new ImportFileProcessing(importVmToUpdate, _ctx, null);
+            // Processing includes:
+            //  1. persisting revenue,
+            //  2. persisting revenue delinquencies,  and
+            //  3. updating Positions.
 
-            IEnumerable<Data.Entities.Income> revenueListingToSave;
+            ImportFileProcessing busLayerComponent = new ImportFileProcessing(importVmToUpdate, _ctx, null);
+            IEnumerable<Income> revenueListingToSave;
 
             if (busLayerComponent.ValidateVm())
             {
@@ -50,8 +55,8 @@ namespace PIMS3.DataAccess.ImportData
                 }
                 else
                 {
-                    // Deferring use of using{}: ctx scope needed.
-                    _ctx.AddRange(revenueListingToSave);
+                    // Persist to 'Income'. Deferring use of using{}: ctx scope needed.
+                    _ctx.AddRange(revenueListingToSave); 
                     recordsSaved = _ctx.SaveChanges();
                 }
 
@@ -63,12 +68,84 @@ namespace PIMS3.DataAccess.ImportData
                         totalAmtSaved += record.AmountRecvd;
                     }
 
+                    // Returned values to caller.
                     importVmToUpdate.AmountSaved = totalAmtSaved;
                     importVmToUpdate.RecordsSaved = recordsSaved;
 
-                    // Now update Position records to reflect new payment is due.
-                    var positionDataAccessComponent = new PositionDataProcessing(_ctx);
-                    positionDataAccessComponent.UpdatePositionPymtDueFlags(ExtractPositionIdsForPymtDueProcessing(revenueListingToSave), true);
+
+                    /* === Revenue delinquency processing === */
+
+                    // If at month end/beginning, we'll query Positions for any now delinquent income receivables via "PymtDue" flag.
+                    // Any unpaid income receivables, those not marked as received via 'Income due', will STILL have their 'PymtDue' flag set as
+                    // True, and hence will now be considered a delinquent Position, resulting in persistence to 'DelinquentIncome' table. 
+                    // Delinquent position searches may ONLY be performed during month-end xLSX processing, as income receipts are still being
+                    // accepted during the month via 'Income due'. During 'Income due' payments, flags are set accordingly: [PymtDue : True -> False].
+                    // Any delinquent Positions will automatically be added to the 'Income due' collection that is broadcast via the UI schedule, 
+                    // for necessary action.
+                    if (DateTime.Now.Day <= 3 && DateTime.Now.DayOfWeek.ToString() != "Saturday" && DateTime.Now.DayOfWeek.ToString() != "Sunday")
+                    {
+                        PositionDataProcessing positionDataAccessComponent = new PositionDataProcessing(_ctx); 
+                        IQueryable<dynamic> filteredPositionAssetJoinData = positionDataAccessComponent.GetCandidateDelinquentPositions(investorId);
+                        IList<DelinquentIncome> pastDueListing = new List<DelinquentIncome>();
+                        string delinquentMonth = DateTime.Now.AddMonths(-1).Month.ToString().Trim();
+                        int matchingPositionDelinquencyCount = 0;
+                        IList<DelinquentIncome> existingDelinqencies = positionDataAccessComponent.GetSavedDelinquentRecords(investorId, "");
+                        int duplicateDelinquencyCount = 0;
+
+                        foreach (dynamic joinData in filteredPositionAssetJoinData)
+                        {
+                            // 'DelinquentIncome' PKs: InvestorId, MonthDue, PositionId
+                            // Do we have a match based on PositionId & InvestorId ? If so, Position is eligible for omitting setting 'PymtDue' to True.
+                            matchingPositionDelinquencyCount = existingDelinqencies.Where(d => d.PositionId == joinData.PositionId
+                                                                                            && d.InvestorId == joinData.InvestorId).Count();
+
+                            if(matchingPositionDelinquencyCount >= 1)
+                            {
+                                // Do we have a duplicate entry ?
+                                duplicateDelinquencyCount = existingDelinqencies.Where(d => d.PositionId == joinData.PositionId
+                                                                                         && d.InvestorId == joinData.InvestorId
+                                                                                         && d.MonthDue == delinquentMonth).Count();
+                            }
+
+                        
+                            if (joinData.DividendFreq == "M")
+                            {
+                                if (matchingPositionDelinquencyCount > 0 && duplicateDelinquencyCount == 0)
+                                    pastDueListing.Add(InitializeDelinquentIncome(joinData));
+                                else
+                                    continue;
+                            }
+                            else
+                            {
+                                string[] divMonths = joinData.DividendMonths.Split(',');
+                                for (var i = 0; i < divMonths.Length; i++)
+                                {
+                                    if (divMonths[i].Trim() == delinquentMonth)
+                                    {
+                                        if (matchingPositionDelinquencyCount > 0 && duplicateDelinquencyCount == 0)
+                                            pastDueListing.Add(InitializeDelinquentIncome(joinData));
+                                        else
+                                            continue;
+                                    }
+                                }
+                            }
+                            matchingPositionDelinquencyCount = 0;
+                        }
+
+                        // Persist to 'DelinquentIncome' as needed. 
+                        if (pastDueListing.Any())
+                        {
+                            bool pastDueSaved = positionDataAccessComponent.SaveDelinquencies(pastDueListing.ToList());
+                            if (pastDueSaved)
+                            {
+                                importVmToUpdate.MiscMessage = "Found & stored " + pastDueListing.Count() + " Position(s) with delinquent revenue.";
+                                Log.Information("Saved {0} delinquent position(s) to 'DelinquentIncome' via ImportFileDataProcessing.SaveRevenue()", pastDueListing.Count());
+                            }
+                        }
+
+                        // Finally, update PymtDue flags on received XLSX positions.
+                        positionDataAccessComponent.UpdatePositionPymtDueFlags(ExtractPositionIdsForPymtDueProcessing(revenueListingToSave), true);
+                    }
                 }
                 _ctx.Dispose();
             }
@@ -183,7 +260,6 @@ namespace PIMS3.DataAccess.ImportData
             vmToProcess.MiscMessage = tickersProcessed;
 
             return vmToProcess;
-
         }
 
 
@@ -250,22 +326,54 @@ namespace PIMS3.DataAccess.ImportData
         }
 
 
-        private string[] ExtractPositionIdsForPymtDueProcessing(IEnumerable<Data.Entities.Income> incomeCollection)
+        private List<PositionsForPaymentDueVm> ExtractPositionIdsForPymtDueProcessing(IEnumerable<Income> incomeCollection)
         {
-            // Use successfully saved income records to gather positionIds, which will be used for updating corresponding
+            // Use successfully saved income records to gather positionIds, which in turn will be used for updating corresponding
             // Position records with: 'PymtDue = true'.
-            List<string> idsForUpdating = new List<string>();
-            foreach (var incomeRec in incomeCollection)
+            List<PositionsForPaymentDueVm> xlsxPositions = new List<PositionsForPaymentDueVm>();
+            for(var i = 0; i < incomeCollection.Count(); i++)
             {
-                idsForUpdating.Add(incomeRec.PositionId);
+                // Only PositionIds needed.
+                PositionsForPaymentDueVm posVm = new PositionsForPaymentDueVm
+                {
+                    PositionId = incomeCollection.ElementAt(i).PositionId
+                };
+
+                xlsxPositions.Add(posVm);
             }
-            return idsForUpdating.ToArray();
+
+            return xlsxPositions;
         }
 
 
         private string BuildLogMessage(string msgContext)
         {
             return string.Format("Error saving {0}. Bad data import xlsx format (columns, data), xlsx file path, or faulty network connectivity.", msgContext);
+        }
+
+
+        private DelinquentIncome MapVmToDelinquentIncome(IncomeReceivablesVm mapSource, string investorId)
+        {
+            return new DelinquentIncome
+            {
+                PositionId = mapSource.PositionId,
+                MonthDue = mapSource.MonthDue.ToString(),
+                InvestorId = investorId,
+                TickerSymbol = mapSource.TickerSymbol
+            };
+        }
+
+
+        private DelinquentIncome InitializeDelinquentIncome(dynamic delinquency)
+        {
+            return new DelinquentIncome
+            {
+                TickerSymbol = delinquency.TickerSymbol,
+                PositionId = delinquency.PositionId,
+                InvestorId = delinquency.InvestorId,
+                MonthDue = DateTime.Now.AddMonths(-1).Month.ToString()
+            };
+
         }
 
     }
