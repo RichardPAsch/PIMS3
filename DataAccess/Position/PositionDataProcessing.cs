@@ -11,7 +11,7 @@ namespace PIMS3.DataAccess.Position
 {
     public class PositionDataProcessing
     {
-        // TODO: REFACTOR !!
+        // TODO: consider REFACTOR for UpdatePositionPymtDueFlags() into BL ?
 
         private PIMS3Context _ctx;
         private int recordsSaved = 0;
@@ -34,24 +34,21 @@ namespace PIMS3.DataAccess.Position
         }
 
 
-        public bool UpdatePositionPymtDueFlags(List<PositionsForPaymentDueVm> sourcePositionsInfo, bool isRecorded = false)
+        public bool UpdatePositionPymtDueFlags(List<PositionsForPaymentDueVm> sourcePositionsInfo, bool isPersisted = false)
         {
-            // -----------------------------------------
-            // This should be refactored into BL layer!!
-            // -----------------------------------------
-
-            // Received sourcePositionsInfo may contain either:
-            //  1. data-imported month-end XLSX revenue processed Position Ids, OR
-            //  2. selected 'Income Due' Positions marked for pending payment processing; selection(s) may also include * delinquent positions *.
+             // Received sourcePositionsInfo may contain either:
+             //  1. data-imported month-end XLSX revenue processed Position Ids, OR
+             //  2. selected 'Income Due' Positions marked for pending payment processing; selection(s) may also include * delinquent positions *.
             bool updatesAreOk = false;
             List<Data.Entities.Position> targetPositionsToUpdate = new List<Data.Entities.Position>();
             IList<DelinquentIncome> delinquentPositions = new List<DelinquentIncome>();
-            int positionsUpdated = 0;
 
-            // Context of processing.
-            // isRecorded: false - income received, but not yet recorded, e.g., processing payment(s) via 'Income Due'.
-            // isRecorded: true  - income received & recorded/saved, and is now eligible for next receivable cycle, e.g., XLSX via 'Data Import'.
-            if (!isRecorded)
+            int positionsUpdatedCount = 0; 
+
+            // Parameter context:
+            // isPersisted: false - income received, but not yet recorded/saved, e.g., processing payment(s) via 'Income Due'.
+            // isPersisted: true  - income received & recorded/saved, and is now eligible for next receivable cycle, e.g., XLSX via 'Data Import'.
+            if (!isPersisted)
             {
                 // Any delinquent records will appear first.
                 var sourcePositionsInfoSorted = sourcePositionsInfo.OrderBy(p => p.TickerSymbol).ThenBy(p => p.MonthDue);
@@ -106,13 +103,16 @@ namespace PIMS3.DataAccess.Position
             {
                 string currentInvestorId = FetchInvestorId(sourcePositionsInfo.First().PositionId);
                 delinquentPositions = GetSavedDelinquentRecords(currentInvestorId, "");
+                int positionsNotUpdatedCount = 0;
 
                 // Loop thru each XLSX position within the month-end collection & determine if it's eligible for updating its' 'PymtDue' flag.
-                foreach (var xlsxPosition in sourcePositionsInfo)
+                // debug -> existing PosId delinquency: 0481727F-737E-4775-870A-A8F20118F977 for PICB
+                foreach (PositionsForPaymentDueVm xlsxPosition in sourcePositionsInfo)
                 {
-                    IList<DelinquentIncome> foundDelinquentPosition = delinquentPositions.Where(p => p.PositionId == xlsxPosition.PositionId).ToList();
-                    if (foundDelinquentPosition != null)
+                    IList<DelinquentIncome> existingDelinquentPositions = delinquentPositions.Where(p => p.PositionId == xlsxPosition.PositionId).ToList();
+                    if (existingDelinquentPositions.Any())
                     {
+                        positionsNotUpdatedCount++;
                         continue;
                     }
                     else
@@ -125,66 +125,17 @@ namespace PIMS3.DataAccess.Position
                     }
                 }
 
-                if(targetPositionsToUpdate.Count() >= 1)
+                if (targetPositionsToUpdate.Any())
                 {
-                    _ctx.AddRange(targetPositionsToUpdate);
-                    positionsUpdated = _ctx.SaveChanges();
+                    _ctx.UpdateRange(targetPositionsToUpdate);
+                    positionsUpdatedCount = _ctx.SaveChanges();
 
-                    if (positionsUpdated == sourcePositionsInfo.Count())
+                    if (positionsUpdatedCount + positionsNotUpdatedCount == sourcePositionsInfo.Count())
                         updatesAreOk = true;
                 }
             }
 
             return updatesAreOk;
-
-
-
-            /* ======= orig code =============
-            // Get matching Positions.
-            //foreach (var position in sourcePositionsInfo)
-            //{
-            //    JObject positionIdInfo = JObject.Parse(position.ToString());
-            //    string currentPosId = positionIdInfo["positionId"].ToString().Trim();
-            //    targetPositionsToUpdate.Add(_ctx.Position.Where(p => p.PositionId == currentPosId).FirstOrDefault());
-            //}
-
-            // If months' end, capture any unpaid Positions ('PymtDue : true') for populating 'DelinquentIncomes' table.
-            // Any delinquencies still found for a Position, will mark that Position as 'PymtDue: true'.
-            PositionProcessing positionProcessingBusLogic = new PositionProcessing(_ctx);
-            string currInvestorId = FetchInvestorId(targetPositionsToUpdate.First().PositionId);
-            delinquentPositions = GetSavedDelinquentRecords(currInvestorId, null);
-            
-            // Update Positions, where appropriate.
-            if (targetPositionsToUpdate.Count() == sourcePositionsInfo.Count)
-            {
-                //bool delinquencyRemoved;
-                foreach(Data.Entities.Position position in targetPositionsToUpdate)
-                {
-                    // Omit position update if any outstanding overdue payments found. 
-                    IQueryable<DelinquentIncome> delinquentPositionsFound = delinquentPositions.Where(p => p.PositionId == position.PositionId);
-                    if(delinquentPositionsFound.Count() >= 1)
-                    {
-                       // delinquencyRemoved = RemoveDelinquency(delinquentPositionsFound.First());
-                        //position.PymtDue = (delinquentPositionsFound.Count() == 1 && delinquencyRemoved) ? false : true;
-                    }
-                    else
-                    {
-                        // position.PymtDue = false;
-                        //position.PymtDue = isRecorded == null ? false : true;
-                        position.PymtDue = isRecorded;
-                    }
-                    position.LastUpdate = DateTime.Now;
-                }
-                
-                //_ctx.UpdateRange(targetPositionsToUpdate);
-                //positionsUpdated = _ctx.SaveChanges();
-
-                //if(positionsUpdated == targetPositionsToUpdate.Count())
-                //    updatesAreOk = true;
-            }
-            return updatesAreOk;
-            === end orig code ==== */
-
         }
 
 
@@ -197,13 +148,12 @@ namespace PIMS3.DataAccess.Position
 
             var assets = _ctx.Asset.Select(a => a);
 
-            // p1: join table; p2&p3: join PKs; p4: projection form.
+            // p1: join table, p2&p3: join PKs, p4: projection form.
             var dataJoin = positions.Join(assets, p => p.AssetId, a => a.AssetId, (positionData, assetData) => new IncomeReceivablesVm
             {
                 PositionId = positionData.PositionId,
                 TickerSymbol = assetData.Profile.TickerSymbol,
                 AccountTypeDesc = positionData.AccountType.AccountTypeDesc,
-                // MonthDue = assetData.
                 DividendPayDay = assetData.Profile.DividendPayDay,
                 DividendFreq = assetData.Profile.DividendFreq,
                 DividendMonths = assetData.Profile.DividendMonths
@@ -226,7 +176,6 @@ namespace PIMS3.DataAccess.Position
                                         .OrderByDescending(p => p.MonthDue)
                                         .ThenBy(p => p.TickerSymbol)
                                         .ToList();
-                                        //.AsQueryable();
             }
             else
             {
@@ -234,7 +183,6 @@ namespace PIMS3.DataAccess.Position
                                        .OrderByDescending(p => p.MonthDue)
                                        .ThenBy(p => p.TickerSymbol)
                                        .ToList();
-                                       //.AsQueryable();
             }
         }
 
@@ -248,9 +196,18 @@ namespace PIMS3.DataAccess.Position
         }
 
 
+        public bool SaveDelinquencies(List<DelinquentIncome> pastDuePositionsToSave)
+        {
+            _ctx.AddRange(pastDuePositionsToSave);
+            recordsSaved = _ctx.SaveChanges();
+
+            return recordsSaved > 0 ? true : false;
+        }
+
+               
         public IQueryable<PositionsForEditVm> GetPositions(string investorId, bool includeInactiveStatusRecs)
         {
-            // Explicitly querying for status, as other statuses may be used in future versions.
+            // Explicitly querying for specific statuses, as other statuses may be used in future versions.
             var positionAssetJoin = _ctx.Position.Where(p => (p.Status == "A" || p.Status == "I") && p.PositionAsset.InvestorId == investorId)
                                                   .Join(_ctx.Asset, a => a.AssetId, p => p.AssetId, (assetsData, positionData) =>
                                                               new
@@ -290,6 +247,24 @@ namespace PIMS3.DataAccess.Position
                                     .ThenBy(p => p.TickerSymbol);
         }
 
+
+        public IQueryable<dynamic> GetCandidateDelinquentPositions(string currentInvestorId)
+        {
+            IQueryable<dynamic> candidatePositions = _ctx.Position.Where(p => p.Status == "A" && 
+                                                               p.PositionAsset.InvestorId == currentInvestorId &&
+                                                               p.PymtDue == true)
+                                                    .Join(_ctx.Asset, p => p.AssetId, a => a.AssetId, (position,asset) => new {
+                                                                      position.PositionAsset.Profile.DividendFreq,
+                                                                      asset.Profile.TickerSymbol,
+                                                                      position.PositionAsset.Profile.DividendMonths,
+                                                                      position.PositionId,
+                                                                      asset.InvestorId
+                                                     })
+                                                    .AsQueryable();
+            
+            return candidatePositions;
+        }
+        
 
         public int UpdatePositions(PositionsForEditVm[] editedPositionsAbridged)
         {
@@ -337,7 +312,7 @@ namespace PIMS3.DataAccess.Position
         }
 
 
-        // Data used for lookup/dropdown functionality in 'Positions' grid ONLY, hence, including here for now.
+        // Data used for lookup/dropdown functionality in 'Positions' grid ONLY.
         public IQueryable<AssetClassesVm> GetAssetClassDescriptions()
         {
             return _ctx.AssetClass.Select((ac) => new AssetClassesVm() {
@@ -359,7 +334,6 @@ namespace PIMS3.DataAccess.Position
                            .FirstOrDefault().AssetId
                            .ToString();
             }
-
         }
 
 
@@ -390,5 +364,6 @@ namespace PIMS3.DataAccess.Position
         }
 
     }
+
 
 }
