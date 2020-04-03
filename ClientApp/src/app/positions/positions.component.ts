@@ -137,7 +137,6 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
             editedPositions.push(editedPosition);
         }
 
-        let test = 2;
         this.positionSvc.UpdateEditedPositions(editedPositions)
             .retry(2)
             .pipe(takeUntil(this.getUnsubscribe()))
