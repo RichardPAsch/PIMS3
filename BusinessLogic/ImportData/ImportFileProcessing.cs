@@ -135,7 +135,7 @@ namespace PIMS3.BusinessLogic.ImportData
                         newIncomeListing.Add(newIncomeRecord);
                         _totalXlsIncomeRecordsToSave += 1;
                         newIncomeRecord = null;
-                    } // for
+                    } // end 'for'
 
                     if(_xlsTickerSymbolsOmitted.Length > 0)
                     {
@@ -145,7 +145,7 @@ namespace PIMS3.BusinessLogic.ImportData
                    
                     return newIncomeListing;
 
-                } // using
+                } // end 'using'
             }
             catch (Exception ex)
             {
@@ -321,8 +321,8 @@ namespace PIMS3.BusinessLogic.ImportData
                             _assetsNotAddedListing += enumerableCells.ElementAt(1).Trim() + " ,";
                             lastTickerProcessed = enumerableCells.ElementAt(1).Trim();
                         }
-                    }   // end for
-                }       // end using
+                    }   // end 'for'
+                }       // end 'using'
             }
             catch(Exception ex)
             {
@@ -362,7 +362,7 @@ namespace PIMS3.BusinessLogic.ImportData
 
         private List<Position> InitializePositions(List<Position> initializedPositions, string[] currentRow)
         {
-            // AssetId must never be null & always point to a referencing Asset when creating new Position(s).
+            // AssetId MUST never be null & always point to a referencing Asset when creating new Position(s).
             if (assetIdForPosition == string.Empty || assetIdForPosition == null)
                 return null;
 
@@ -406,8 +406,6 @@ namespace PIMS3.BusinessLogic.ImportData
             return decimal.Round(decimal.Parse(yield.ToString(CultureInfo.InvariantCulture)), 2);
         }
 
-       
-
-
     }
+
 }
