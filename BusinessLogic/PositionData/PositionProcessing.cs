@@ -81,7 +81,11 @@ namespace PIMS3.BusinessLogic.PositionData
                     {
                         PositionId = delinquentIncome.PositionId,
                         TickerSymbol = delinquentIncome.TickerSymbol,
-                        //DividendFreq = delinquentIncome.DividendFreq, TODO ?
+                        DividendFreq = delinquentIncome.DividendFreq,
+                        AccountTypeDesc = _ctx.Position.Where(x => x.PositionId == delinquentIncome.PositionId)
+                                                       .Select(y => y.AccountType.AccountTypeDesc)
+                                                       .First()
+                                                       .ToString(),
                         MonthDue = int.Parse(delinquentIncome.MonthDue)
                     });
                 }
