@@ -24,5 +24,9 @@ namespace PIMS3.Data.Entities
         public string AccountTypeDesc { get; set; }
 
 
+        [Required]
+        public string DividendFreq { get; set; }
+
+
     }
 }
