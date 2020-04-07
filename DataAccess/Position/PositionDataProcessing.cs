@@ -173,16 +173,26 @@ namespace PIMS3.DataAccess.Position
             if (string.IsNullOrEmpty(monthToCheck))
             {
                 return _ctx.DelinquentIncome.Where(p => p.InvestorId == investorId)
-                                        .OrderByDescending(p => p.MonthDue)
-                                        .ThenBy(p => p.TickerSymbol)
-                                        .ToList();
+                           .Join(_ctx.Profile, d => d.TickerSymbol, pr => pr.TickerSymbol, (di, pr) => new DelinquentIncome
+                           {
+                                TickerSymbol = di.TickerSymbol,
+                                MonthDue = di.MonthDue,
+                                DividendFreq = pr.DividendFreq,
+                                PositionId = di.PositionId
+                           })
+                           .ToList();
             }
             else
             {
                 return _ctx.DelinquentIncome.Where(p => p.InvestorId == investorId && p.MonthDue == monthToCheck)
-                                       .OrderByDescending(p => p.MonthDue)
-                                       .ThenBy(p => p.TickerSymbol)
-                                       .ToList();
+                           .Join(_ctx.Profile, d => d.TickerSymbol, pr => pr.TickerSymbol, (di, pr) => new DelinquentIncome
+                           {
+                                TickerSymbol = di.TickerSymbol,
+                                MonthDue = di.MonthDue,
+                                DividendFreq = pr.DividendFreq,
+                                PositionId = di.PositionId
+                           })
+                           .ToList();
             }
         }
 
@@ -362,6 +372,7 @@ namespace PIMS3.DataAccess.Position
             int positionsUpdated = _ctx.SaveChanges();
             return positionsUpdated >= 1 ? true : false;
         }
+
 
     }
 
