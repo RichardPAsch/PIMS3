@@ -22,7 +22,8 @@ export class IncomeReceivablesComponent extends BaseUnsubscribeComponent impleme
     agGridReceivables: AgGridNg2;
 
     public currentMonth: string;
-    public positionCount: number;
+    public currentPositionCount: number;
+    public delinquentPositionCount: number;
 
     ngOnInit() {
         this.currentMonth = this.GetMonthName();
@@ -59,7 +60,9 @@ export class IncomeReceivablesComponent extends BaseUnsubscribeComponent impleme
             .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(responsePositions => {
                 this.agGridReceivables.api.setRowData(this.mapReceivablesForGrid(responsePositions));
-                this.positionCount = responsePositions.length;
+                this.delinquentPositionCount = this.calculateDelinquentCount(responsePositions);
+                this.currentPositionCount = responsePositions.length - this.delinquentPositionCount;
+                this.delinquentPositionCount = this.delinquentPositionCount;
             },
                 (apiErr: HttpErrorResponse) => {
                     if (apiErr.error instanceof Error) {
@@ -131,5 +134,17 @@ export class IncomeReceivablesComponent extends BaseUnsubscribeComponent impleme
             )
     }
 
+
+    private calculateDelinquentCount(searchPositions: any): number {
+
+        let pastDueCount: number = 0;
+        let today = new Date();
+
+        for (let i = 0; i < searchPositions.length; i++) {
+            if (searchPositions[i].monthDue < today.getMonth() + 1)
+                pastDueCount++;
+        }
+        return pastDueCount;
+    }
 
 }
