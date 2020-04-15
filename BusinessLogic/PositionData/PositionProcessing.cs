@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using PIMS3.ViewModels;
 using PIMS3.Data.Entities;
-using Serilog;
-
 
 namespace PIMS3.BusinessLogic.PositionData
 {
