@@ -91,67 +91,6 @@ namespace PIMS3.BusinessLogic.PositionData
                 }
             }
 
-            // ******* Not needed -> preserve as precaution until 4/15/2020  *************
-            // Trap for month-end/beginning processing regarding 'tickersWithIncomeDue' & delinquent revenue.
-            //if (DateTime.Now.Day <= 3 && DateTime.Now.DayOfWeek.ToString() != "Saturday" && DateTime.Now.DayOfWeek.ToString() != "Sunday")
-            //{
-            //    // Do we have persisted income receivables for the month just ended? If so, just append them to our returning collection.
-            //    IQueryable<DelinquentIncome> delinquenciesForMonthJustEnded = savedDelinquencies.Where(p => int.Parse(p.MonthDue) == DateTime.Now.AddMonths(-1).Month);
-
-            //    if (tickersWithIncomeDue.Count >= 1)
-            //    {
-            //        // Capture & persist now delinquent income receivables, before appending to our current collection; this allows
-            //        // for displaying an updated set that can be acted upon.
-            //        List<DelinquentIncome> currentOverduePositionIncomes = new List<DelinquentIncome>();
-            //        foreach (IncomeReceivablesVm position in tickersWithIncomeDue)
-            //        {
-            //            DelinquentIncome overduePositionIncome = new DelinquentIncome
-            //            {
-            //                InvestorId = investor,
-            //                PositionId = position.PositionId,
-            //                MonthDue = CalculateDelinquentMonth(),
-            //                TickerSymbol = position.TickerSymbol,
-            //                AccountTypeDesc = position.AccountTypeDesc
-            //            };
-            //            currentOverduePositionIncomes.Add(overduePositionIncome);
-            //        }
-
-            //        bool dataSaved = positionDataAccessComponent.SavePositionsWithOverdueIncome(currentOverduePositionIncomes);
-            //        if (!dataSaved)
-            //            Log.Warning("Unable to save Position(s) with delinquent due payment(s) for investor: {0}, via PositionProcessing.GetPositionsWithIncomeDue()", investor);
-
-
-            //        if (delinquenciesForMonthJustEnded.Any())
-            //        {
-            //            // 'savedDelinquencies' has last months' delinquencies, so append to returning collection.
-            //            tickersWithIncomeDue = MapAndAddOverduePositionsToCurrentPositions(delinquenciesForMonthJustEnded.ToList(), tickersWithIncomeDue);
-            //        }
-            //        else
-            //        {
-            //            // No 'delinquenciesForMonthJustEnded' found, so just return savedDelinquencies + new tickersWithIncomeDue.
-            //            if (savedDelinquencies.Any())
-            //            {
-            //                tickersWithIncomeDue = MapAndAddOverduePositionsToCurrentPositions(savedDelinquencies.ToList(), tickersWithIncomeDue);
-            //            }
-            //        }
-            //    }
-            //    else
-            //    {
-            //        if (delinquenciesForMonthJustEnded.Any())
-            //        {
-            //            tickersWithIncomeDue = MapAndAddOverduePositions(delinquenciesForMonthJustEnded.ToList());
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    // Non end-of-the-month processing. Add any persisted, if applicable, delinquencies to returned collection.
-            //    if (savedDelinquencies.Any())
-            //    {
-            //        tickersWithIncomeDue = MapAndAddOverduePositionsToCurrentPositions(savedDelinquencies.ToList(), tickersWithIncomeDue);
-            //    }
-            //}
-
             return tickersWithIncomeDue.OrderByDescending(r => r.MonthDue)
                                        .ThenBy(r => r.DividendFreq)
                                        .ThenBy(r => r.TickerSymbol)
