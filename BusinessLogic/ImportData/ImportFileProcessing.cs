@@ -24,7 +24,6 @@ namespace PIMS3.BusinessLogic.ImportData
         private IEnumerable<Data.Entities.Income> duplicateResults;
         private static int _totalXlsIncomeRecordsToSave = 0;
         private readonly PIMS3Context _ctx;
-        private static string _assetsNotAddedListing = string.Empty;
         private string assetIdForPosition = string.Empty;
         private InvestorSvc _investorSvc;
 
@@ -317,8 +316,6 @@ namespace PIMS3.BusinessLogic.ImportData
                         else
                         {
                             // Attempted duplicate Position-Account insertion.
-                            // TODO: What are we doing with  _assetsNotAddedListing ?
-                            _assetsNotAddedListing += enumerableCells.ElementAt(1).Trim() + " ,";
                             lastTickerProcessed = enumerableCells.ElementAt(1).Trim();
                         }
                     }   // end 'for'
