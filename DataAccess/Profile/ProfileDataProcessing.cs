@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Serilog;
 
 
 namespace PIMS3.DataAccess.Profile
@@ -55,8 +56,7 @@ namespace PIMS3.DataAccess.Profile
 
         public Data.Entities.Profile BuildProfile(string ticker)
         {
-            // TODO: refactor into data access & bus logic.
-            // Update or initialize Profile data.
+            // Update or initialize Profile data via 3rd party Tiingo service.
             DateTime cutOffDateTimeForProfileUpdate = DateTime.Now.AddHours(-72);
             const string BaseTiingoUrl = "https://api.tiingo.com/tiingo/daily/";
             const string TiingoAccountToken = "95cff258ce493ec51fd10798b3e7f0657ee37740";
@@ -95,15 +95,15 @@ namespace PIMS3.DataAccess.Profile
                 var metaDataInitialized = false;
                 IQueryable<Data.Entities.Profile> existingProfile;
 
-                // Just in case, we'll check again for an existing Profile to update.
-                // TODO: 'investorLoginName' - may be "" in some cases ?
+                // Check for Profile to update, either custom, or standard. The latter will contain
+                // an uninitialized investorLoginName, and is accounted for in FetchDbProfile().
                 try
                 {
                     existingProfile = FetchDbProfile(ticker, investorLoginName);
                 }
                 catch (Exception)
                 {
-                    // TODO: log error.
+                    Log.Error("Error retreiving Db Profile via ProfileDataProcessing.BuildProfile() for ticker: {0}", ticker);
                     return null;
                 }
 
@@ -137,16 +137,18 @@ namespace PIMS3.DataAccess.Profile
                     if (divCashGtZero)
                         break;
 
-                    // New Profile processing. Capture meta data (name/ticker). 
+                    // New Profile processing. Capture meta data (name/ticker).
                     if (!metaDataInitialized)
                     {
                         var Uri = client.BaseAddress + "?token=" + TiingoAccountToken;
-                        //metaDataResponse = await client.GetAsync(Uri);
                         metaDataResponse = FetchProfileViaWebSync(new HttpClient(), Uri);
                         if (metaDataResponse == null || metaDataResponse == string.Empty)
-                            return null; // TODO: Log: BadRequest("Unable to fetch Profile meta data for: " + tickerForProfile);
+                        {
+                            Log.Warning("BadRequest - unable to fetch Profile meta data for: {0}", ticker);
+                            return null; 
+                        }
 
-                        var responseMetaData = metaDataResponse;// Content.ReadAsStringAsync();
+                        var responseMetaData = metaDataResponse;  // Content.ReadAsStringAsync();
                         var jsonTickerMetaData = JObject.Parse(responseMetaData);
 
                         updatedOrNewProfile.TickerDescription = jsonTickerMetaData["name"].ToString().Trim();
@@ -203,7 +205,6 @@ namespace PIMS3.DataAccess.Profile
         public JArray FetchDividendSpecsForTicker(string searchTicker)
         {
             // Data fetch for determining dividend frequency & months paid.
-            // TODO: Refactor!
             const string BaseTiingoUrl = "https://api.tiingo.com/tiingo/daily/";
             const string TiingoAccountToken = "95cff258ce493ec51fd10798b3e7f0657ee37740";
 
@@ -249,24 +250,22 @@ namespace PIMS3.DataAccess.Profile
                         string responseString = responseContent.ReadAsStringAsync().Result;
 
                         webResponse = responseString;
-                        //Console.WriteLine(responseString);
                     }
                     else
                     {
-                        // TODO: log error, data ?
+                        Log.Warning("Error fetching Profile data via ProfileDataProcessing.FetchProfileViaWebSync().");
                         return webResponse;
                     }
                 }
             }
             catch (Exception ex)
             {
-                // TODO: log error, connection ?
-                var debug = ex.Message;
+                Log.Error("Error (connection ?) via ProfileDataProcessing.FetchProfileViaWebSync() due to: {0}.", ex.Message);
                 return webResponse;
             }
             
             return webResponse;
-        }
+        } 
 
 
         private static ProfileVm InitializeProfile(string ticker, bool isDbProfileCheck, string _serverBaseUri)
@@ -346,9 +345,8 @@ namespace PIMS3.DataAccess.Profile
 
         public bool SaveProfile(Data.Entities.Profile newProfile)
         {
-            // 6.21.19
-            // Shouldn't we check for existing Profile first; so therefore:
-            // Run through UI 'Asset Profile' menu option first, utilizing 'Create Profile' button & debug.
+            // Check for existing Profile first, therefore run through UI 'Asset Profile'
+            // menu option first, utilizing 'Create Profile' button & debug.
             int savedCount = 0;
             bool profileSaved = false;
 
@@ -361,7 +359,7 @@ namespace PIMS3.DataAccess.Profile
             catch (Exception ex)
             {
                 Exception err = ex.InnerException;
-                // TODO: Log error.
+                Log.Error("Error saving Profile data via ProfileDataProcessing.SaveProfile() due to: {0}.", err);
             }
 
             return profileSaved;
