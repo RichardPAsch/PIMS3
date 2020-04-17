@@ -62,7 +62,6 @@ namespace PIMS3.Controllers
             int positionsUpdated = positionDataAccessComponent.UpdatePositions(MapToVm(positionEdits));
             string positionTickerSymbolsUpdated = string.Empty;
 
-            // TODO: 'return BadRequest();' - results in calling above UpdatePositions(MapToVm(positionEdits) again ?
             if (positionsUpdated == 0)
             {
                 return Ok(recordsUpdatedCount);  
