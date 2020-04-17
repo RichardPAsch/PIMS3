@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using System;
+using Serilog;
 
 
 namespace PIMS3.BusinessLogic.ProfileData
@@ -64,10 +65,9 @@ namespace PIMS3.BusinessLogic.ProfileData
             var profileDataAccessComponent = new ProfileDataProcessing(ctx);
             JArray orderedJsonTickerPriceData = profileDataAccessComponent.FetchDividendSpecsForTicker(tickerSymbol);
 
-            // Handle unresolved ticker in Tiingo service.
-            // TODO: write error msg to log: [BadRequest("Unable to update Profile price data for: " + ticker);]
             if (orderedJsonTickerPriceData == null)
             {
+                Log.Warning("ProfileProcessing.CalculateDivFreqAndDivMonths() - found unresolved ticker in Tiingo service, unable to update Profile price data for {0}: ", tickerSymbol);
                 return null;
             }
 
