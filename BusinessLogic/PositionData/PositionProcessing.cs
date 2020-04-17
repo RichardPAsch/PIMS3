@@ -12,7 +12,6 @@ namespace PIMS3.BusinessLogic.PositionData
     {
         private Data.PIMS3Context _ctx;
         private IQueryable<DelinquentIncome> savedDelinquencies = new List<DelinquentIncome>().AsQueryable();
-        private IQueryable<DelinquentIncome> savedDelinquenciesUpdated = new List<DelinquentIncome>().AsQueryable();
         private IList<DelinquentIncome> unSavedDelinquentPositions = new List<DelinquentIncome>();
         private List<IncomeReceivablesVm> tickersWithIncomeDue = new List<IncomeReceivablesVm>();
 
