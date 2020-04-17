@@ -5,6 +5,7 @@ using System.Linq;
 using PIMS3.ViewModels;
 using PIMS3.Data.Entities;
 
+
 namespace PIMS3.BusinessLogic.PositionData
 {
     public class PositionProcessing
@@ -184,7 +185,6 @@ namespace PIMS3.BusinessLogic.PositionData
         {
             // Intentionally ommitting dividend: (freq, months, & payday) in delinquencies collection for inclusion in returned collection, 
             // so that these records are more conspicious in the UI.
-            // TODO: 1. show DivFreq, 2. use "" instead of zeroes for divDay.
             foreach (DelinquentIncome delinquentPosition in delinquentSource)
             {
                 IncomeReceivablesVm overduePositionIncomeToAdd = new IncomeReceivablesVm
