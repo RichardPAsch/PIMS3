@@ -124,11 +124,11 @@ export class IncomeComponent extends BaseUnsubscribeComponent implements OnInit 
             this.incomeSvc.DeleteIncome(incomeIds)
                 .retry(2)
                 .pipe(takeUntil(this.getUnsubscribe()))
-                .subscribe(deleteResponse => {
-                    this.alertSvc.success("Successfully deleted "
-                        + incomeIds.length + " income record(s).");
-                    this.fetchRevenue();
-                },
+                .subscribe(() => {
+                        this.alertSvc.success("Successfully deleted "
+                            + incomeIds.length + " income record(s).");
+                        this.fetchRevenue();
+                    },
                     (apiError: HttpErrorResponse) => {
                         this.alertSvc.error("Error deleting revenue due to "
                             + "'" + apiError.message + "'. Please try again later.");
