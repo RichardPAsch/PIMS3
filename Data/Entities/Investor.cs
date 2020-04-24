@@ -33,11 +33,9 @@ namespace PIMS3.Data.Entities
         public  string LoginName { get; set; }
 
 
-        //[Required]
         public byte[] PasswordHash { get; set; }
 
 
-        //[Required]
         public byte[] PasswordSalt { get; set; }
 
 
