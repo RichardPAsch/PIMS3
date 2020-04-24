@@ -45,7 +45,7 @@ namespace PIMS3.Data.Entities
 
 
         // Design spec for 'Position' db field -> no nulls allowed.
-        // Date Position added to asset; used in Revenue editing (back-dating checks)
+        // Date Position was added to portfolio; used in Revenue editing (back-dating checks)
         [Required]
         public DateTime PositionDate { get; set; }
 
@@ -54,6 +54,7 @@ namespace PIMS3.Data.Entities
         public decimal Fees { get; set; }
 
 
+        [Required]
         [Range(0.00, 9000.00)]
         public decimal UnitCost { get; set; }
 
