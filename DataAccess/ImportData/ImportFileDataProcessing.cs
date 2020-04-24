@@ -271,7 +271,7 @@ namespace PIMS3.DataAccess.ImportData
                 case "Profile":
                     currentType = new Data.Entities.Profile
                     {
-                        ProfileId = entityToMap.ProfileId,  // test this; entityToMap.ProfileId should be dynamically valid ?
+                        ProfileId = entityToMap.ProfileId,  
                         CreatedBy = entityToMap.CreatedBy ?? string.Empty,
                         DividendFreq = entityToMap.DividendFreq,
                         DividendMonths = "NA",
