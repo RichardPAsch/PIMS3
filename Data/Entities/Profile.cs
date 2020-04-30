@@ -10,20 +10,16 @@ namespace PIMS3.Data.Entities
         public string ProfileId { get; set; }
 
 
-        // Profile can only belong 1 unique 'Asset'
+        // Profile can only belong to 1 unique 'Asset'
         // 1:1 cardinality via convention
         public Asset Asset { get; set; }
-
-
-        //public string AssetId { get; set; }
-       
+               
 
         [Required]
         public string TickerSymbol { get; set; }
 
 
         // Non-null indicates user who created custom Profile 
-        [Required]
         public string CreatedBy { get; set; }
 
 
@@ -60,6 +56,7 @@ namespace PIMS3.Data.Entities
 
 
         // aka 'Ask Price' or todays' market price.
+        [Required]
         public decimal UnitPrice { get; set; }
 
 
