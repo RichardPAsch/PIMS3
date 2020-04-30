@@ -29,7 +29,6 @@ namespace PIMS3.Controllers
         public ActionResult UpdatePymtDueFlags([FromBody] List<PositionsForPaymentDueVm> positionsToUpdate)
         {
             // Pending updates for user-selected Position ids marked as having received income.
-            // Bypassing bus logic processing, as there are no business rules to enforce.
             PositionDataProcessing positionDataAccessComponent = new PositionDataProcessing(_ctx);
             bool updatesAreValid = positionDataAccessComponent.UpdatePositionPymtDueFlags(positionsToUpdate);
             if (updatesAreValid)
@@ -38,7 +37,8 @@ namespace PIMS3.Controllers
             }
             else
             {
-                Log.Warning("Payment(s) received processing aborted; one or more delinquencies found for positionId(s) being processed via PositionController.UpdatePymtDueFlags().");
+                Log.Warning("'Income due' payment processing aborted; one or more delinquent positions found among current selections. " + 
+                                                                    "Processing via PositionController.UpdatePymtDueFlags().");
             }
             return Ok(updatesAreValid);
         }
