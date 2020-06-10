@@ -30,22 +30,26 @@ export class HomeComponent extends BaseUnsubscribeComponent implements OnInit {
     loading = false;
     submitted = false;
     returnUrl: string;
-    loginForm = new FormGroup({
-        investorName: new FormControl('rpasch@rpclassics.net', [Validators.required]), 
-        password: new FormControl('rich25102', [Validators.required, Validators.minLength(6)]),
-    });
-    //loginForm = new FormGroup({
-    //    investorName: new FormControl('jbrahms@gmail.com', [Validators.required]),
-    //    password: new FormControl('classical1', [Validators.required, Validators.minLength(6)]),
-    //});
     investorName: string;
+
+    useDefaultInvestor: boolean = true; // default: RPA
+
+    debugInvestorLogin = this.useDefaultInvestor ? "rpasch@rpclassics.net" : "jbrahms@gmail.com";
+    debugInvestorPwrd = this.useDefaultInvestor ? "rich25102" : "classical1";
+
+    loginForm = new FormGroup({
+        investorName: new FormControl(this.debugInvestorLogin, [Validators.required]),
+        password: new FormControl(this.debugInvestorPwrd, [Validators.required, Validators.minLength(6)]),
+    });
+
 
     get formFields() { return this.loginForm.controls; }
 
     get investorFName() { return this.investorFName; }
 
 
-    ngOnInit() { }
+    ngOnInit() {
+    }
 
 
     onSubmit() {
