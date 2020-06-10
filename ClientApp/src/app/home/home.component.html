@@ -1,23 +1,23 @@
 
 <div class="jumbotron">
     <h2>* Portfolio Income Management System *</h2>
-    <h3 style="margin-left: 297px;">WELCOME</h3>
+    <h3 style="margin-left: 297px;"> WELCOME </h3>
+    <br/>
     <ul>
-        <li>With this application, you may manage income derived from an existing investment portfolio.</li>
-        <li>This application is <em>not</em> intended to replace, nor mimic any asset management system that may currently be commerically, or
-            privately available.</li>
+        <li>This application allows for managing revenue derived from an existing investment portfolio, and</li>
+        <li>is <em>not</em> intended to replace, nor mimic, any commercially available asset management system.</li>
     </ul>
 
     <hr />
     <div class="container">
-        <div id="row1" class="row">
+        <div id="loginDiv" class="row">
             <div class="col text-center"><h3 id="loginHdr">Login</h3></div>
         </div>
 
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
             <label class="col-sm-2 control-label" for="investorName">Name:</label>
-            <div class="col-sm-8">
+            <div id="nameDiv" class="col-sm-8">
                 <div class="input-group input-group-md">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-user"></span>
@@ -28,10 +28,10 @@
                     </div>
                 </div>
             </div>
-            <br/><br/><br/>
+            <br/>
 
             <label class="col-sm-2 control-label" for="password">Password:</label>
-            <div class="col-sm-8">
+            <div id="pwrdDiv" class="col-sm-8">
                 <div class="input-group input-group-md">
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-lock"></span>
@@ -49,7 +49,7 @@
                 <div class="col-sm-4">
                     <button id="btnLogin" style="width:205px; " [disabled]="loading" class="btn">Login</button>
                 </div>
-                <div class="col-sm-2">
+                <div id="registerDiv" class="col-sm-2">
                     <a routerLink="/registration" class="btn btn-link">Register</a>
                 </div>
             </section>
@@ -57,6 +57,7 @@
         </form>
 
     </div>
+
 </div>
 
 
