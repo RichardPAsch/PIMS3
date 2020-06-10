@@ -1,79 +1,93 @@
-<div class='main-nav'>
+
+<div class='main-nav' style="height:810px">
     <div class='navbar navbar-inverse'>
-        <div class='navbar-header' style="background-color:lightgoldenrodyellow">
+        <div class='navbar-header' style="background-color:#e9ecef">
             <span id="menuHdr" class='navbar-brand'>
-               <strong>P.I.M.S.- test</strong>
+                <strong>P.I.M.S.- test</strong>
             </span>
             <span id="loginDisplay">{{nameDisplayed}}</span>
         </div>
         <div class='clearfix'></div>
-        <div class='navbar-collapse collapse' [ngClass]='{ "in": isExpanded }'>
-            <ul class='nav navbar-nav'>
-                <!--routerLinkActive :  Angular directive allowing for addition of a CSS class to an element when the link's route becomes active.
-                    Note: Changes should also be reflected in 'app.module' - RouterModule.
-                 -->
-                <li *ngIf="showLogIn" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
-                    <a [routerLink]='["/"]'>
-                        <span class='glyphicon glyphicon-home'></span> Home - Login
-                    </a>
-                </li>
-                <li *ngIf="showRegistration" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
-                    <a [routerLink]='["/registration"]'>
-                        <span class='glyphicon glyphicon-envelope'></span> Registration
-                    </a>
-                </li>
-                <!-- to be inserted in <li> : matTooltip="test tooltip message"-->
-                <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
-                    <a [routerLink]='["/income-summary"]'>
-                        <span class='glyphicon glyphicon-usd'></span> Income summary
-                    </a>
-                </li>
-                <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
-                    <a [routerLink]='["/income-projections"]'>
-                        <span class='glyphicon glyphicon-usd'></span> Income projections
-                    </a>
-                </li>
-                <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
-                    <a [routerLink]='["/income-receivables"]'>
-                        <span class='glyphicon glyphicon-usd'></span> Income due
-                    </a>
-                </li>
-                <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
-                    <a [routerLink]='["/income"]'>
-                        <span class='glyphicon glyphicon-usd'></span> Income recorded
-                    </a>
-                </li>
-                <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
-                    <a [routerLink]='["/data-import"]'>
-                        <span class='glyphicon glyphicon-import'></span> Data import
-                    </a>
-                </li>
-                <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
-                    <a [routerLink]='["/positions"]'>
-                        <span class='glyphicon glyphicon-th-list'></span> Positions
-                    </a>
-                </li>
-                <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
-                    <a [routerLink]='["/profile"]'>
-                        <span class='glyphicon glyphicon-file'></span> Asset profile
-                    </a>
-                </li>
-                <li [routerLinkActive]='["link-active"]' (click)='showGettingStarted()'>
-                    <a [routerLink]='["/getting-started"]'>
-                        <span class='glyphicon glyphicon-file'></span> Getting started
-                    </a>
-                </li>
-                <li *ngIf="showPasswordReset" [routerLinkActive]='["link-active"]'>
-                    <a [routerLink]='["/password-reset"]'>
-                        <span class='glyphicon glyphicon-edit'></span> Password reset
-                    </a>
-                </li>
-                <li *ngIf="showLogOut">
-                    <a [routerLink]='["/"]' (click)='logoutInvestor()'>
-                        <span class='glyphicon glyphicon-log-out'></span> Log out
-                    </a>
-                </li>
-            </ul>
-        </div>
+
+        
+        <nav class="navbar bg-dark navbar-light">
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" (click)="toggleCollapsed()" data-target="navBarToToggle" aria-controls="navBarToToggle" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!--Navbar "collapse" not working for <div> ? Angular fix available? e.g., collapse  [collapse]="isCollapsed"-->
+            <div class="navbar-collapse" id="navBarToToggle">
+                <ul class="navbar-nav">
+                    <li class="nav-item" *ngIf="showLogIn" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
+                        <a class="nav-link" [routerLink]='["/"]'>
+                            <span class='glyphicon glyphicon-home'></span> Home - Login
+                        </a>
+                    </li>
+                    <li class="nav-item" *ngIf="showRegistration" [routerLinkActive]='["link-active"]' [routerLinkActiveOptions]='{ exact: true }'>
+                        <a class="nav-link" [routerLink]='["/registration"]'>
+                            <span class='glyphicon glyphicon-envelope'></span> Registration
+                        </a>
+                    </li>
+                    <!-- to be inserted in <li> : matTooltip="test tooltip message"-->
+                    <li class="nav-item" [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                        <a class="nav-link" [routerLink]='["/income-summary"]'>
+                            <span class='glyphicon glyphicon-usd'></span> Income summary
+                        </a>
+                    </li>
+                    <li class="nav-item" [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                        <a class="nav-link" [routerLink]='["/income-projections"]'>
+                            <span class='glyphicon glyphicon-usd'></span> Income projections
+                        </a>
+                    </li>
+                    <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                        <a class="nav-link" [routerLink]='["/income-receivables"]'>
+                            <span class='glyphicon glyphicon-usd'></span> Income due
+                        </a>
+                    </li>
+                    <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                        <a class="nav-link" [routerLink]='["/income"]'>
+                            <span class='glyphicon glyphicon-usd'></span> Income recorded
+                        </a>
+                    </li>
+                    <li class="nav-item" [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                        <a class="nav-link" [routerLink]='["/data-import"]'>
+                            <span class='glyphicon glyphicon-import'></span> Data import
+                        </a>
+                    </li>
+                    <li class="nav-item" [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                        <a class="nav-link" [routerLink]='["/positions"]'>
+                            <span class='glyphicon glyphicon-th-list'></span> Positions
+                        </a>
+                    </li>
+                    <li class="nav-item" [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                        <a class="nav-link" [routerLink]='["/profile"]'>
+                            <span class='glyphicon glyphicon-file'></span> Asset profile
+                        </a>
+                    </li>
+                    <li [routerLinkActive]='["link-active"]' (click)='showGettingStarted()'>
+                        <a class="nav-link" [routerLink]='["/getting-started"]'>
+                            <span class='glyphicon glyphicon-file'></span> Getting started
+                        </a>
+                    </li>
+                    <li *ngIf="showPasswordReset" [routerLinkActive]='["link-active"]'>
+                        <a [routerLink]='["/password-reset"]'>
+                            <span class='glyphicon glyphicon-edit'></span> Password reset
+                        </a>
+                    </li>
+                    <li class="nav-item" *ngIf="showLogOut">
+                        <a class="nav-link" [routerLink]='["/"]' (click)='logoutInvestor()'>
+                            <span class='glyphicon glyphicon-log-out'></span> Log out
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </nav>
+
+
     </div>
 </div>
+
+
+
