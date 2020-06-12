@@ -7,6 +7,7 @@ import { LogNonException } from '../error-logging/log-non-exception';
 import { takeUntil } from 'rxjs/operators';
 import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
+
 // Deferred until dependent Angular components updated! (v.8.0.2)
 //import { MatTooltipModule } from '@angular/material/tooltip'; 
 
@@ -21,6 +22,7 @@ export class NavMenuComponent extends BaseUnsubscribeComponent implements OnInit
 
     private baseUrl;
 
+
     constructor(private router: Router, private authenticationSvc: AuthenticationService, private http: HttpClient, globalsSvc: GlobalsService/*, @Optional() private name: string*/) {
         super();
         this.baseUrl = globalsSvc.pimsBaseUrl;
@@ -33,6 +35,7 @@ export class NavMenuComponent extends BaseUnsubscribeComponent implements OnInit
     showLogIn: boolean = true;
     showRegistration: boolean = true;
     showPasswordReset: boolean = false;
+    isCollapsed: boolean = true;  // for navBar menu collapsing; pending fix
 
 
     ngOnInit() {
@@ -82,6 +85,10 @@ export class NavMenuComponent extends BaseUnsubscribeComponent implements OnInit
     
     toggle() {
         this.isExpanded = !this.isExpanded;
+    }
+
+    toggleCollapsed() {
+        this.isCollapsed = !this.isCollapsed;
     }
 
 
