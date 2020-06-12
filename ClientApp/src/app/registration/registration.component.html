@@ -6,6 +6,7 @@
             <div class="col text-center"><h3 id="registrationHdr">Registration</h3></div>
         </div>
 
+
         <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" style="margin-top:27px;">
 
             <label class="col-sm-2 control-label" for="firstName">First Name:</label>
@@ -14,13 +15,13 @@
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-user"></span>
                     </span>
-                    <input type="text" class="form-control" placeholder="account first name" formControlName="firstName" [ngClass]="{'isInValid': submitted && formFields.firstName.errors}">
+                    <input id="fname" type="text" class="form-control" placeholder="account first name" formControlName="firstName" [ngClass]="{'isInValid': submitted && formFields.firstName.errors}">
                     <div *ngIf="submitted && formFields.firstName.errors" class="text-danger">
                         <div *ngIf="formFields.firstName.errors.required">First Name is required</div>
                     </div>
                 </div>
             </div>
-            <br /><br /><br />
+            <br/>
 
             <label class="col-sm-2 control-label" for="lastName">Last Name:</label>
             <div class="col-sm-8">
@@ -28,13 +29,13 @@
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-user"></span>
                     </span>
-                    <input type="text" class="form-control" placeholder="account last name" formControlName="lastName" [ngClass]="{'isInValid': submitted && formFields.lastName.errors}">
+                    <input id="lname" type="text" class="form-control" placeholder="account last name" formControlName="lastName" [ngClass]="{'isInValid': submitted && formFields.lastName.errors}">
                     <div *ngIf="submitted && formFields.lastName.errors" class="text-danger">
                         <div *ngIf="formFields.lastName.errors.required">Last Name is required</div>
                     </div>
                 </div>
             </div>
-            <br /><br /><br />
+            <br />
 
             <label class="col-sm-2 control-label" for="investorName">Username:</label>
             <div class="col-sm-8">
@@ -42,7 +43,7 @@
                     <span class="input-group-addon">
                         <span class="glyphicon glyphicon-user"></span>
                     </span>
-                    <input type="email" class="form-control" placeholder="Email" formControlName="loginName" [ngClass]="{'isInValid': submitted && formFields.loginName.errors}">
+                    <input id="uname" type="email" class="form-control" placeholder="Email" formControlName="loginName" [ngClass]="{'isInValid': submitted && formFields.loginName.errors}">
                     <div *ngIf="submitted && formFields.loginName.errors" class="text-danger">
                         <div *ngIf="formFields.loginName.errors.required">Login name is required</div>
                     </div>
@@ -52,7 +53,7 @@
                     </div>
                 </div>
             </div>
-            <br /><br /><br />
+            <br />
 
             <label class="col-sm-2 control-label" for="password">Password:</label>
             <div class="col-sm-8">
@@ -83,7 +84,7 @@
                     <button id="btnRegistration" style="width:205px;" [disabled]="loading" class="btn">Register</button>
                 </div>
                 <div class="col-sm-2">
-                    <a routerLink='/' class="btn btn-link">Cancel</a>
+                    <a id="cancel" routerLink='/' class="btn btn-link">Cancel</a>
                 </div>
             </section>
 
