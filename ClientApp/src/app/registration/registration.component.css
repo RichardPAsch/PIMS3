@@ -12,13 +12,26 @@ h3{
 }
 #registrationHdr {
     color: #337AB7;
+    margin-left: -149px;
 }
 #divPwrd{
     padding-left: 21px;
     color: orangered;
 }
-.jumbotron {
-    margin-top: 50px;
+div.jumbotron {
+    margin-top: -20px;
+    height: 751px;
     margin-bottom: 0;
     width: 800px;
+}
+#fname, #lname, #uname, #pwrd{
+    margin-top: -38px;
+    margin-left: 100px;
+}
+label[_ngcontent-ng-cli-universal-c3] {
+    padding-top: 1px;
+}
+#cancel{
+    margin-top: -65px;
+    margin-left: 239px;
 }
