@@ -1,17 +1,12 @@
 <header>
-    - Data Import for portfolio -
+    - Portfolio data import(s) -
 </header>
 
 <ul>
-    <li>Populates the system with Revenue and/or Asset (Position) data.</li>
-    <li>Both Revenue & Asset data file imports must follow required XLSX/XLS spreadsheet templated formats. </li>
-    <li>Revenue imports require the existence of a Asset/Position for EACH income record being processed.</li>
-    <li>Asset/Position imports via 'Asset [new]', require the existence of a Profile for each Asset/Position added,</li>
-    <li>  and as such will be <em>automatically</em> created, when such ticker data is available via the web.</li>
-    <li>Any ticker to be added, may first be tested for available Profile data via the web using 'Asset Profile' lookup,</li>
-    <li>  and if not avaialble, be added manually as a 'custom' Profile.</li>
-    <li>Account types currently supported for data importing include: <em> CMA, Roth-IRA, IRA, 401(k), & Keogh.</em></li>
-    <li id="lastLi">Any ticker to be added, NOT found to have a Profile, may be manually added via 'Asset Profile'.</li>
+    <li>See <em>"Getting Started"</em> for useage details.</li>
+    <li>Records & saves imported Revenue or new Asset (Position) data.</li>
+    <li>All data imports must follow required XLSX/XLS spreadsheet templated formats. </li>
+    <li id="lastLi">Any ticker to be added, NOT found to have a Profile, may be manually added via <em>"Asset Profile"</em>.</li>
 </ul>
 
 <div class="col-md-12">
@@ -26,28 +21,29 @@
             <form [formGroup]="dataImportForm" class="form-horizontal ng-valid" role="form">
 
                 <div class="form-group">
-                    <div id="notation" class="col-md-12 col-md-offset-0">
-                        <h5>Select the type of data to be added, and enter its' corresponding XLSX file location, prior to selecting 'Import'.</h5>
-                    </div>
                 </div>
 
-                <div class="form-group" (ngSubmit)="processImportFile()" formGroupName="importDataType">
-                    <label id="lblDataType" class="col-sm-2 control-label">Import data type:</label>
-                    <div id="divDataTypes" class="col-md-5">
-                        <input type="radio" formControlName="importType" value="revenue" />&nbsp;Revenue&nbsp;&nbsp;
-                        <input type="radio" formControlName="importType" value="asset" />&nbsp;Asset [ new ]&nbsp;&nbsp;
+                <div class="jumbotron">
+                    <h6>Select import type, and enter its' XLSX file location, prior to selecting 'Import'.</h6><br/>
+                    <div id="dataTypeDiv" class="form-group" (ngSubmit)="processImportFile()" formGroupName="importDataType">
+                        <label id="lblDataType" class="col-sm-4 control-label">Type of data to import:</label>
+                        <div id="divDataTypes" class="col-md-5">
+                            <input type="radio" formControlName="importType" value="revenue" />&nbsp;Revenue&nbsp;&nbsp;
+                            <input type="radio" formControlName="importType" value="asset" />&nbsp;Asset [ new ]
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label id="lblFilePath" class="col-sm-2 control-label">File location:</label>
-                    <div class="col-md-7">
-                        <input type="text"
-                               formControlName="importFilePath"
-                               id="inputFilePath"
-                               class="form-control" s
-                               data-ng-model="vm.importFilePath" />
+                    <div class="form-group">
+                        <label id="lblFilePath" class="col-sm-3 control-label">File location:</label>
+                        <div class="col-md-7">
+                            <input type="text"
+                                   formControlName="importFilePath"
+                                   id="inputFilePath"
+                                   class="form-control" s
+                                   data-ng-model="vm.importFilePath" />
+                        </div>
                     </div>
+                    <br />
                 </div>
 
                 <div class="form-group" formGroupName="importActions">
@@ -56,7 +52,7 @@
                             <button id="btnImport" style="background-color: #66a3ff" type="submit" [disabled]="!dataImportForm.valid" class="btn btn-w-md btn-gap-v btn-info col-md-2" (click)="processImportFile()">
                                 Import
                             </button>
-                        </span>
+                        </span>&nbsp;
                         <span>
                             <button id="btnCancel" type="submit" [disabled]="!dataImportForm.valid" class="btn btn-w-md btn-gap-v btn-info col-md-4" (click)="cancelImportFile()">
                                 Cancel
