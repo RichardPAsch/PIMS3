@@ -1,16 +1,14 @@
-/*#msgs {
-    margin-left: 10px;
-    padding-left: 25px;
-}*/
+
 #inputFilePath {
   background-color: lightgoldenrodyellow;
-  width: 600px;
+  width: 555px;
+  margin-left:-1px;
 }
 .panel .panel-default { /* adjust height as new fileds are added.*/
     height: 375px;
 }
 #notation {
-  padding-left: 50px;
+  padding-left: 1px;
 }
 #panelSection { /* adjust panel height & width*/
     margin-top: 70px;
@@ -19,8 +17,10 @@
 }
 #lblFilePath, #lblDataType {
   text-align: left;
-  margin-left: 37px;
-  width: 150px;
+}
+#lblDataType{
+    width: 200px;
+    margin-left:3px;
 }
 #divBtns {
   margin-left: 24px;
@@ -31,7 +31,7 @@ input[type="file"] {
   height: 34px;
 }
 #btnImport {
-  margin-left: 13px;
+  margin-left: -42px;
   width: 143px;
 }
 #btnCancel {
@@ -43,9 +43,8 @@ input[type="file"] {
     color: #333333;
 }
 #divDataTypes {
-  width: 225px;
   margin-left: 2px;
-  margin-top: 8px;
+  margin-top: 0px;
 }
 header {
     background-color: #222;
@@ -55,6 +54,7 @@ header {
     color: white;
     width: 633px;
     height: 34px;
+    margin-top: -19px;
 }
 ul {
     margin-top: 15px;
@@ -67,5 +67,21 @@ ul {
 .panel-default > .panel-heading {
     background-color: #3387c6;
     color: white;
+}
+div.panel-heading{
+    width: 627px;
+    margin-left: -8px;
+}
+#dataTypeDiv{
+    width: 616px;
+}
+.jumbotron{
+    width: 628px;  /*774px;*/
+    margin-left: -8px;
+    height: 275px;
+}
+h6{
+    margin-top: -30px;
+    width: 600px;
 }
 
