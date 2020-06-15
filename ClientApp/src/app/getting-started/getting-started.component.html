@@ -29,7 +29,13 @@
                         All columns are <em>required</em>, and should be populated as necessary. Both parts require proper file paths for import
                         to work successfully. Asset/positions depend upon valid ticker symbols for fetching Profile data behind the scenes.
                         Both revenue & position entries may be back-dated. Any problem tickers are most likely due to Profile generation, and
-                        may be resolved by skipping to 'Asset Profile' menu option.
+                        may be resolved by skipping to 'Asset Profile' menu option. The following arw addtional useage details:
+                        -- Revenue imports require the existence of a Asset/Position for EACH income record being processed
+                        -- Asset/Position imports ('Asset [new]') require the existence of a Profile for each Asset/Position added,
+                        and as such will be <em>automatically</em> created, when such ticker data is available via the web.
+                        -- Account types currently supported for data importing include: <em> CMA, Roth-IRA, IRA, 401(k), & Keogh.</em>
+                        -- Any ticker to be added, may first be tested for available Profile data via the web using 'Asset Profile' lookup,
+                        and if not avaialble, be added manually as a 'custom' Profile.
                         <ul>
                             <li>
                                 Assets/Positions - Recover 'PositionsTemplate.xlsx' and populate with your portfolio holdings. Any problems,
