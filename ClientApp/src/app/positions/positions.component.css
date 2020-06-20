@@ -6,6 +6,7 @@ header {
     color: white;
     width: 633px;
     height: 34px;
+    margin-top: 3px;
 }
 
 ul {
@@ -17,11 +18,8 @@ ul {
 #gridPositions {
     width: 635px;
     height: 400px;
-    /*height: 900px;*/
 }
 .btn.btn-link{
     font-size: 15px;
 }
-/*.ag-cell-edit-input { // doesn't work for dropdown width
-    width: 70px;
-}*/
+
