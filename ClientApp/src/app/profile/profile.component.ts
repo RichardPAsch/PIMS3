@@ -40,11 +40,11 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
         divYield: new FormControl(0, [Validators.required, Validators.min(0.5), Validators.max(45), Pims3Validations.isNumberValidator()]),
         tickerDesc: new FormControl('', [Validators.required, Validators.maxLength(50)]),
         divFreq: new FormControl('', [Validators.required, Validators.maxLength(1), Pims3Validations.divFreqValidator()]),
-        peRatio: new FormControl(1, [Validators.min(1), Pims3Validations.isNumberValidator()]),
-        eps: new FormControl(1, [Validators.min(0.25), Pims3Validations.isNumberValidator()]),
-        unitPrice: new FormControl(0, [Validators.required, Validators.min(0.50), Pims3Validations.isNumberValidator()]),
-        divPayMonths: new FormControl('1', [Pims3Validations.divPayMonthsValidator(), Validators.maxLength(8)]),
-        divPayDay: new FormControl(0, [Validators.required, Validators.min(1), Validators.max(31)])
+        peRatio: new FormControl(0, [Validators.min(1), Pims3Validations.isNumberValidator()]),
+        eps: new FormControl(0, [Validators.min(0.25), Pims3Validations.isNumberValidator()]),
+        unitPrice: new FormControl(1.00, [Validators.required, Validators.min(0.50), Pims3Validations.isNumberValidator()]),
+        divPayMonths: new FormControl('1,3,6,9', [Pims3Validations.divPayMonthsValidator(), Validators.maxLength(8)]),
+        divPayDay: new FormControl('25', [Validators.required, Validators.min(1), Validators.max(31)])
     });
     assetProfileFreqAndMonths: any;
 
