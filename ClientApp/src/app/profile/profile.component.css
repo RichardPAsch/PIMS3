@@ -3,22 +3,33 @@
 }
 
 #tickerSymbol {
+    width: 95px;
+}
+
+ #divYield, #peRatio {
+    width: 60px;
+}
+ #eps{
+     width: 66px;
+ }
+#divRate {
+    width: 66px;
+}
+#divPayMonths{
+    width: 86px;
+    margin-left: -14px;
+}
+
+#divPayDay {
+    width: 45px;
+    margin-left: -2px;
+}
+
+#divFreq {
     width: 71%;
 }
-
- #divYield, #peRatio, #eps {
-    width: 50%;
-}
-#divRate, #divPayMonths, #peRatio {
-    width: 90px;
-}
-
-#divPayDay  {
-    width: 70px;
-}
-
-#divFreq, #unitPrice {
-    width: 71%;
+#unitPrice{
+    width:73px;
 }
 
 .panel .panel-default { /* adjust height as new fileds are added.*/
@@ -31,7 +42,8 @@
 }
 
 #tickerDesc {
-    width: 727px;
+    width: 468px;
+    margin-left: -50px;
 }
 
 #uiView {
@@ -51,6 +63,7 @@ header {
     color: white;
     width: 633px;
     height: 34px;
+    margin-top: 3px;
 }
 
 ul {
@@ -63,24 +76,28 @@ ul {
     background-color: #66A3FF;
     color: white;
 }
+#btnProfile{
+    width: 115px;
+    margin-left: -30px;
+}
+#btnSavedProfile{
+    width: 147px;
+}
 
 #lastUpdate {
     float: right;
     font-weight: bold;
+    padding-right: 7px;
+    font-size: 15px;
 }
 
 #btnNewProfile {
-    margin-left: 68px;
-    width: 150px;
+    width: 122px;
 }
 
 #btnUpdateProfile {
-    margin-left: 62px;
+    margin-left: -11px;
     margin-right: 20px;
-}
-
-#btnProfile {
-    margin-right: 10px;
 }
 
 #btnSavedProfile {
@@ -93,5 +110,29 @@ ul {
     padding:10px;
     margin-bottom: 1px;
 }
+.form-group{
+    margin-top: -49px;
+}
+#peRatio{
+    margin-left: 14px;
+}
+#peDiv{
+    padding-left: 0px;
+}
+#peLbl{
+    padding-right:0px;
+}
+.jumbotron{
+    height: 270px;
+    margin-top: -6px;
+}
+#payDayLbl{
+    margin-left: -47px;
+    padding-right: 82px;
+}
+label{
+    padding-top: 6px;
+}
+
 
 
