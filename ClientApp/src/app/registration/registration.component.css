@@ -1,37 +1,45 @@
 label{
-    padding-top: 8px;
+    padding-top: 6px;
 }
 input {
     background-color: lightgoldenrodyellow;
 }
 h3{
-    margin-top: 4px;
+    margin-top: -20px;
 }
 .input-group-addon {
     background-color: #e1e5ed;
 }
 #registrationHdr {
     color: #337AB7;
-    margin-left: -149px;
+    text-align: center;
 }
 #divPwrd{
     padding-left: 21px;
     color: orangered;
 }
 div.jumbotron {
-    margin-top: -20px;
-    height: 751px;
+    margin-top: 16px;
+    height: 426px;
     margin-bottom: 0;
-    width: 800px;
-}
-#fname, #lname, #uname, #pwrd{
-    margin-top: -38px;
-    margin-left: 100px;
-}
-label[_ngcontent-ng-cli-universal-c3] {
-    padding-top: 1px;
+    width: 634px;
 }
 #cancel{
-    margin-top: -65px;
-    margin-left: 239px;
+    margin-top: 51px;
+    margin-left: 70px;
+}
+header {
+    background-color: #222;
+    padding: 5px;
+    text-align: center;
+    font-size: 17px;
+    color: white;
+    width: 633px;
+    height: 34px;
+    margin-top: -19px;
+}
+#btnRegistration{
+    margin-top: 50px;
+    margin-left: -43px;
+    width: 205px;
 }
