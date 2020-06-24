@@ -30,6 +30,8 @@ import { ErrorService } from '../app/shared/error.service';
 import { ErrorHandler } from '@angular/core';
 import { AlertComponent } from './alert/alert.component';
 import { BaseUnsubscribeComponent } from './base-unsubscribe/base-unsubscribe.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { CollapseModule } from 'ngx-bootstrap/collapse';
 
 
 /* Notes:
@@ -66,6 +68,8 @@ import { BaseUnsubscribeComponent } from './base-unsubscribe/base-unsubscribe.co
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
+    BrowserAnimationsModule,
+    CollapseModule,
       RouterModule.forRoot([
         // Access to a route is controlled via adding 'AuthorizationGuard' to canActivate property array. The route guards
         // in the array are run by Angular to decide if the route can be "activated". If all of the route
