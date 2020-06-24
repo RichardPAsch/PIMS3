@@ -231,3 +231,8 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+
+# Remove, not in previous version ?
+# /ClientApp/5.0.0
+# /ClientApp/browserslist
+# /ClientApp/src/app/error-logging/logException.js.map
