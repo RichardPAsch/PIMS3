@@ -92,9 +92,8 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
                             else {
                                 //API returns unsuccessful response status codes, e.g., 404, 500 etc.
                                 let ticker: string = selectedData[gridRow].ticker;
-                                this.alertSvc.warn("Unable to process income projection for '" + ticker.toUpperCase() + "'" + " due to :"
-                                    + "'" + apiErr + "'"
-                                    + ". Please check ticker validity.");
+                                this.alertSvc.warn("Unable to process income projection for '" + ticker.toUpperCase() + "'" + ". No "
+                                    + "profile data was found. Please check ticker validity via 'Asset Profile'.");
                             }
                         }
                     ) // end subscribe
