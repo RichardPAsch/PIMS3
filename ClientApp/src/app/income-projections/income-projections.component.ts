@@ -26,7 +26,7 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
 
     
     columnDefs = [
-        { headerName: "Ticker", field: "ticker", sortable: true, filter: true, checkboxSelection: true, width: 100, valueFormatter: upperCaseFormatter },
+        { headerName: "Ticker", field: "ticker", sortable: true, filter: true, checkboxSelection: true, width: 108, valueFormatter: upperCaseFormatter },
         { headerName: "Capital ($)", field: "capital", width: 110, type: "numericColumn" },
         { headerName: "Price( $)", field: "unitPrice", width: 100, type: "numericColumn" },
         {
@@ -71,35 +71,51 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
                         dividendRate: selectedData[gridRow].dividendRate,
                         dividendYield: selectedData[gridRow].dividendYield > 0 ? selectedData[gridRow].dividendYield : 0
                     };
-                    profiles.push(this.initializeGridModel(manualProfile, selectedData[gridRow].capital));
+                    profiles.push(this.calculateProjections(manualProfile, selectedData[gridRow].capital, false));
                     // Last row ?
                     if (gridRow == selectedData.length - 1 )
                         this.agGrid.api.setRowData(profiles);
                 } else {
-                    this.profileSvc.getProfileData(selectedData[gridRow].ticker)
-                        .retry(2)     // Retrying request in case of transient errors, e.g, slow network, no internet access.
-                        // Ensure no memory leaks via 'BaseUnsubscribeComponent'; 'takeUntil' MUST be last operator within pipe().
+                    // For efficiency, we'll check for CUSTOM profile(s) before invoking HTTP service call for NYSE profile.
+                    let loggedInvestor = JSON.parse(sessionStorage.getItem('currentInvestor'));
+                    this.profileSvc.getProfileDataViaDb(selectedData[gridRow].ticker, loggedInvestor.username)
+                        .retry(2)
                         .pipe(takeUntil(this.getUnsubscribe()))
-                        .subscribe(responseProfile => {
-                            profiles.push(this.initializeGridModel(responseProfile, selectedData[gridRow].capital));
-                            this.agGrid.api.setRowData(profiles);
+                        .subscribe(customProfileResponse => {
+                            if (customProfileResponse != null) {
+                                profiles.push(this.calculateProjections(customProfileResponse[0], selectedData[gridRow].capital, true));
+                                this.agGrid.api.setRowData(profiles);
+                            } else {
+                                this.getUnsubscribe();
+                                this.profileSvc.getProfileData(selectedData[gridRow].ticker)
+                                    .retry(2)
+                                    .pipe(takeUntil(this.getUnsubscribe()))
+                                    .subscribe(responseProfile => {
+                                        profiles.push(this.calculateProjections(responseProfile, selectedData[gridRow].capital, false));
+                                        this.agGrid.api.setRowData(profiles);
+                                    },
+                                    (apiErr: HttpErrorResponse) => {
+                                        if (apiErr.error instanceof Error) {
+                                            this.alertSvc.error("Error processing income projection(s), due to network error. Please try again later.");
+                                        }
+                                        else {
+                                            this.alertSvc.warn("No NYSE, nor custom Profile data was found for 1 or more entered ticker(s). Please recheck ticker validity.")
+                                        }
+                                    } 
+                                );
+                            }
                         },
                         (apiErr: HttpErrorResponse) => {
                             if (apiErr.error instanceof Error) {
                                 // Client-side or network error encountered.
-                                this.alertSvc.error("Error processing income projection(s), due to network error. Please try again later.");
-                            }
-                            else {
-                                //API returns unsuccessful response status codes, e.g., 404, 500 etc.
-                                let ticker: string = selectedData[gridRow].ticker;
-                                this.alertSvc.warn("Unable to process income projection for '" + ticker.toUpperCase() + "'" + ". No "
-                                    + "profile data was found. Please check ticker validity via 'Asset Profile'.");
+                                this.alertSvc.error("Error processing income projection(s) for custom Profile due to network error. Please try again later.");
                             }
                         }
-                    ) // end subscribe
-                }
+
+                    )  // line 84 subscribe
+                }      // line 78 else
             }
-        } // end for
+        }              // end for
     }
 
 
@@ -114,39 +130,50 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
     }
 
    
-    initializeGridModel(recvdProfile: any, capitalToInvest: number): ProjectionProfile {
+    calculateProjections(recvdProfile: any, capitalToInvest: number, isCustomProfile: boolean): ProjectionProfile {
 
-        // Using specifically created 'ProjectionProfile' to accommodate projectedIncome for grid purposes, as
-        // income projection is not a 'Profile.cs' attribute.
+        // 'ProjectionProfile' created to accommodate projectedIncome for grid purposes, as income projection
+        //  is not a 'Profile.cs' attribute.
         let profileRecord = new ProjectionProfile();
+        let calculatedShares: number = +(capitalToInvest / recvdProfile.unitPrice).toFixed(2);
+        let calculatedAnnualizedRate: number = 0;
+        let calculatedMonthlyRate: number = 0;
+               
         profileRecord.ticker = recvdProfile.tickerSymbol;
         profileRecord.capital = capitalToInvest;
         profileRecord.unitPrice = recvdProfile.unitPrice;
+        // Rate recv'd via Tiingo is per frequency of dividend distributions.
         profileRecord.dividendRate = recvdProfile.dividendRate;
         profileRecord.dividendYield = recvdProfile.dividendYield;
-        // dividendFreq == undefined in manual override scenarios.
+        // Trap for possible undefined dividendFreq in manual override scenarios.
         profileRecord.dividendFreq = recvdProfile.dividendFreq == undefined ? "M" : recvdProfile.dividendFreq;
 
-        let calculatedIncome = ((capitalToInvest / profileRecord.unitPrice) * profileRecord.dividendRate);
+       
+        if (isCustomProfile) {
+            profileRecord.projectedMonthlyIncome = +(calculatedShares * (profileRecord.dividendRate/12)).toFixed(2);
+        } else {
+            switch (profileRecord.dividendFreq) {
+                case "Q":
+                    calculatedAnnualizedRate = +(profileRecord.dividendRate * 4).toFixed(4);
+                    break;
+                case "S":
+                    calculatedAnnualizedRate = +(profileRecord.dividendRate * 2).toFixed(4);
+                    break;
+                case "A":
+                    calculatedAnnualizedRate = +(profileRecord.dividendRate * 1).toFixed(4);
+                    break;
+                case "M":
+                    calculatedAnnualizedRate = +(profileRecord.dividendRate * 12).toFixed(4);
+                    break;
+            }
 
-        switch (profileRecord.dividendFreq) {
-            case "Q":
-                profileRecord.projectedMonthlyIncome = +(calculatedIncome / 3).toFixed(2);
-                break;
-            case "S":
-                profileRecord.projectedMonthlyIncome = +(calculatedIncome / 6).toFixed(2);
-                break;
-            case "A":
-                profileRecord.projectedMonthlyIncome = +(calculatedIncome / 12).toFixed(2);
-                break;
-            case "M":
-                profileRecord.projectedMonthlyIncome = +calculatedIncome.toFixed(2);
-                break;
+            calculatedMonthlyRate = +(calculatedAnnualizedRate / 12).toFixed(4);
+            profileRecord.projectedMonthlyIncome = +(calculatedShares * calculatedMonthlyRate).toFixed(2);
         }
        
         return profileRecord;
     };
-    
+
 }
 
 function upperCaseFormatter(valueToFormat) {
