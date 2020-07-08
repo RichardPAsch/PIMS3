@@ -6,7 +6,7 @@
     <li>'Get Saved Profile' - Fetch saved custom profile (view/edit).</li>
     <li>'Update Profile' - Update saved custom profile (dividend frequency and/or months paid).</li>
     <li>'Create Profile' - Create/Save a custom profile <em>if</em> data is unavailable via 'Get Profile'. </li>
-    <li>*Note* - Custom profiles are read/write accessible & unique to each investor. </li>
+    <li>*Note* - Custom profiles are read/write  & require an annualized div rate. </li>
 </ul>
 
 <!-- Legend for control error-validation activation:
@@ -30,9 +30,7 @@
             <form class="form-horizontal ng-pristine ng-valid" role="form" [formGroup]="assetProfileForm">
                 <br/>
                 <div class="jumbotron">
-                    <!--NEW CODE !-->
                     <div class="form-group">
-
                         <div class="row">
                             <label style="vertical-align:middle" class="col-sm-2 control-label" for="tickerSymbol">Ticker:</label>
                             <div class="col-sm-3">
@@ -47,7 +45,7 @@
                         <div class="row">
                             <label id="peLbl" class="col-sm-2 control-label" for="peRatio">P/E Ratio :</label>
                             <div id="peDiv" class="col-sm-2">
-                                <input class="form-control" formControlName="peRatio" id="peRatio" [readonly]="isReadOnly">
+                                <input class="form-control" formControlName="peRatio" id="peRatio" [readonly]=isReadOnly>
                                 <div *ngIf="!btnNewProfileSubmitted && formFields.peRatio.invalid && (formFields.peRatio.dirty)" class="alert alert-danger">
                                     <div *ngIf="formFields.peRatio.errors.min"> Minimum allowed P/E: 1.00.</div>
                                     <div *ngIf="formFields.peRatio.errors.isNumber"> Invalid entry.</div>
@@ -56,7 +54,7 @@
 
                             <label class="col-sm-2 control-label" for="eps">EPS ($):</label>
                             <div class="col-sm-2">
-                                <input class="form-control" formControlName="eps" id="eps" [readonly]="isReadOnly">
+                                <input class="form-control" formControlName="eps" id="eps"  [readonly]=isReadOnly>
                                 <div *ngIf="!btnNewProfileSubmitted && formFields.eps.invalid && (formFields.eps.dirty)" class="alert alert-danger">
                                     <div *ngIf="formFields.eps.errors.min"> Minimum allowed EPS: 0.25.</div>
                                     <div *ngIf="formFields.eps.errors.isNumber"> Invalid entry.</div>
@@ -65,7 +63,7 @@
 
                             <label class="col-sm-2 control-label" for="unitPrice">Price ($):</label>
                             <div class="col-sm-2">
-                                <input class="form-control" formControlName="unitPrice" id="unitPrice" [readonly]="isReadOnly">
+                                <input class="form-control" formControlName="unitPrice" id="unitPrice"  [readonly]=isReadOnly>
                                 <div *ngIf="!btnNewProfileSubmitted && formFields.unitPrice.invalid && (formFields.unitPrice.dirty)" class="alert alert-danger">
                                     <div *ngIf="formFields.unitPrice.errors.min"> Minimum allowed price: 0.50.</div>
                                     <div *ngIf="formFields.unitPrice.errors.isNumber"> Invalid entry.</div>
@@ -76,7 +74,7 @@
                         <div class="row">
                             <label class="col-sm-3 control-label" for="tickerDesc">Description:</label>
                             <div class="col-sm-8">
-                                <input class="form-control" id="tickerDesc" formControlName="tickerDesc" [readonly]="isReadOnly" maxlength="50" placeholder={{defaultTickerDesc}}>
+                                <input class="form-control" id="tickerDesc" formControlName="tickerDesc"  [readonly]=isReadOnly maxlength="50" placeholder={{defaultTickerDesc}}>
                                 <div *ngIf="!btnNewProfileSubmitted && formFields.tickerDesc.invalid && (formFields.tickerDesc.dirty)" class="alert alert-danger">
                                     <div *ngIf="formFields.tickerDesc.errors.maxlength"> Maximum length for symbol: 50 characters.</div>
                                     <div *ngIf="formFields.tickerDesc.errors.required"> Ticker description required.</div>
@@ -91,7 +89,7 @@
                         <div class="row">
                             <label class="col-sm-2 control-label" for="divYield">Yield (%):</label>
                             <div class="col-sm-2">
-                                <input class="form-control" formControlName="divYield" id="divYield" [readonly]="isReadOnly">
+                                <input class="form-control" formControlName="divYield" id="divYield"  [readonly]=isReadOnly>
                                 <div *ngIf="!btnNewProfileSubmitted && formFields.divYield.invalid && (formFields.divYield.dirty)" class="alert alert-danger">
                                     <div *ngIf="formFields.divYield.errors.max"> Maximum allowed yield: 50.</div>
                                     <div *ngIf="formFields.divYield.errors.min"> Minimum allowed yield: 0.5.</div>
@@ -102,7 +100,7 @@
 
                             <label class="col-sm-2 control-label" for="divRate">Rate ($):</label>
                             <div class="col-sm-2">
-                                <input class="form-control" formControlName="divRate" id="divRate" [readonly]="isReadOnly">
+                                <input class="form-control" formControlName="divRate" id="divRate"  [readonly]=isReadOnly>
                                 <div *ngIf="!btnNewProfileSubmitted && formFields.divRate.invalid && (formFields.divRate.dirty)" class="alert alert-danger">
                                     <div *ngIf="formFields.divRate.errors.max"> Maximum allowed rate: 30.</div>
                                     <div *ngIf="formFields.divRate.errors.min"> Minimum allowed rate: 0.001.</div>
@@ -124,7 +122,7 @@
                         <div class="row">
                             <label class="col-sm-2 control-label" for="divFreq">Frequency:</label>
                             <div class="col-sm-3">
-                                <input class="form-control" (blur)="enableDisableDivPayMonths()" oninput="this.value = this.value.toUpperCase()" id="divFreq" formControlName="divFreq" placeholder="A,S,Q,M" data-ng-model="vm.assetDivFreq" [readonly]="isReadOnly">
+                                <input class="form-control" (blur)="enableDisableDivPayMonths()" oninput="this.value = this.value.toUpperCase()" id="divFreq" formControlName="divFreq" placeholder="A,S,Q,M" data-ng-model="vm.assetDivFreq"  [readonly]=isReadOnly>
                                 <div *ngIf="!btnNewProfileSubmitted && formFields.divFreq.invalid && (formFields.divFreq.dirty)" class="alert alert-danger">
                                     <div *ngIf="formFields.divFreq.errors.maxlength"> Maximum allowed length for frequency: 1 character.</div>
                                     <div *ngIf="formFields.divFreq.errors.required"> Frequency required.</div>
