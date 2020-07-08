@@ -30,8 +30,7 @@ export class ProfileService {
         return this.http.get<Profile>(webApiUri);
     }
 
-
-    getProfileDataViaDb(ticker: string, loginName: string): Observable<boolean> {
+    getProfileDataViaDb(ticker: string, loginName: string): Observable<Profile> {
 
         let webApiUri = this.baseUrl + "/api/Profile/" + ticker + "/" + true + "/" + loginName;
         return this.http.get<any>(webApiUri);
