@@ -5,7 +5,6 @@ import { first } from 'rxjs/operators';
 import { AuthenticationService } from '../shared/authentication.service';
 import { InvestorService } from '../shared/investor.service';
 import { Pims3Validations } from '../shared/pims3-validations';
-import { HttpErrorResponse } from '@angular/common/http';
 import { AlertService } from '../shared/alert.service';
 import { takeUntil } from 'rxjs/operators';
 import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
