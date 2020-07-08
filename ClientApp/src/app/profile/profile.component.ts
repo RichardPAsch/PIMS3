@@ -23,9 +23,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
         this.investor = JSON.parse(sessionStorage.getItem('currentInvestor')); 
     }
 
-    // For simplicity, we'll default 'divPayMonths' to '1' (vs '0') upon initialization, to avoid an invalid assetProfileForm  
-    // that would result from Pims3Validations.divPayMonthsValidator(). Validation normally performed via
-    // Pims3Validations.areDivMonthsAndDivFrequencyReconciled() prior to persistence.
+    // divPayMonthsValidator() validation normally performed via Pims3Validations.areDivMonthsAndDivFrequencyReconciled() prior to persistence.
     defaultTickerDesc: string = "NYSE description - 50 characters max.";
     investor: any;
     date1 = new Date();
@@ -36,15 +34,15 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
     assetProfile: Profile = new Profile();
     assetProfileForm = new FormGroup({
         ticker: new FormControl('', [Validators.required, Validators.maxLength(6)]),
-        divRate: new FormControl(0, [Validators.required, Validators.min(0.001), Validators.max(30.00), Pims3Validations.isNumberValidator()]),
-        divYield: new FormControl(0, [Validators.required, Validators.min(0.5), Validators.max(45), Pims3Validations.isNumberValidator()]),
+        divRate: new FormControl(0.001, [Validators.required, Validators.min(0.001), Validators.max(30.00), Pims3Validations.isNumberValidator()]),
+        divYield: new FormControl(0.5, [Validators.required, Validators.min(0.5), Validators.max(45), Pims3Validations.isNumberValidator()]),
         tickerDesc: new FormControl('', [Validators.required, Validators.maxLength(50)]),
         divFreq: new FormControl('', [Validators.required, Validators.maxLength(1), Pims3Validations.divFreqValidator()]),
-        peRatio: new FormControl(0, [Validators.min(1), Pims3Validations.isNumberValidator()]),
-        eps: new FormControl(0, [Validators.min(0.25), Pims3Validations.isNumberValidator()]),
-        unitPrice: new FormControl(1.00, [Validators.required, Validators.min(0.50), Pims3Validations.isNumberValidator()]),
+        peRatio: new FormControl(1, [Validators.min(1), Pims3Validations.isNumberValidator()]),
+        eps: new FormControl(0, [Validators.min(0), Pims3Validations.isNumberValidator()]),
+        unitPrice: new FormControl(0.01, [Validators.required, Validators.min(0.01), Pims3Validations.isNumberValidator()]),
         divPayMonths: new FormControl('1,3,6,9', [Pims3Validations.divPayMonthsValidator(), Validators.maxLength(8)]),
-        divPayDay: new FormControl('25', [Validators.required, Validators.min(1), Validators.max(31)])
+        divPayDay: new FormControl('15', [Validators.required, Validators.min(1), Validators.max(31)])
     });
     assetProfileFreqAndMonths: any;
 
@@ -90,7 +88,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
 
 
     getProfile(): void {
-        // ** Currently using 3rd party API (Tiingo) for Profile data fetches. **
+        // ** Currently using 3rd party API (Tiingo) service for non-custom Profile data fetches. **
 
         // Obtain Profile basics.
         let profileData: any = this.profileSvc.getProfileData(this.assetProfileForm.controls["ticker"].value);
@@ -106,53 +104,57 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
         combined
             .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(profileAndDivInfoArr => {
-            let profileElement: any = profileAndDivInfoArr[0];
-            // Scenario may arise where we have a valid ticker, but with incomplete or non-existent pricing info: (profileAndDivInfoArr[1]).
-            if (profileElement.tickerSymbol == null || profileAndDivInfoArr[1] == null) {
-                this.alertSvc.warn("Insufficient, or no web Profile data found for: " + "'" +
-                    this.assetProfileForm.controls["ticker"].value + "'." +
-                    " Please check ticker validity.");
-                this.initializeView(null, true);
-                return;
-            }
-
-            let model: Profile = this.mapResponseToModel(profileElement);
-
-            let dividendElement: any = profileAndDivInfoArr[1];
-            if (model.divPayMonths == "0" || model.divPayMonths == null)
-                model.divPayMonths = dividendElement.DM;
-
-            if (model.divFreq == "" || model.divFreq == null || model.divFreq == "NA")
-                model.divFreq = dividendElement.DF;
-
-            this.initializeView(model, false);
-            this.btnUpdateProfileIsDisabled = true;
-            this.isReadOnlyPayMonthsAndDay = false;
-        },
-            () => {
-                if (this.assetProfileForm.controls["ticker"].value == "") {
-                    this.alertSvc.warn("A ticker symbol entry is required.");
-                    this.btnGetProfileIsDisabled = true;
+                let profileElement: any = profileAndDivInfoArr[0];
+                // Scenario may arise where we have a valid ticker, but with incomplete or non-existent pricing info: (profileAndDivInfoArr[1]).
+                if (profileElement.tickerSymbol == null || profileAndDivInfoArr[1] == null) {
+                    this.alertSvc.warn("Insufficient, or no web Profile data found for: " + "'" +
+                        this.assetProfileForm.controls["ticker"].value + "'." +
+                        " Please check ticker validity.");
+                    this.initializeView(null, true);
                     return;
                 }
 
-                let isNewProfile = confirm("No data found via web for: \n" + this.assetProfileForm.controls["ticker"].value + ".\nCreate new Profile?");
-                if (isNewProfile) {
-                    this.isReadOnly = false;
-                    this.isReadOnlyPayMonthsAndDay = false;
-                    this.btnCreateProfileIsDisabled = false;
-                    this.btnUpdateProfileIsDisabled = true;
-                } else {
-                    this.initializeView(null, true);
-                    this.cancelledNewProfileCreation = true;
+                let model: Profile = this.mapResponseToModel(profileElement);
+
+                let dividendElement: any = profileAndDivInfoArr[1];
+                if (model.divPayMonths == "0" || model.divPayMonths == null)
+                    model.divPayMonths = dividendElement.DM;
+
+                if (model.divFreq == "" || model.divFreq == null || model.divFreq == "NA")
+                    model.divFreq = dividendElement.DF;
+
+                this.initializeView(model, false);
+                this.btnUpdateProfileIsDisabled = true;
+                this.isReadOnlyPayMonthsAndDay = false;
+
+                // All input fields shoud be read-only, except for 'divPayDay'.
+                this.isReadOnly = true;
+            },
+                () => {
+                    if (this.assetProfileForm.controls["ticker"].value == "") {
+                        this.alertSvc.warn("A ticker symbol entry is required.");
+                        this.btnGetProfileIsDisabled = true;
+                        return;
+                    }
+
+                    let isNewProfile = confirm("No data found via web for: \n" + this.assetProfileForm.controls["ticker"].value + ".\nCreate new Profile?");
+                    if (isNewProfile) {
+                        this.isReadOnly = false;
+                        this.isReadOnlyPayMonthsAndDay = false;
+                        this.btnCreateProfileIsDisabled = false;
+                        this.btnUpdateProfileIsDisabled = true;
+                        this.divPayMonthsIsDisabled = false;
+                    } else {
+                        this.initializeView(null, true);
+                        this.cancelledNewProfileCreation = true;
+                    }
+                    this.btnGetProfileIsDisabled = true;
+                    this.btnGetDbProfileIsDisabled = true;
                 }
-                this.btnGetProfileIsDisabled = true;
-                this.btnGetDbProfileIsDisabled = true;
-            }
-        );
+             );
     }
 
-
+    // Custom profile retreival.
     getDbProfile(): void {
         this.profileSvc.getProfileDataViaDb(this.assetProfileForm.controls["ticker"].value, this.investor.username)
             .retry(2)
@@ -169,6 +171,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
                     this.btnCreateProfileIsDisabled = true;
                     this.btnGetProfileIsDisabled = true;
                     this.btnGetDbProfileIsDisabled = true;
+                    this.divPayMonthsIsDisabled = false; 
                 }
             },
                 () => {
@@ -204,9 +207,10 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
 
     createProfile(): void {
 
-        // Method applicable to creating a custom Profile.
+        // Applicable to creating a custom Profile.
         let dbProfilePost$;
         let freqAndMonthsReconcile: boolean;
+
       
         if (this.assetProfileForm.invalid) {
             return;
@@ -293,7 +297,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
             dbProfileGet$ = this.profileSvc.getProfileDataViaDb(profileToUpdate.tickerSymbol, this.investor.username);
             dbProfilePut$ = this.profileSvc.updateProfile(profileToUpdate);
         } catch (e) {
-            this.alertSvc.error("Error obtaining existing Profile for : " + "'" + profileToUpdate.tickerSymbol + "'.");
+            this.alertSvc.error("Error updating existing Profile for : " + "'" + profileToUpdate.tickerSymbol + "'.");
         }
 
         // RxJS : tap() - returned value(s) are untouchable, as opposed to edit/transform capability available via map().
