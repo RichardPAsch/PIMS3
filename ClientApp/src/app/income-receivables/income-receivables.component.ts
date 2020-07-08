@@ -7,6 +7,7 @@ import { AlertService } from '../shared/alert.service';
 import { takeUntil } from 'rxjs/operators';
 import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
+
 @Component({
   selector: 'app-income-receivables',
   templateUrl: './income-receivables.component.html',
@@ -97,8 +98,7 @@ export class IncomeReceivablesComponent extends BaseUnsubscribeComponent impleme
 
         return mappedReceivables;
     }
-
-
+    
     public processPositionUpdates() {
 
         // Capture all data, positionId, monthDue, etc., pertaining to selection(s).
@@ -133,8 +133,7 @@ export class IncomeReceivablesComponent extends BaseUnsubscribeComponent impleme
                 }
             )
     }
-
-
+    
     private calculateDelinquentCount(searchPositions: any): number {
 
         let pastDueCount: number = 0;
@@ -146,5 +145,16 @@ export class IncomeReceivablesComponent extends BaseUnsubscribeComponent impleme
         }
         return pastDueCount;
     }
+
+    // Commented for possible future use.
+    //private populateDaysOfMonth(): number[] {
+
+    //    let days = new Array<number>();
+
+    //    for (var i = 0; i < 31; i++) {
+    //        days.push(i + 1);
+    //    }
+    //    return days;
+    //}
 
 }
