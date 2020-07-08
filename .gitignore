@@ -236,3 +236,5 @@ _Pvt_Extensions
 # /ClientApp/5.0.0
 # /ClientApp/browserslist
 # /ClientApp/src/app/error-logging/logException.js.map
+/ClientApp/5.0.0
+/Logs/PIMS3_log_20200708.txt
