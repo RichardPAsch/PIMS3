@@ -248,12 +248,15 @@ namespace PIMS3.DataAccess.Profile
 
                         // Using '.Result' - results in synchronously reading the result.
                         string responseString = responseContent.ReadAsStringAsync().Result;
-
                         webResponse = responseString;
                     }
                     else
                     {
-                        Log.Warning("Error fetching Profile data via ProfileDataProcessing.FetchProfileViaWebSync().");
+                        if(response.ReasonPhrase == "Not Found") // 404
+                            Log.Warning("Error fetching Profile data via ProfileDataProcessing.FetchProfileViaWebSync(), due to " + response.ReasonPhrase);
+                        else
+                            Log.Warning("Non '404' (not found) error via ProfileDataProcessing.FetchProfileViaWebSync().");
+
                         return webResponse;
                     }
                 }
