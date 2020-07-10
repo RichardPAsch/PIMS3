@@ -24,10 +24,10 @@ a {
 }
 .jumbotron {
     /* 'Home - Login'  */
-    margin-top: -20px;  
+    margin-top: 2px;  
     margin-bottom: 0;
     width: 800px;
-    height: 746px;
+    height: 750px;
 }
 
 #nameDiv, #pwrdDiv{
