@@ -51,7 +51,7 @@ export class NavMenuComponent extends BaseUnsubscribeComponent implements OnInit
             .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(login => {
             if (login != "") {
-                this.nameDisplayed = "Welcome - " + login;
+                this.nameDisplayed = "Welcome,  " + login + ".";
                 this.showPasswordReset = true;
             }
         }); 
