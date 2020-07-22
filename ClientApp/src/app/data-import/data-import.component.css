@@ -61,9 +61,7 @@ ul {
     margin-bottom: 12px;
     font-size: 15px;
 }
-#lastLi {
-    margin-bottom: -53px;
-}
+
 .panel-default > .panel-heading {
     background-color: #3387c6;
     color: white;
@@ -71,6 +69,7 @@ ul {
 div.panel-heading{
     width: 627px;
     margin-left: -8px;
+    margin-top: -39px;
 }
 #dataTypeDiv{
     width: 616px;
