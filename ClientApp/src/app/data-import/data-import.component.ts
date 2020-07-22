@@ -137,10 +137,11 @@ export class DataImportComponent extends BaseUnsubscribeComponent {
 
         let msgContext: string = isRevenueData ? 'revenue' : 'position';
         return 'Unable to save submitted XLS/XLSX ' + msgContext + ' data. Please check file ' +
-            ' 1) column headings are correct and ordered, ' +
-            ' 2) columns contain valid data, ' +
-            ' 3) path is valid, OR ' +
-            ' 4) ticker symbols match appropriate existing account(s).';
+            ' 1) does not contain duplicate Position data, ' +
+            ' 2) column headings are correct and ordered, ' +
+            ' 3) columns contain valid data, ' +
+            ' 4) path is valid, OR ' +
+            ' 5) ticker symbols match appropriate existing account(s).';
     }
 
 }
