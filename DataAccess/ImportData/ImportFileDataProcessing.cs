@@ -32,13 +32,14 @@ namespace PIMS3.DataAccess.ImportData
 
         public DataImportVm SaveRevenue(DataImportVm importVmToUpdate, PIMS3Context _ctx, string investorId)
         {
-            // Processing includes:
+            //  Processing includes:
             //  1. persisting revenue,
-            //  2. persisting revenue delinquencies,  and
-            //  3. updating Positions.
+            //  2. persisting revenue delinquencies, and
+            //  3. updating Positions ("PymtDue") where applicable.
 
             ImportFileProcessing busLayerComponent = new ImportFileProcessing(importVmToUpdate, _ctx, null);
             IEnumerable<Income> revenueListingToSave;
+            PositionDataProcessing positionDataAccessComponent = new PositionDataProcessing(_ctx);
 
             if (busLayerComponent.ValidateVm())
             {
@@ -68,12 +69,14 @@ namespace PIMS3.DataAccess.ImportData
                         totalAmtSaved += record.AmountRecvd;
                     }
 
-                    // Returned values to caller.
+                    // Returned values to UI.
                     importVmToUpdate.AmountSaved = totalAmtSaved;
                     importVmToUpdate.RecordsSaved = recordsSaved;
 
-
-                    /* === Revenue delinquency processing === */
+                    // Update Positions. 
+                    positionDataAccessComponent.UpdatePositionPymtDueFlags(ExtractPositionIdsForPymtDueProcessing(revenueListingToSave), true);
+                    
+                    /* === Month-end delinquent revenue processing === */
 
                     // If at month end/beginning, we'll query Positions for any now delinquent income receivables via "PymtDue" flag.
                     // Any unpaid income receivables, those not marked as received via 'Income due', will STILL have their 'PymtDue' flag set as
@@ -84,7 +87,7 @@ namespace PIMS3.DataAccess.ImportData
                     // for necessary action.
                     if (DateTime.Now.Day <= 3 && DateTime.Now.DayOfWeek.ToString() != "Saturday" && DateTime.Now.DayOfWeek.ToString() != "Sunday")
                     {
-                        PositionDataProcessing positionDataAccessComponent = new PositionDataProcessing(_ctx); 
+                        //PositionDataProcessing positionDataAccessComponent = new PositionDataProcessing(_ctx); 
                         IQueryable<dynamic> filteredPositionAssetJoinData = positionDataAccessComponent.GetCandidateDelinquentPositions(investorId);
                         IList<DelinquentIncome> pastDueListing = new List<DelinquentIncome>();
                         string delinquentMonth = DateTime.Now.AddMonths(-1).Month.ToString().Trim();
@@ -106,7 +109,6 @@ namespace PIMS3.DataAccess.ImportData
                                                                                          && d.InvestorId == joinData.InvestorId
                                                                                          && d.MonthDue == delinquentMonth).Count();
                             }
-
                         
                             if (joinData.DividendFreq == "M")
                             {
