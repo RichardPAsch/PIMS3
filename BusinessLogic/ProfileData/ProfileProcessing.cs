@@ -15,13 +15,14 @@ namespace PIMS3.BusinessLogic.ProfileData
 
         public Profile BuildProfileForProjections(Profile profile, Data.PIMS3Context ctx)
         {
-            profileToBeInitialized = profile; // should now have DF :Yes!
+            profileToBeInitialized = profile; 
             var profileDataAccessComponent = new ProfileDataProcessing(ctx);
 
             // try-catch here, or done in data access component? 
             profileToBeInitialized = profileDataAccessComponent.BuildProfile(profile.TickerSymbol.Trim());
 
-            // Fetched dividend rate via 3rd party service is unreliable.
+            // Fetched dividend rate via 3rd party service is unreliable. Reinitializing frequency; needed.
+            profileToBeInitialized.DividendFreq = profile.DividendFreq; 
             CalculateDividendYield();
 
             return profileToBeInitialized;
