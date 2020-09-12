@@ -42,7 +42,6 @@ namespace PIMS3.Controllers
                 profileModel.DividendFreq = dividendFreqAndMonths["DF"];
 
                 Profile initializedProfile = profileBusLogicComponent.BuildProfileForProjections(profileModel, _dbCtx);
-                initializedProfile.DividendFreq = dividendFreqAndMonths["DF"];
 
                 return Ok(initializedProfile);
             }
