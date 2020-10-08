@@ -89,7 +89,7 @@ export class IncomeComponent extends BaseUnsubscribeComponent implements OnInit 
             cellStyle: { textAlign: "right" },
             cellRenderer: (data) => { return data.value ? (new Date(data.value)).toLocaleDateString() : ''; }
         },
-        { headerName: "Amount", field: "amountRecvd", width: 92, editable: true, sortable: true, resizable: true, cellStyle: { textAlign: "right" } },
+        { headerName: "Amount", field: "amountRecvd", valueFormatter: params => params.data.amountRecvd.toFixed(2), width: 92, editable: true, sortable: true, resizable: true, cellStyle: { textAlign: "right" } },
         { headerName: "IncomeId", field: "incomeId", width: 50, hide: true }
     ];
 
@@ -206,7 +206,7 @@ export class IncomeComponent extends BaseUnsubscribeComponent implements OnInit 
             modelRecord.dividendFreq = recvdRevenue[idx].dividendFreq;
             modelRecord.accountTypeDesc = recvdRevenue[idx].accountTypeDesc;
             modelRecord.dateRecvd = recvdRevenue[idx].dateRecvd;
-            modelRecord.amountRecvd = (recvdRevenue[idx].amountReceived).toFixed(2),  
+            modelRecord.amountRecvd = recvdRevenue[idx].amountReceived,
             modelRecord.incomeId = recvdRevenue[idx].incomeId;
 
             mappedRevenue.push(modelRecord);
@@ -246,5 +246,7 @@ export class IncomeComponent extends BaseUnsubscribeComponent implements OnInit 
         }
         return runningTotal;
     }
+
+    
 
 }
