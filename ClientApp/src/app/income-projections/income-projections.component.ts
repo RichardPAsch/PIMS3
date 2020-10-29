@@ -150,7 +150,7 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
 
        
         if (isCustomProfile) {
-            profileRecord.projectedMonthlyIncome = +(calculatedShares * (profileRecord.dividendRate/12)).toFixed(2);
+            profileRecord.projectedMonthlyIncome = +(calculatedShares * (profileRecord.dividendRate/12));
         } else {
             switch (profileRecord.dividendFreq) {
                 case "Q":
@@ -168,7 +168,11 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
             }
 
             calculatedMonthlyRate = +(calculatedAnnualizedRate / 12).toFixed(4);
-            profileRecord.projectedMonthlyIncome = +(calculatedShares * calculatedMonthlyRate).toFixed(2);
+            profileRecord.projectedMonthlyIncome = +(calculatedShares * calculatedMonthlyRate);
+
+            // Ensure 2 decimal formatting.
+            profileRecord.projectedMonthlyIncome = profileRecord.projectedMonthlyIncome.toFixed(2);
+
         }
        
         return profileRecord;
@@ -179,5 +183,7 @@ export class IncomeProjectionsComponent extends BaseUnsubscribeComponent impleme
 function upperCaseFormatter(valueToFormat) {
     return valueToFormat.data.ticker.toUpperCase();
 }
+
+
 
 
