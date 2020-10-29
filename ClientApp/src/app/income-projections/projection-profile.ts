@@ -7,7 +7,7 @@ export class ProjectionProfile {
     unitPrice: number;
     dividendRate: number;
     dividendYield: number;
-    projectedMonthlyIncome: number;
+    projectedMonthlyIncome: any; 
     dividendFreq: string;
     dividendPayMonths: string;
 
