@@ -2,7 +2,7 @@
     - Income due schedule for <em> {{currentMonth}} </em> -
 </header>
 <ul>
-    <li>Select [x] position(s) for updating as income received, before selecting "Update selection(s)".</li>
+    <li>Select [x] position(s) for updating as paid, prior to selecting "Mark selection(s) as paid".</li>
     <li>'Div.Day' : <em>approximate</em> day of the month income is due.</li>
     <li>'Month Due' :  includes any receipts in arrears.</li>
     <li>Receivable counts : Current:&nbsp;<strong>{{currentPositionCount|number}}</strong>&nbsp;Delinquent:&nbsp;<strong>{{delinquentPositionCount|number}}</strong></li>
@@ -18,5 +18,5 @@
     </ag-grid-angular>
 </p>
 <p>
-    <button id="btnReceivables" class="btn" (click)="processPositionUpdates()">Update selection(s)</button>
+    <button id="btnReceivables" class="btn" (click)="processPositionUpdates()">Mark selection(s) as paid</button>
  </p>
