@@ -41,6 +41,9 @@ namespace PIMS3.Controllers
             {
                 profileModel.DividendFreq = dividendFreqAndMonths["DF"];
 
+                if (!string.IsNullOrEmpty(dividendFreqAndMonths["DPD"]))
+                    profileModel.DividendPayDay = Convert.ToInt32(dividendFreqAndMonths["DPD"]);
+
                 Profile initializedProfile = profileBusLogicComponent.BuildProfileForProjections(profileModel, _dbCtx);
 
                 return Ok(initializedProfile);
