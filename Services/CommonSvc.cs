@@ -1,5 +1,6 @@
 ﻿using PIMS3.Data;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace PIMS3.Services
@@ -57,6 +58,26 @@ namespace PIMS3.Services
         public static string GenerateGuid()
         {
             return Guid.NewGuid().ToString();
+        }
+
+        public static int CalculateMedianValue(List<int> valuesList)
+        {
+            List<int> sortedValuesList = new List<int>(valuesList);
+            sortedValuesList.Sort();
+                        
+            if(sortedValuesList.Count() %2 == 0)
+            {
+                // Ex: 'PFXF' :  1, 1, 1, 1, 1, 1, 1, 2, 3, 3, 24, 30
+                double n1 = (sortedValuesList.ElementAt((sortedValuesList.Count / 2) - 1));
+                double n2 = sortedValuesList.ElementAt((sortedValuesList.Count / 2));
+
+                return Convert.ToInt32(Math.Round((n1 + n2) / 2));
+            }
+            else
+            {
+                return sortedValuesList.ElementAt((sortedValuesList.Count / 2));
+            }
+
         }
     }
 
