@@ -5,6 +5,7 @@ using System.Text;
 using Newtonsoft.Json.Linq;
 using System;
 using Serilog;
+using PIMS3.Services;
 
 
 namespace PIMS3.BusinessLogic.ProfileData
@@ -22,7 +23,8 @@ namespace PIMS3.BusinessLogic.ProfileData
             profileToBeInitialized = profileDataAccessComponent.BuildProfile(profile.TickerSymbol.Trim());
 
             // Fetched dividend rate via 3rd party service is unreliable. Reinitializing frequency; needed.
-            profileToBeInitialized.DividendFreq = profile.DividendFreq; 
+            profileToBeInitialized.DividendFreq = profile.DividendFreq;
+            profileToBeInitialized.DividendPayDay = profile.DividendPayDay;
             CalculateDividendYield();
 
             return profileToBeInitialized;
@@ -72,6 +74,8 @@ namespace PIMS3.BusinessLogic.ProfileData
                 return null;
             }
 
+            List<int> divPayoutDays = new List<int>(); 
+
             foreach (JObject objChild in orderedJsonTickerPriceData.Children<JObject>())
             {
                 // Loop will key in on "divCash" for gathering needed freq & month specs.
@@ -86,11 +90,14 @@ namespace PIMS3.BusinessLogic.ProfileData
                         {
                             divFreqCounter += 1;
                             oneYearDivPayMonths_1.Append(ExtractMonthFromDivPayDate(tempDate));
+                            divPayoutDays.Add(ExtractDivPayDay(tempDate));
                             oneYearDivPayMonths_1.Append(",");
                         }
                     }
                 }
             }
+
+            int medianDivPayoutDay = CommonSvc.CalculateMedianValue(divPayoutDays);
 
             if (oneYearDivPayMonths_1.Length == 0)
                 return null;
@@ -102,7 +109,13 @@ namespace PIMS3.BusinessLogic.ProfileData
             Dictionary<string, string> finalProfileSpecs = new Dictionary<string, string>();
             int monthsCount = oneYearDivPayMonths_3.Length;
 
-            if(monthsCount >= 3 && monthsCount <= 5)
+
+            /* == finalProfileSpecs Keys legend: ==
+                     "DF"(dividend frequency)
+                     "DM"(dividend months)
+                     "DPD"(dividend payout day) 
+             */
+            if (monthsCount >= 3 && monthsCount <= 5)
             {
                 // Due to possible inconsistent number of income receipts made within the last 12 month price history obtained
                 // from our 3rd party service (Tiingo), we'll account for this by designating as (Q)uarterly dividend frequency.
@@ -123,6 +136,9 @@ namespace PIMS3.BusinessLogic.ProfileData
                 finalProfileSpecs.Add("DM", oneYearDivPayMonths_2);
             }
 
+            if(medianDivPayoutDay > 0)
+                finalProfileSpecs.Add("DPD", medianDivPayoutDay.ToString());
+
             return finalProfileSpecs;
         }
 
@@ -142,9 +158,11 @@ namespace PIMS3.BusinessLogic.ProfileData
         }
 
 
-       
-
-
+        private int ExtractDivPayDay(string sourceDate)
+        {
+            return Convert.ToDateTime(sourceDate).Day;
+        }
+        
 
     }
 }
