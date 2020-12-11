@@ -88,8 +88,10 @@ namespace PIMS3.Controllers
         {
             var profileDataAccessComponent = new ProfileDataProcessing(_dbCtx);
             bool isOkUpdate = profileDataAccessComponent.UpdateProfile(MapToProfile(editedProfile));
+            if(isOkUpdate)
+                Log.Information("Profile successfully updated for ticker: " + editedProfile.tickerSymbol);
 
-            return Ok(isOkUpdate);
+            return Ok(isOkUpdate); 
         }
 
 
