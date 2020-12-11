@@ -29,7 +29,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
     date1 = new Date();
     currentDateTime: string;
     isReadOnly: boolean = true;
-    isReadOnlyPayMonthsAndDay: boolean = false;
+    isReadOnlyPayMonthsAndDay: boolean = true;
     enteredTicker: string;
     assetProfile: Profile = new Profile();
     assetProfileForm = new FormGroup({
@@ -124,12 +124,14 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
                     model.divFreq = dividendElement.DF;
 
                 this.initializeView(model, false);
-                this.btnUpdateProfileIsDisabled = true;
-                this.isReadOnlyPayMonthsAndDay = false;
 
-                // All input fields shoud be read-only, except for 'divPayDay'.
+                // Allow investor to sync (update) existing local Profile with latest web-derived info.
+                this.btnUpdateProfileIsDisabled = false;  
+
+                // All input fields are read-only.
                 this.isReadOnly = true;
             },
+                // Exception/error response condition trapping.
                 () => {
                     if (this.assetProfileForm.controls["ticker"].value == "") {
                         this.alertSvc.warn("A ticker symbol entry is required.");
@@ -140,7 +142,6 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
                     let isNewProfile = confirm("No data found via web for: \n" + this.assetProfileForm.controls["ticker"].value + ".\nCreate new Profile?");
                     if (isNewProfile) {
                         this.isReadOnly = false;
-                        this.isReadOnlyPayMonthsAndDay = false;
                         this.btnCreateProfileIsDisabled = false;
                         this.btnUpdateProfileIsDisabled = true;
                         this.divPayMonthsIsDisabled = false;
@@ -295,20 +296,14 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
 
         try {
             dbProfileGet$ = this.profileSvc.getProfileDataViaDb(profileToUpdate.tickerSymbol, this.investor.username);
-            dbProfilePut$ = this.profileSvc.updateProfile(profileToUpdate);
-        } catch (e) {
-            this.alertSvc.error("Error updating existing Profile for : " + "'" + profileToUpdate.tickerSymbol + "'.");
-        }
 
-        // RxJS : tap() - returned value(s) are untouchable, as opposed to edit/transform capability available via map().
-        let combined = dbProfileGet$.pipe(
-            switchMap(profileInfo => {
-                return dbProfilePut$.pipe(
-                    tap(profileUpdate => {
-                        if (profileUpdate) {
-                            this.alertSvc.success("Existing Profile for " +
-                                "'" + profileInfo[0].tickerSymbol + "'" +
-                                " successfully updated.");
+            if (dbProfileGet$ != null) {
+                this.profileSvc.updateProfile(profileToUpdate)
+                    .retry(2)
+                    .pipe(takeUntil(this.getUnsubscribe()))
+                    .subscribe(updateResponse => {
+                        if (updateResponse) {
+                            this.alertSvc.success("Profile successfully updated for '" + profileToUpdate.tickerSymbol + "'.");
                             this.btnGetProfileIsDisabled = true;
                             this.btnGetDbProfileIsDisabled = true;
                             this.btnCreateProfileIsDisabled = true;
@@ -316,9 +311,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
                             this.btnUpdateProfileSubmitted = true;
                         }
                         else {
-                            this.alertSvc.error("Error updating existing local Profile at this time for " +
-                                "'" + profileInfo[0].tickerSymbol + "'." +
-                                "Please retry later.");
+                            this.alertSvc.error("Error updating profile for '" + profileToUpdate.tickerSymbol + "' at this time, please retry later.");
                             this.btnGetProfileIsDisabled = false;
                             this.btnGetDbProfileIsDisabled = true;
                             this.btnCreateProfileIsDisabled = true;
@@ -327,12 +320,13 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
                         }
                         this.initializeView(null, true);
                         this.btnUpdateProfileIsDisabled = true;
-                    })
-                );
-            })
-        );
+                    });
+            }
+            
+        } catch (e) {
+            this.alertSvc.error("Possible system or network error. Please contact support.");
+        }
 
-        combined.pipe(takeUntil(this.getUnsubscribe())).subscribe();
     }
 
        
