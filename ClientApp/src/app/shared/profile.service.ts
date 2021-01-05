@@ -30,6 +30,7 @@ export class ProfileService {
         return this.http.get<Profile>(webApiUri);
     }
 
+
     getProfileDataViaDb(ticker: string, loginName: string): Observable<Profile> {
 
         let webApiUri = this.baseUrl + "/api/Profile/" + ticker + "/" + true + "/" + loginName;
@@ -48,6 +49,13 @@ export class ProfileService {
 
         let webApiUri = this.baseUrl + "/api/Profile";
         return this.http.put<boolean>(webApiUri, partialProfileUpdate);
+    }
+
+
+    updatePortfolioProfiles(loginName: string): Observable<any> {
+
+        let webApiUri = this.baseUrl + "/api/Profile/" + loginName;
+        return this.http.put<boolean>(webApiUri, null); 
     }
 
 
