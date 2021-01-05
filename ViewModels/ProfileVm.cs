@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 
@@ -45,4 +46,33 @@ namespace PIMS3.ViewModels
         public decimal UnitPrice { get; set; }
         
     }
+
+
+
+    public class ProfileForUpdateVm
+    {
+        // Model for batch updating Profiles, based on income history.
+        public string ProfileId { get; set; }
+
+        public string TickerSymbol { get; set; }
+
+        public string DividendFreq { get; set; }
+
+        public string DividendMonths { get; set; }
+
+        public int DividendPayDay { get; set; }
+
+        public DateTime? LastUpdate { get; set; }
+
+        public List<Data.Entities.Profile> BatchProfilesList { get; set; }
+
+        public string ExceptionTickerSymbols { get; set; }
+
+        public bool UpdateHasErrors { get; set; }
+
+        
+
+    }
+
+
 }
