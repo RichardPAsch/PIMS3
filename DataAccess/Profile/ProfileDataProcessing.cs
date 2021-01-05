@@ -7,6 +7,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Serilog;
+using System.Collections.Generic;
+using PIMS3.Services;
 
 
 namespace PIMS3.DataAccess.Profile
@@ -43,6 +45,34 @@ namespace PIMS3.DataAccess.Profile
                 return dbProfile;
             }
 
+        }
+
+        private ProfileForUpdateVm[] FetchDBProfilesByInvestor(string currentInvestor)
+        {
+
+            // to be called by controller
+
+            if (currentInvestor == null || currentInvestor == string.Empty)
+                return null;
+
+            InvestorSvc service = new InvestorSvc(_ctx);
+            Data.Entities.Investor investor = service.GetByLogin(currentInvestor);
+
+            IQueryable<ProfileForUpdateVm> joinData = _ctx.Position.Where(p => p.PositionAsset.InvestorId == investor.InvestorId && p.Status == "A")
+                                                                   .Join(_ctx.Profile, p => p.PositionAsset.Profile.ProfileId,
+                                                                                      pr => pr.ProfileId,
+                                                                                      (position, profile) => new ProfileForUpdateVm
+                                                                                      {
+                                                                                          ProfileId = profile.ProfileId,
+                                                                                          TickerSymbol = profile.TickerSymbol,
+                                                                                          DividendFreq = profile.DividendFreq,
+                                                                                          DividendMonths = profile.DividendMonths,
+                                                                                          DividendPayDay = profile.DividendPayDay
+                                                                                      })
+                                                                   .OrderBy(results => results.TickerSymbol)
+                                                                   .AsQueryable();
+
+            return joinData.ToArray();
         }
 
 
@@ -369,6 +399,44 @@ namespace PIMS3.DataAccess.Profile
         }
 
 
+        public ProfilesUpdateSummaryResultModel BatchUpdateProfiles(string currentInvestor)
+        {
+            // Partially updates all investors' asset Profiles (freq, months, & payday), based on *12 month* revenue history.
+            int updateCount = 0;
+            IncomeData.IncomeDataProcessing incomeDataAccessComponent = new IncomeData.IncomeDataProcessing(_ctx);
+            CommonSvc svc = new CommonSvc(_ctx);
+            ProfilesUpdateSummaryResultModel results = new ProfilesUpdateSummaryResultModel();
+
+            ProfileForUpdateVm processedResults = incomeDataAccessComponent.Process12MosRevenueHistory(svc.GetInvestorIdFromInvestor(currentInvestor));
+            if (!processedResults.UpdateHasErrors)
+            {
+                List<Data.Entities.Profile> profilesToUpdate = processedResults.BatchProfilesList;
+                
+                try
+                {
+                    _ctx.UpdateRange(profilesToUpdate); 
+                    updateCount = _ctx.SaveChanges();  
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Error updating Profile(s) via ProfileDataProcessing.BatchUpdateProfiles(), due to :{0} '", ex.InnerException + "'");
+                    return null;
+                }
+            }
+            else
+            {
+                Log.Error("Error processing revenue history for dividend payment data, recorded via ProfileDataProcessing.BatchUpdateProfiles().");
+                return null;
+            }
+
+            // Initialize with just relevant info, for use by UI.
+            results.ProcessedTickersCount = updateCount > 0 ? updateCount : 0;
+            results.OmittedTickers = processedResults.ExceptionTickerSymbols != string.Empty ? processedResults.ExceptionTickerSymbols.Trim() : string.Empty;
+            
+            return results;
+        }
+
+
         private Data.Entities.Profile MapVmToEntity(ProfileVm mapSource)
         {
             return new Data.Entities.Profile
@@ -388,10 +456,12 @@ namespace PIMS3.DataAccess.Profile
 
         }
 
+    }
 
-
-
-
+    public class ProfilesUpdateSummaryResultModel
+    {
+        public string OmittedTickers { get; set; }
+        public int ProcessedTickersCount { get; set; }
     }
 
 
