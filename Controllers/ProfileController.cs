@@ -8,6 +8,7 @@ using System.Linq;
 using PIMS3.Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Serilog;
+using Newtonsoft.Json;
 
 
 namespace PIMS3.Controllers
@@ -23,6 +24,7 @@ namespace PIMS3.Controllers
         {
             _dbCtx = dbCtx;
         }
+
 
         [HttpGet("{tickerProfileToFetch}")]
         [ProducesResponseType(200, Type = typeof(Profile))]
@@ -86,12 +88,33 @@ namespace PIMS3.Controllers
         [HttpPut("")]
         public ActionResult<bool> UpdateProfile([FromBody] dynamic editedProfile)
         {
-            var profileDataAccessComponent = new ProfileDataProcessing(_dbCtx);
+            ProfileDataProcessing profileDataAccessComponent = new ProfileDataProcessing(_dbCtx);
             bool isOkUpdate = profileDataAccessComponent.UpdateProfile(MapToProfile(editedProfile));
             if(isOkUpdate)
                 Log.Information("Profile successfully updated for ticker: " + editedProfile.tickerSymbol);
 
             return Ok(isOkUpdate); 
+        }
+
+        [HttpPut("{investorLogin}")]
+        public ActionResult<string> UpdateAllProfiles(string investorLogin)
+        {
+            // Investor-initiated portfolio profile updates.
+            string serializedBatchResponse = string.Empty;
+
+            ProfileDataProcessing profileDataAccessComponent = new ProfileDataProcessing(_dbCtx);
+            ProfilesUpdateSummaryResultModel batchResponse = profileDataAccessComponent.BatchUpdateProfiles(investorLogin);
+
+            if(batchResponse != null || batchResponse.ProcessedTickersCount > 0)
+            {
+                serializedBatchResponse = JsonConvert.SerializeObject(batchResponse);
+                return serializedBatchResponse;
+            }
+            else
+            {
+                Log.Error("Error updating Profiles via ProfileController.UpdateAllProfiles() for investor: " + investorLogin);
+                return string.Empty;
+            }
         }
 
 
