@@ -9,6 +9,11 @@
     <li>*Note* - Only custom profiles are editable & have minimum required entries. </li>
 </ul>
 
+<div>
+    <input type="checkbox" [(ngModel)] ="UpdateAllPositions" (change)="updateInvestorProfiles()" />&nbsp;
+    <label>Update portfolio Profiles' payment info. [ Minimum 1 year <em>revenue history</em> required ]</label>
+</div>
+
 <!-- Legend for control error-validation activation:
     ==============================================
         1. "dirty"   = value changed.
