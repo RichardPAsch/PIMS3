@@ -432,10 +432,13 @@ namespace PIMS3.DataAccess.Profile
             // Initialize with just relevant info, for use by UI.
             results.ProcessedTickersCount = updateCount > 0 ? updateCount : 0;
             results.OmittedTickers = processedResults.ExceptionTickerSymbols != string.Empty ? processedResults.ExceptionTickerSymbols.Trim() : string.Empty;
-            
+
+            Log.Information("Updated " + results.ProcessedTickersCount + " Profiles based on revenue history, for " + currentInvestor);
+            if(results.OmittedTickers != string.Empty)
+                Log.Information("Omitted Profile updates based on revenue history for " + results.OmittedTickers);
+
             return results;
         }
-
 
         private Data.Entities.Profile MapVmToEntity(ProfileVm mapSource)
         {
@@ -455,7 +458,6 @@ namespace PIMS3.DataAccess.Profile
             };
 
         }
-
     }
 
     public class ProfilesUpdateSummaryResultModel
