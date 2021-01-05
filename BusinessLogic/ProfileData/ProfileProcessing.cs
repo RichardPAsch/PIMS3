@@ -30,6 +30,7 @@ namespace PIMS3.BusinessLogic.ProfileData
             return profileToBeInitialized;
         }
 
+
         private void CalculateDividendYield()
         {
             decimal calculatedAnuualizedDividendRate = 0M;
@@ -109,12 +110,12 @@ namespace PIMS3.BusinessLogic.ProfileData
             Dictionary<string, string> finalProfileSpecs = new Dictionary<string, string>();
             int monthsCount = oneYearDivPayMonths_3.Length;
 
-
             /* == finalProfileSpecs Keys legend: ==
                      "DF"(dividend frequency)
                      "DM"(dividend months)
                      "DPD"(dividend payout day) 
              */
+
             if (monthsCount >= 3 && monthsCount <= 5)
             {
                 // Due to possible inconsistent number of income receipts made within the last 12 month price history obtained
