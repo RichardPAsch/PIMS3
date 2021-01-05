@@ -8,6 +8,7 @@ import { Pims3Validations } from '../shared/pims3-validations';
 import { AlertService } from '../shared/alert.service';
 import { takeUntil } from 'rxjs/operators';
 import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
+import { HttpErrorResponse } from '@angular/common/http';
 
 
 @Component({
@@ -284,7 +285,6 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
 
         let profileToUpdate = new Profile();
         let dbProfileGet$;
-        let dbProfilePut$
 
         profileToUpdate.tickerSymbol = this.assetProfileForm.controls["ticker"].value;
         profileToUpdate.divPayMonths = this.assetProfileForm.controls["divPayMonths"].value;
@@ -326,7 +326,40 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
         } catch (e) {
             this.alertSvc.error("Possible system or network error. Please contact support.");
         }
+    }
 
+
+    updateInvestorProfiles(): void {
+
+        // Investor elects to update all Position Profiles re: dividend attributes i.e, freq, month, day.
+        this.profileSvc.updatePortfolioProfiles(this.investor.username)
+            .retry(2)
+            .pipe(takeUntil(this.getUnsubscribe()))
+            .subscribe(updatesResponse => {
+                if (updatesResponse) {
+                    if (updatesResponse.ProcessedTickersCount == 0) {
+                        this.alertSvc.warn("Database error updating Profile(s); reference application log for details.");
+                    } else {
+                        this.alertSvc.success(this.buildAlertMessage(updatesResponse)); 
+                    }
+                } else {
+                    // Possible non-Db update failure, or other backend-related issues.
+                    this.alertSvc.error("Error processing Profile update(s); reference application log for details.");
+                }
+            },
+            (apiError: HttpErrorResponse) => {
+                if (apiError.error instanceof Error) {
+                    // Client-side or network error encountered.
+                    this.alertSvc.error("Error updating Profiles due to possible network error. Please try again later.");
+                }
+                else {
+                    //API returns unsuccessful response status codes, e.g., 404, 500 etc.
+                    let truncatedMsgLength = apiError.error.errorMsg.indexOf(":") - 7;
+                    this.alertSvc.error("Error updating Profile updates due to "
+                        + "'" + apiError.error.errorMsg.substring(0, truncatedMsgLength) + "'."
+                        + " Please try again later.");
+                }
+            })
     }
 
        
@@ -386,7 +419,20 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
     }
 
 
-  
-    
+    buildAlertMessage(recvdResponse: any): string {
+
+        let msg = "";
+        let respObj = recvdResponse;
+        
+        if (respObj.OmittedTickers.length > 0) {
+            msg = "Successfully updated " + respObj.ProcessedTickersCount + " Profile(s). Exceptions : " + respObj.OmittedTickers
+                + ", due to insufficient revenue history. Update exception tickers individually via 'Update Profile'.";
+
+        } else {
+            msg = "Successfully updated " + respObj.ProcessedTickersCount + " ticker Profile(s).";
+        }
+        
+        return msg;
+    }
 
 }
