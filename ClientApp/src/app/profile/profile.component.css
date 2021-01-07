@@ -134,5 +134,18 @@ label{
     padding-top: 6px;
 }
 
+h6 {
+    background-color: lightgoldenrodyellow;
+    width: 632px;
+}
+
+#section1Hdr {
+    margin-top: 15px;
+}
+
+#section2Hdr {
+    margin-top: 66px;
+}
+
 
 
