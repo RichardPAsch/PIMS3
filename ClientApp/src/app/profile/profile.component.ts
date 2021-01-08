@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ProfileService } from '../shared/profile.service';
 import { Profile } from '../profile/profile';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { tap, switchMap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { forkJoin } from 'rxjs';
 import { Pims3Validations } from '../shared/pims3-validations';
 import { AlertService } from '../shared/alert.service';
