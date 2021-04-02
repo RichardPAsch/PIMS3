@@ -26,8 +26,9 @@ namespace PIMS3.DataAccess.Profile
 
         public IQueryable<Data.Entities.Profile> FetchDbProfile(string ticker, string currentlyLoggedName)
         {
+            // Fetch customized Profile (p.CreatedBy) as needed.
             investorLoginName = currentlyLoggedName;
-            IQueryable<Data.Entities.Profile> dbProfile = currentlyLoggedName == null || currentlyLoggedName == string.Empty
+            IQueryable<Data.Entities.Profile> dbProfile = currentlyLoggedName == null || currentlyLoggedName == string.Empty 
                 ? _ctx.Profile.Where(p => p.TickerSymbol.ToUpper() == ticker.ToUpper())
                               .Select(p => p)
                               .AsQueryable()
@@ -46,6 +47,7 @@ namespace PIMS3.DataAccess.Profile
             }
 
         }
+
 
         private ProfileForUpdateVm[] FetchDBProfilesByInvestor(string currentInvestor)
         {
@@ -152,8 +154,6 @@ namespace PIMS3.DataAccess.Profile
 
                                 if (cashValue <= 0) break;
                                 existingProfile.First().DividendRate = decimal.Parse(property.Value.ToString());
-                                // Arbitrary day; will need to allow for updating !
-                                existingProfile.First().DividendPayDay = 15;
                                 existingProfile.First().UnitPrice = decimal.Parse(objChild.Properties().ElementAt(1).Value.ToString());
                                 existingProfile.First().DividendYield = busLayerComponent.CalculateDividendYield(existingProfile.First().DividendRate, existingProfile.First().UnitPrice);
                                 existingProfile.First().LastUpdate = DateTime.Now;
@@ -208,7 +208,7 @@ namespace PIMS3.DataAccess.Profile
                             if (cashValue <= 0) continue;
                             updatedOrNewProfile.DividendRate = decimal.Parse(property.Value.ToString());
                             updatedOrNewProfile.DividendYield = busLayerComponent.CalculateDividendYield(updatedOrNewProfile.DividendRate, updatedOrNewProfile.UnitPrice);
-                            updatedOrNewProfile.DividendPayDay = 15; 
+                            updatedOrNewProfile.DividendPayDay = existingProfile.First().DividendPayDay; // 15; 
                             divCashGtZero = true;
                             break;
                         }
