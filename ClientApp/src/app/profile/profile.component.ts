@@ -106,6 +106,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
             .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(profileAndDivInfoArr => {
                 let profileElement: any = profileAndDivInfoArr[0];
+
                 // Scenario may arise where we have a valid ticker, but with incomplete or non-existent pricing info: (profileAndDivInfoArr[1]).
                 if (profileElement.tickerSymbol == null || profileAndDivInfoArr[1] == null) {
                     this.alertSvc.warn("Insufficient, or no web Profile data found for: " + "'" +
@@ -129,8 +130,9 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
                 // Allow investor to sync (update) existing local Profile with latest web-derived info.
                 this.btnUpdateProfileIsDisabled = false;  
 
-                // All input fields are read-only.
+                // Input fields are read-only, except for "Day". This will allow for new position edit(s).
                 this.isReadOnly = true;
+                this.isReadOnlyPayMonthsAndDay = false;
             },
                 // Exception/error response condition trapping.
                 () => {
@@ -153,9 +155,10 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
                     this.btnGetProfileIsDisabled = true;
                     this.btnGetDbProfileIsDisabled = true;
                 }
-             );
+        );
     }
 
+    
     // Custom profile retreival.
     getDbProfile(): void {
         this.profileSvc.getProfileDataViaDb(this.assetProfileForm.controls["ticker"].value, this.investor.username)
@@ -385,7 +388,6 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
             // String value ascertains this attribute has not been overlooked.
             profileModel.divPayMonths = "N/A";
         }
-            
 
         profileModel.divPayDay = webProfile.dividendPayDay;
         profileModel.divYield = webProfile.dividendYield;
