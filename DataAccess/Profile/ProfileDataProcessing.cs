@@ -208,7 +208,8 @@ namespace PIMS3.DataAccess.Profile
                             if (cashValue <= 0) continue;
                             updatedOrNewProfile.DividendRate = decimal.Parse(property.Value.ToString());
                             updatedOrNewProfile.DividendYield = busLayerComponent.CalculateDividendYield(updatedOrNewProfile.DividendRate, updatedOrNewProfile.UnitPrice);
-                            updatedOrNewProfile.DividendPayDay = existingProfile.First().DividendPayDay; // 15; 
+                            updatedOrNewProfile.DividendPayDay = existingProfile == null ? 15 : existingProfile.First().DividendPayDay; 
+
                             divCashGtZero = true;
                             break;
                         }
