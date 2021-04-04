@@ -413,7 +413,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
             peRatio: refresh ? 0 : profileData.PE_ratio,
             eps: refresh ? 0 : profileData.EPS,
             unitPrice: refresh ? 0 : profileData.unitPrice,
-            divPayMonths: refresh ? '' : profileData.divPayMonths,
+            divPayMonths: refresh ? '' : this.sortDivPayMonths(profileData.divPayMonths),
             divPayDay: refresh ? '' : profileData.divPayDay
         });
 
@@ -435,6 +435,19 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
         }
         
         return msg;
+    }
+
+
+    sortDivPayMonths(recvdInfo: string): string {
+
+        let monthsStringArray = recvdInfo.split(',');
+        let monthsNumberArray: number[] = new Array();
+        for (let i = 0; i < monthsStringArray.length; i++) {
+            monthsNumberArray[i] = parseInt(monthsStringArray[i]);
+        }
+
+        return monthsNumberArray.sort((a, b) => a - b).toString();
+
     }
 
 }
