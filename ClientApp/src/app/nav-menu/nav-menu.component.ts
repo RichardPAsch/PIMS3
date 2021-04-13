@@ -102,7 +102,8 @@ export class NavMenuComponent extends BaseUnsubscribeComponent implements OnInit
                 "\n 4. Income recorded - Show payment(s) received for up to last 5 years." +
                 "\n 5. Data import - Import new income and/or position(s) into system." +
                 "\n 6. Positions - Show both existing and old Position(s)." +
-                "\n 7. Asset profile - Show profile, or enter/edit custom profile for a ticker."
+                "\n 7. Asset profile - Show profile, or enter/edit custom profile for a ticker." +
+                "\n 8. Distributions - Show asset dividend distributions information profile."
             );
         }
     }
