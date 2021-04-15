@@ -1,10 +1,22 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title></title>
-</head>
-<body>
-    <div>To be implemented...</div>
-</body>
-</html>
+<header>
+    - Dividend/interest distribution schedules -
+</header>
+<ul>
+    <li>All columns are sortable except for "Month(s)".</li>
+    <li>All columns support filtering.</li>
+    <li>
+        Asset distribution frequency counts: &nbsp; [Q: <strong>{{quarterlyCount}}</strong> ] &nbsp;
+                                                    [M: <strong>{{monthlyCount|number}}</strong>]  &nbsp;
+                                                    [S: <strong>{{semi_annualCount}}</strong>]  &nbsp;
+                                                    [A: <strong>{{annualCount}}</strong>]
+    </li>
+</ul>
+<p></p>
+<p>
+    <ag-grid-angular #agGridDistributions
+                     id="gridDistributions"
+                     class="ag-theme-blue"
+                     [rowData]="rowData"
+                     [columnDefs]="columnDefs">
+    </ag-grid-angular>
+</p>
