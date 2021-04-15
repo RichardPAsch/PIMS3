@@ -32,6 +32,7 @@ import { AlertComponent } from './alert/alert.component';
 import { BaseUnsubscribeComponent } from './base-unsubscribe/base-unsubscribe.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
+import { DistributionsComponent } from './distributions/distribution.component';
 
 
 /* Notes:
@@ -60,7 +61,8 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
     GettingStartedComponent,
     PasswordResetComponent,
     AlertComponent,
-    BaseUnsubscribeComponent
+    BaseUnsubscribeComponent,
+    DistributionsComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -86,6 +88,7 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
         { path: 'profile', component: ProfileComponent, canActivate: [AuthorizationGuard] },
         { path: 'getting-started', component: GettingStartedComponent },  // informational only
         { path: 'password-reset', component: PasswordResetComponent },
+        { path: 'distributions', component: DistributionsComponent, canActivate: [AuthorizationGuard]},
 
          // Otherwise redirect to home
          { path: '**', redirectTo: '' }
