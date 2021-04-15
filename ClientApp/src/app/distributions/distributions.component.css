@@ -1,0 +1,19 @@
+header {
+    background-color: #222;
+    padding: 5px;
+    text-align: center;
+    font-size: 17px;
+    color: white;
+    width: 633px;
+    height: 34px;
+    margin-top: 3px;
+}
+ul {
+    margin-top: 10px;
+    margin-bottom: 12px;
+    font-size: 15px;
+}
+#gridDistributions {
+    width: 473px;
+    height: 400px;
+}
