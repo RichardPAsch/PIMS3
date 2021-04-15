@@ -48,6 +48,11 @@
                             <span class='glyphicon glyphicon-usd'></span> Income recorded
                         </a>
                     </li>
+                    <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                        <a class="nav-link" [routerLink]='["/distributions"]'>
+                            <span class="glyphicon glyphicon-usd"></span>Distribution schedules
+                        </a>
+                    </li>
                     <li class="nav-item" [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
                         <a class="nav-link" [routerLink]='["/data-import"]'>
                             <span class='glyphicon glyphicon-import'></span> Data import
