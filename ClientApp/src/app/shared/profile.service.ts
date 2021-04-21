@@ -16,9 +16,12 @@ export class ProfileService {
     // it also interferes with normal valid backend operations, eg. 'CSQ'. Investigate?
 
     baseUrl: string;
+    currentInvestorId: string;
  
     constructor(private http: HttpClient, globalsSvc: GlobalsService) {
         this.baseUrl = globalsSvc.pimsBaseUrl;
+        let investor = JSON.parse(sessionStorage.getItem('currentInvestor'));
+        this.currentInvestorId = investor.id;
     }
 
 
@@ -63,5 +66,12 @@ export class ProfileService {
 
         let webApiUri = this.baseUrl + "/api/Profile";
         return this.http.post<boolean>(webApiUri, newProfile);
+    }
+
+
+    fetchDistributionSchedules(): Observable<any> {
+
+        let webApiUrl = this.baseUrl + "/api/GetDistributionSchedules/" + this.currentInvestorId;
+        return this.http.get<any>(webApiUrl);
     }
 }
