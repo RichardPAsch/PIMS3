@@ -9,6 +9,7 @@ using PIMS3.Data.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Serilog;
 using Newtonsoft.Json;
+using PIMS3.ViewModels;
 
 
 namespace PIMS3.Controllers
@@ -127,6 +128,25 @@ namespace PIMS3.Controllers
             return Ok(profileIsCreated);
         }
 
+        // Unique routing to avoid signature conflicts.
+        [HttpGet("~/api/GetDistributionSchedules/{loggedInvestorId}")]
+        public ActionResult<DistributionScheduleVm> GetDistributionSchedules(string loggedInvestorId)
+        {
+            ProfileDataProcessing profileDataAccessComponent = new ProfileDataProcessing(_dbCtx);
+
+            try
+            {
+                var profileSchedules = profileDataAccessComponent.FetchProfileDividendSchedules(loggedInvestorId);
+                return Ok(profileSchedules);
+            }
+            catch (Exception)
+            {
+                Log.Warning("Error fetching profiles for {0}, via ProfileController.GetDistributionSchedules().", loggedInvestorId);
+                return BadRequest(new { errorMsg = "Error fetching custom Profile." });
+            }
+
+        }
+
 
 
         private Profile MapToProfile(dynamic editsOrNew, bool isNewProfile = false)
@@ -161,6 +181,8 @@ namespace PIMS3.Controllers
                     LastUpdate = DateTime.Now
                 };
         }
+
+        
 
     }
 
