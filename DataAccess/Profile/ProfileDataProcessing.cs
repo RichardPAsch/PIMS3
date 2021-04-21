@@ -441,6 +441,26 @@ namespace PIMS3.DataAccess.Profile
             return results;
         }
 
+
+        public DistributionScheduleVm[] FetchProfileDividendSchedules(string investorId)
+        {
+            IQueryable<DistributionScheduleVm> profileSchedules = _ctx.Position.Where(x => x.PositionAsset.InvestorId == investorId && x.Status == "A")
+                                                                      .Select(positions => positions.PositionAsset.Profile)
+                                                                      .Select(profile => new DistributionScheduleVm
+                                                                          {
+                                                                             TickerSymbol = profile.TickerSymbol,
+                                                                             DistributionFrequency = profile.DividendFreq,
+                                                                             DistributionMonths = profile.DividendMonths,
+                                                                             DistributionDay = profile.DividendPayDay
+                                                                          })
+                                                                      .Distinct()
+                                                                      .OrderBy(x => x.TickerSymbol)
+                                                                      .AsQueryable();
+
+            return profileSchedules.ToArray();
+        }
+
+
         private Data.Entities.Profile MapVmToEntity(ProfileVm mapSource)
         {
             return new Data.Entities.Profile
