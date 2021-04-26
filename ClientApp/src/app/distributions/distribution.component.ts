@@ -6,6 +6,7 @@ import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.c
 import { Distribution } from '../distributions/distribution';
 import { ProfileService } from '../shared/profile.service';
 import { AlertService } from '../shared/alert.service';
+import { GlobalsService } from '../shared/globals.service';
 
 @Component({
     selector: 'app-distributions',
@@ -15,7 +16,7 @@ import { AlertService } from '../shared/alert.service';
 export class DistributionsComponent extends BaseUnsubscribeComponent implements OnInit {
 
     
-    constructor(private profileSvc: ProfileService, private alertSvc: AlertService) {
+    constructor(private profileSvc: ProfileService, private alertSvc: AlertService, private globalsSvc: GlobalsService) {
         super();
     }
 
@@ -43,12 +44,13 @@ export class DistributionsComponent extends BaseUnsubscribeComponent implements 
 
 
     public getDistributionSchedules(): any {
-
+    
         this.profileSvc.fetchDistributionSchedules()
             .retry(2)
             .pipe(takeUntil(this.getUnsubscribe()))
             .subscribe(responseSchedules => {
                 this.calculateDistributionCounts(responseSchedules);
+                this.processDivMonthsCollectionSort(responseSchedules); 
                 this.agGridDistributions.api.setRowData(this.mapDistributionsForGrid(responseSchedules));
             },
             (apiError: HttpErrorResponse) => {
@@ -60,6 +62,17 @@ export class DistributionsComponent extends BaseUnsubscribeComponent implements 
                 }
             }
         )
+    }
+
+
+    processDivMonthsCollectionSort(sourceCollection: any[]): any[] {
+
+        for (let index = 0; index < sourceCollection.length; index++) {
+            if (sourceCollection[index].distributionFrequency == "S" || sourceCollection[index].distributionFrequency == "Q") {
+                sourceCollection[index].distributionMonths = this.globalsSvc.sortDivPayMonthsValue(sourceCollection[index].distributionMonths);
+            }
+        }
+        return sourceCollection
     }
 
     mapDistributionsForGrid(recvdDistributions: any) : Distribution[] {
