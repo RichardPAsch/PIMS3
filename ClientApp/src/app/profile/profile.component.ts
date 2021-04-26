@@ -9,6 +9,7 @@ import { AlertService } from '../shared/alert.service';
 import { takeUntil } from 'rxjs/operators';
 import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 import { HttpErrorResponse } from '@angular/common/http';
+import { GlobalsService } from '../shared/globals.service';
 
 
 @Component({
@@ -19,7 +20,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit {
 
-    constructor(private profileSvc: ProfileService, private alertSvc: AlertService) {
+    constructor(private profileSvc: ProfileService, private alertSvc: AlertService, private globalsSvc: GlobalsService) {
         super();
         this.investor = JSON.parse(sessionStorage.getItem('currentInvestor')); 
     }
@@ -404,6 +405,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
 
     initializeView(profileData: Profile, refresh: boolean): void {
 
+
         this.assetProfileForm.setValue({
             ticker: refresh ? '' : profileData.tickerSymbol,
             tickerDesc: refresh ? this.defaultTickerDesc : profileData.tickerDesc,
@@ -413,7 +415,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
             peRatio: refresh ? 0 : profileData.PE_ratio,
             eps: refresh ? 0 : profileData.EPS,
             unitPrice: refresh ? 0 : profileData.unitPrice,
-            divPayMonths: refresh ? '' : this.sortDivPayMonths(profileData.divPayMonths),
+            divPayMonths: refresh ? '' : this.globalsSvc.sortDivPayMonthsValue(profileData.divPayMonths),
             divPayDay: refresh ? '' : profileData.divPayDay
         });
 
