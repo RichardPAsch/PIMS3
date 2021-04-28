@@ -37,6 +37,8 @@
   <ItemGroup>
     <None Remove="ClientApp\src\app\data-import\data-import.component.ts" />
     <None Remove="ClientApp\src\app\data-import\data-importVm.ts" />
+    <None Remove="ClientApp\src\app\distributions\distribution.component.ts" />
+    <None Remove="ClientApp\src\app\distributions\distribution.ts" />
     <None Remove="ClientApp\src\app\income-projections\projection-profile.ts" />
     <None Remove="ClientApp\src\app\income-summary\income-summary.component.ts" />
   </ItemGroup>
@@ -44,6 +46,8 @@
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\app\data-import\data-import.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\data-import\data-importVm.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\distributions\distribution.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\distributions\distribution.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\income-projections\projection-profile.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\income-summary\income-summary.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\error-logging\logException.ts" />
