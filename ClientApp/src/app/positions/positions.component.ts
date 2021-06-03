@@ -157,12 +157,21 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
     }
 
     processAssetClassDescriptions(initializeDropDown: boolean): void {
-        this.positionSvc.GetAssetClassDescAndCode()
-            .retry(1)
-            .pipe(takeUntil(this.getUnsubscribe()))
-            .subscribe(assetClassesArr => {
-                this.buildAssetClassInfo(assetClassesArr, true);
-            });
+
+        if (initializeDropDown) {
+            this.positionSvc.GetAssetClassDescAndCode()
+                .retry(1)
+                .pipe(takeUntil(this.getUnsubscribe()))
+                .subscribe(assetClassesArr => {
+                    sessionStorage.setItem('descriptions', JSON.stringify(assetClassesArr));
+                    this.buildAssetClassInfo(assetClassesArr, true);
+                });
+        } else {
+            // Show code-descriptions lookup.
+            let desc = JSON.parse(sessionStorage.getItem('descriptions'));
+            alert(this.buildAssetClassDescriptions(desc));
+        }
+        
     }
     
     buildAssetClassInfo(assetClassesData: any, forDropDownUse: boolean): string {
@@ -197,6 +206,17 @@ export class PositionsComponent extends BaseUnsubscribeComponent implements OnIn
             this.acctTypeDropDownCodes.push(acctTypes[i]);
         }
         return;
+    }
+
+    buildAssetClassDescriptions(assetClassesInfo: any): string {
+
+        // Due to alert dialog row limits, avoiding "\n" break after each description.
+        let descriptions = "";
+        for (let i = 1; i < assetClassesInfo.length; i++) {
+            descriptions += "[" + assetClassesInfo[i].code + "] - " + assetClassesInfo[i].description + "  ||  ";
+        }
+        return descriptions;
+
     }
 
 }
