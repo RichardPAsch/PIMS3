@@ -37,7 +37,7 @@ export class IncomeSummaryComponent extends BaseUnsubscribeComponent implements 
     }
     
     columnDefs = [
-        { headerName: "Month recv'd", field: "MonthRecvd", sortable: true, checkboxSelection: true, width: 118, resizable: true },
+        { headerName: "Month recv'd", field: "MonthRecvd", sortable: true, width: 118, resizable: true },
         { headerName: "Amount recv'd", field: "AmountRecvd", width: 130, resizable: true, cellStyle: { textAlign: "right" },
             filter: "agNumberColumnFilter",
             filterParams: {
