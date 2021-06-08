@@ -8,10 +8,6 @@ import { takeUntil } from 'rxjs/operators';
 import { BaseUnsubscribeComponent } from '../base-unsubscribe/base-unsubscribe.component';
 
 
-// Deferred until dependent Angular components updated! (v.8.0.2)
-//import { MatTooltipModule } from '@angular/material/tooltip'; 
-
-
 @Component({
   selector: 'app-nav-menu',
   templateUrl: './nav-menu.component.html',
@@ -37,6 +33,16 @@ export class NavMenuComponent extends BaseUnsubscribeComponent implements OnInit
     showPasswordReset: boolean = false;
     isCollapsed: boolean = true;  // for navBar menu collapsing; pending fix
 
+    // Menu tooltips.
+    ttIncomeSummary = "YTD summary of income by month";
+    ttIncomeProjections = "Calculate monthly income - up to 5 tickers";
+    ttIncomeDue = "Show outstanding payment(s) for the month";
+    ttIncomeRecorded = "Show payment(s) received for last 5 years";
+    ttDistSchedules = "Show payment schedule(s) for position(s)";
+    ttDataImport = "Import new income and/or position(s) into system";
+    ttPositions = "Show active and/or inactive Position(s)";
+    ttAssetProfile = "Show/enter, custom or standard profile for ticker";
+    ttStart = "Detailed info re: application usage";
 
     ngOnInit() {
         // Subscribing to BehaviorSubject automatically updates here when value(s) change.
@@ -56,8 +62,7 @@ export class NavMenuComponent extends BaseUnsubscribeComponent implements OnInit
             }
         }); 
     }
-
-
+    
     logoutInvestor() {
         this.authenticationSvc.logout();
         this.authenticationSvc.loggedOut.pipe(takeUntil(this.getUnsubscribe())).subscribe(isLoggedOutValue => this.showLogOut = isLoggedOutValue);
@@ -81,8 +86,7 @@ export class NavMenuComponent extends BaseUnsubscribeComponent implements OnInit
         informationalLogModel.message1 = message;
         return this.http.post<string>(this.baseUrl + '/api/Logging/LogNonError', informationalLogModel);
     }
-
-    
+        
     toggle() {
         this.isExpanded = !this.isExpanded;
     }
@@ -90,22 +94,7 @@ export class NavMenuComponent extends BaseUnsubscribeComponent implements OnInit
     toggleCollapsed() {
         this.isCollapsed = !this.isCollapsed;
     }
+    
 
-
-    aboutThis() {
-        // 7.6.19 - Temporary workaround until tooltips are implemented, pending necessary Angular component upgrades (v8.0.2).
-        if (this.showLogIn) {
-            alert("                              -- Menu Summary -- " +
-                "\n 1. Income summary - YTD summary of income by month." +
-                "\n 2. Income projections - Calculate monthly income for up to 5 tickers." +
-                "\n 3. Income due - Show outstanding payment(s) for the month." +
-                "\n 4. Income recorded - Show payment(s) received for up to last 5 years." +
-                "\n 5. Data import - Import new income and/or position(s) into system." +
-                "\n 6. Positions - Show both existing and old Position(s)." +
-                "\n 7. Asset profile - Show profile, or enter/edit custom profile for a ticker." +
-                "\n 8. Distributions - Show asset dividend distributions information profile."
-            );
-        }
-    }
 
 }
