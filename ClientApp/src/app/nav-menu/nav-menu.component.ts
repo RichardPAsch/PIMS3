@@ -37,7 +37,7 @@ export class NavMenuComponent extends BaseUnsubscribeComponent implements OnInit
     ttIncomeSummary = "YTD summary of income by month";
     ttIncomeProjections = "Calculate monthly income - up to 5 tickers";
     ttIncomeDue = "Show outstanding payment(s) for the month";
-    ttIncomeRecorded = "Show payment(s) received for last 5 years";
+    ttIncomeRecorded = "Show payment(s) received up to last 5 years";
     ttDistSchedules = "Show payment schedule(s) for position(s)";
     ttDataImport = "Import new income and/or position(s) into system";
     ttPositions = "Show active and/or inactive Position(s)";
