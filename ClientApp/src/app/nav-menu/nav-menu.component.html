@@ -28,47 +28,47 @@
                         </a>
                     </li>
                     <!-- to be inserted in <li> : matTooltip="test tooltip message"-->
-                    <li class="nav-item" [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                    <li class="nav-item" [routerLinkActive]='["link-active"]' data-toggle="tooltip" title={{ttIncomeSummary}} data-placement="right">
                         <a class="nav-link" [routerLink]='["/income-summary"]'>
                             <span class='glyphicon glyphicon-usd'></span> Income summary
                         </a>
-                    </li>
-                    <li class="nav-item" [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                    </li> <!--Reference: "https://getbootstrap.com/docs/4.0/components/tooltips/#examples"-->
+                    <li class="nav-item" [routerLinkActive]='["link-active"]' data-toggle="tooltip" title={{ttIncomeProjections}} data-placement="right">
                         <a class="nav-link" [routerLink]='["/income-projections"]'>
                             <span class='glyphicon glyphicon-usd'></span> Income projections
                         </a>
                     </li>
-                    <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                    <li [routerLinkActive]='["link-active"]' data-toggle="tooltip" title={{ttIncomeDue}} data-placement="right">
                         <a class="nav-link" [routerLink]='["/income-receivables"]'>
                             <span class='glyphicon glyphicon-usd'></span> Income due
                         </a>
                     </li>
-                    <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                    <li [routerLinkActive]='["link-active"]' data-toggle="tooltip" title={{ttIncomeRecorded}} data-placement="right">
                         <a class="nav-link" [routerLink]='["/income"]'>
                             <span class='glyphicon glyphicon-usd'></span> Income recorded
                         </a>
                     </li>
-                    <li [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                    <li [routerLinkActive]='["link-active"]' data-toggle="tooltip" title={{ttDistSchedules}} data-placement="right">
                         <a class="nav-link" [routerLink]='["/distributions"]'>
                             <span class="glyphicon glyphicon-usd"></span>Distribution schedules
                         </a>
                     </li>
-                    <li class="nav-item" [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                    <li class="nav-item" [routerLinkActive]='["link-active"]' data-toggle="tooltip" title={{ttDataImport}} data-placement="right">
                         <a class="nav-link" [routerLink]='["/data-import"]'>
                             <span class='glyphicon glyphicon-import'></span> Data import
                         </a>
                     </li>
-                    <li class="nav-item" [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                    <li class="nav-item" [routerLinkActive]='["link-active"]' data-toggle="tooltip" title={{ttPositions}} data-placement="right">
                         <a class="nav-link" [routerLink]='["/positions"]'>
                             <span class='glyphicon glyphicon-th-list'></span> Positions
                         </a>
                     </li>
-                    <li class="nav-item" [routerLinkActive]='["link-active"]' (click)='aboutThis()'>
+                    <li class="nav-item" [routerLinkActive]='["link-active"]' data-toggle="tooltip" title={{ttAssetProfile}} data-placement="right">
                         <a class="nav-link" [routerLink]='["/profile"]'>
                             <span class='glyphicon glyphicon-file'></span> Asset profile
                         </a>
                     </li>
-                    <li [routerLinkActive]='["link-active"]' (click)='showGettingStarted()'>
+                    <li [routerLinkActive]='["link-active"]' data-toggle="tooltip" title={{ttStart}} data-placement="right">
                         <a class="nav-link" [routerLink]='["/getting-started"]'>
                             <span class='glyphicon glyphicon-file'></span> Getting started
                         </a>
