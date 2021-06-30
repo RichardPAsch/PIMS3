@@ -131,9 +131,10 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
                 // Allow investor to sync (update) existing local Profile with latest web-derived info.
                 this.btnUpdateProfileIsDisabled = false;  
 
-                // Input fields are read-only, except for "Day". This will allow for new position edit(s).
+                // Select input fields as read/write, e.g., 'Day'/'Month(s)', allowing for position edit(s).
                 this.isReadOnly = true;
                 this.isReadOnlyPayMonthsAndDay = false;
+                this.divPayMonthsIsDisabled = false;
             },
                 // Exception/error response condition trapping.
                 () => {
