@@ -1,5 +1,7 @@
 
-## PIMS3 path (master branch):  C:\Development\VS2017\PIMS3\ClientApp  [run -> "npm start" & "ng build --watch" seperately.]
+## PIMS3 UI path (local "Master" branch)                                                ->  C:\Development\VS2017\PIMS3\ClientApp  
+## Run node.js "scripts" section in package.json  [ AVOID "ng serve" cmd ]              ->  "npm start" in VS command prompt #1
+## Enable real-time ts updating during DEBUG; generate build artifacts to output folder ->  "ng build --watch" in command prompt #2.
 
 # AngularSpa:
 
