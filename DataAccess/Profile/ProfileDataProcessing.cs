@@ -358,6 +358,7 @@ namespace PIMS3.DataAccess.Profile
                 existingProfile.First().TickerDescription = editedProfile.TickerDescription;
                 existingProfile.First().DividendRate = editedProfile.DividendRate;
                 existingProfile.First().DividendYield = editedProfile.DividendYield;
+                existingProfile.First().DividendFreq = editedProfile.DividendFreq;
                 existingProfile.First().PERatio = editedProfile.PERatio;
                 existingProfile.First().DividendMonths = editedProfile.DividendMonths;
                 existingProfile.First().DividendPayDay = editedProfile.DividendPayDay;
