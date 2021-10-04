@@ -31,7 +31,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
     date1 = new Date();
     currentDateTime: string;
     isReadOnly: boolean = true;
-    isReadOnlyPayMonthsAndDay: boolean = true;
+    isReadOnlyPayMonthsDayFrequency: boolean = true;
     enteredTicker: string;
     assetProfile: Profile = new Profile();
     assetProfileForm = new FormGroup({
@@ -39,8 +39,8 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
         divRate: new FormControl(0.001, [Validators.required, Validators.min(0.001), Validators.max(30.00), Pims3Validations.isNumberValidator()]),
         divYield: new FormControl(0.5, [Validators.required, Validators.min(0.5), Validators.max(45), Pims3Validations.isNumberValidator()]),
         tickerDesc: new FormControl('', [Validators.required, Validators.maxLength(50)]),
-        divFreq: new FormControl('', [Validators.required, Validators.maxLength(1), Pims3Validations.divFreqValidator()]),
-        peRatio: new FormControl(1, [Validators.min(1), Pims3Validations.isNumberValidator()]),
+        divFreq: new FormControl('A,S,Q,M', [Validators.required, Validators.maxLength(1)]),
+        peRatio: new FormControl(1.00, [Validators.min(1), Pims3Validations.isNumberValidator()]),
         eps: new FormControl(0, [Validators.min(0), Pims3Validations.isNumberValidator()]),
         unitPrice: new FormControl(0.01, [Validators.required, Validators.min(0.01), Pims3Validations.isNumberValidator()]),
         divPayMonths: new FormControl('1,3,6,9', [Pims3Validations.divPayMonthsValidator(), Validators.maxLength(8)]),
@@ -52,9 +52,10 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
     // General validation flags.
     btnNewProfileSubmitted: boolean = false;
     btnUpdateProfileSubmitted: boolean = false;
+    divPayMonthsIsDisabled: boolean = true;
     // Flag for user response cancelling confirmation prompt to new Profile creation.
     cancelledNewProfileCreation: boolean = false;
-    divPayMonthsIsDisabled: boolean = true;
+
 
 
     // Button availability based on user events.
@@ -131,9 +132,9 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
                 // Allow investor to sync (update) existing local Profile with latest web-derived info.
                 this.btnUpdateProfileIsDisabled = false;  
 
-                // Select input fields as read/write, e.g., 'Day'/'Month(s)', allowing for position edit(s).
+                // Mark select input fields as read/write, e.g., 'Day'/'Month(s)'/'Freq', allowing for position edit(s).
                 this.isReadOnly = true;
-                this.isReadOnlyPayMonthsAndDay = false;
+                this.isReadOnlyPayMonthsDayFrequency = false;
                 this.divPayMonthsIsDisabled = false;
             },
                 // Exception/error response condition trapping.
@@ -187,7 +188,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
                     this.alertSvc.error("Error retreiving existing profile, possible network or application error. Please try again later.");
                 }
             );
-        this.isReadOnlyPayMonthsAndDay = false;
+        this.isReadOnlyPayMonthsDayFrequency = false;
     }
 
 
@@ -290,6 +291,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
 
         let profileToUpdate = new Profile();
         let dbProfileGet$;
+        let isValidFreqAndMonths: boolean = false;
 
         profileToUpdate.tickerSymbol = this.assetProfileForm.controls["ticker"].value;
         profileToUpdate.divPayMonths = this.assetProfileForm.controls["divPayMonths"].value;
@@ -298,7 +300,15 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
         profileToUpdate.divYield = this.assetProfileForm.controls["divYield"].value;
         profileToUpdate.divRate = this.assetProfileForm.controls["divRate"].value;
         profileToUpdate.unitPrice = this.assetProfileForm.controls["unitPrice"].value;
+        profileToUpdate.divFreq = this.assetProfileForm.controls["divFreq"].value;
 
+
+        isValidFreqAndMonths = Pims3Validations.areDivMonthsAndDivFrequencyReconciled(profileToUpdate.divPayMonths, profileToUpdate.divFreq);
+        if (!isValidFreqAndMonths) {
+            this.alertSvc.warn("Update cancelled; invalid 'Frequency' and/or 'Month(s)' entry(ies) found.");
+            return;
+        }
+        
         try {
             dbProfileGet$ = this.profileSvc.getProfileDataViaDb(profileToUpdate.tickerSymbol, this.investor.username);
 
@@ -324,7 +334,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
                             this.btnUpdateProfileSubmitted = false;
                         }
                         this.initializeView(null, true);
-                        this.btnUpdateProfileIsDisabled = true;
+                        this.btnUpdateProfileIsDisabled = true; 
                     });
             }
             
