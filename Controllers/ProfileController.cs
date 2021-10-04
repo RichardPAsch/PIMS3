@@ -174,6 +174,7 @@ namespace PIMS3.Controllers
                     DividendYield = editsOrNew.divYield ?? 0,
                     DividendMonths = editsOrNew.divPayMonths,
                     DividendPayDay = editsOrNew.divPayDay,
+                    DividendFreq = editsOrNew.divFreq,
                     TickerSymbol = editsOrNew.tickerSymbol,
                     PERatio = editsOrNew.PE_ratio ?? 0,
                     EarningsPerShare = editsOrNew.EPS ?? 0,
