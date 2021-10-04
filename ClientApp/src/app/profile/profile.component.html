@@ -122,28 +122,16 @@
                                 </div>
                             </div>
 
+                            <!--&& formFields.divFreq.invalid  && (formFields.divFreq.dirty)-->
                             <div class="row">
                                 <label class="col-sm-2 control-label" for="divFreq">Frequency:</label>
                                 <div class="col-sm-3">
-                                    <input class="form-control" (blur)="enableDisableDivPayMonths()" oninput="this.value = this.value.toUpperCase()" id="divFreq" formControlName="divFreq" placeholder="A,S,Q,M" data-ng-model="vm.assetDivFreq" [readonly]=isReadOnly>
-                                    <div *ngIf="!btnNewProfileSubmitted && formFields.divFreq.invalid && (formFields.divFreq.dirty)" class="alert alert-danger">
-                                        <div *ngIf="formFields.divFreq.errors.maxlength"> Maximum allowed length for frequency: 1 character.</div>
-                                        <div *ngIf="formFields.divFreq.errors.required"> Frequency required.</div>
-                                        <div *ngIf="formFields.divFreq.errors.divFreq">
-                                            <hr />Allowed entries
-                                            <ul>
-                                                <li>(A)nnual</li>
-                                                <li>(S)emi-annual</li>
-                                                <li>(Q)uarterly</li>
-                                                <li>(M)onthly</li>
-                                            </ul>
-                                        </div>
-                                    </div>
+                                    <input class="form-control" (blur)="enableDisableDivPayMonths()" oninput="this.value = this.value.toUpperCase()" id="divFreq" [readonly]=isReadOnlyPayMonthsDayFrequency formControlName="divFreq" placeholder="A,S,Q,M" data-ng-model="vm.assetDivFreq">
                                 </div>
 
                                 <label id="payDayLbl" class="col-sm-2 control-label" for="divPayDay">Day:</label>
                                 <div class="col-sm-2">
-                                    <input class="form-control" id="divPayDay" formControlName="divPayDay" [readonly]="isReadOnlyPayMonthsAndDay">
+                                    <input class="form-control" id="divPayDay" formControlName="divPayDay" [readonly]="isReadOnlyPayMonthsDayFrequency">
                                     <div *ngIf="(!btnUpdateProfileSubmitted && !btnNewProfileSubmitted) && formFields.divPayDay.invalid && (formFields.divPayDay.dirty)" class="alert alert-danger">
                                         <div *ngIf="formFields.divPayDay.errors.max"> Maximum allowed day: 31.</div>
                                         <div *ngIf="formFields.divPayDay.errors.min"> Minimum allowed day: 1.</div>
