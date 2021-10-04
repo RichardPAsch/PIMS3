@@ -2,27 +2,13 @@ import { ValidatorFn, AbstractControl, FormGroup } from '@angular/forms';
 
 export class Pims3Validations {
 
-    static divFreqValidator(): ValidatorFn {
-
-        // Returns a ValidatorFn, which takes a control, & returns either an object or null;
-        // returns object, if applicable, which consists of key(type string) & value (type 'any')
-        return (control: AbstractControl): { [key: string]: any } | null => {
-            if (control != null) {
-                return (control.value == "A" || control.value == "S" || control.value == "Q" || control.value == "M")
-                    ? null                                  // validation Ok. 
-                    : { divFreq: { value: control.value } } // validation error
-            }
-            return null;
-        };
-    }
-
-
+  
     static isNumberValidator(): ValidatorFn {
 
         // Applicable to: 'divRate', 'divYield', 'peRatio', 'eps', & 'unitPrice' for 'Asset Profile' inputs.
         return (control: AbstractControl): { [key: string]: any } | null => {
             if (control != null) {
-                return (isNaN(control.value))
+                 return (isNaN(control.value))
                     ? { isNumber: { value: control.value } } // validation error
                     : null                                   // validation Ok.
             }
