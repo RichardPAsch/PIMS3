@@ -39,7 +39,7 @@ export class ProfileComponent extends BaseUnsubscribeComponent implements OnInit
         divRate: new FormControl(0.001, [Validators.required, Validators.min(0.001), Validators.max(30.00), Pims3Validations.isNumberValidator()]),
         divYield: new FormControl(0.5, [Validators.required, Validators.min(0.5), Validators.max(45), Pims3Validations.isNumberValidator()]),
         tickerDesc: new FormControl('', [Validators.required, Validators.maxLength(50)]),
-        divFreq: new FormControl('A,S,Q,M', [Validators.required, Validators.maxLength(1)]),
+        divFreq: new FormControl('', [Validators.required, Validators.maxLength(1)]),
         peRatio: new FormControl(1.00, [Validators.min(1), Pims3Validations.isNumberValidator()]),
         eps: new FormControl(0, [Validators.min(0), Pims3Validations.isNumberValidator()]),
         unitPrice: new FormControl(0.01, [Validators.required, Validators.min(0.01), Pims3Validations.isNumberValidator()]),
