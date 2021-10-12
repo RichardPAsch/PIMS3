@@ -126,7 +126,7 @@
                             <div class="row">
                                 <label class="col-sm-2 control-label" for="divFreq">Frequency:</label>
                                 <div class="col-sm-3">
-                                    <input class="form-control" (blur)="enableDisableDivPayMonths()" oninput="this.value = this.value.toUpperCase()" id="divFreq" [readonly]=isReadOnlyPayMonthsDayFrequency formControlName="divFreq" placeholder="A,S,Q,M" data-ng-model="vm.assetDivFreq">
+                                    <input class="form-control" placeholder="A,S,Q,M" (blur)="enableDisableDivPayMonths()" oninput="this.value = this.value.toUpperCase()" id="divFreq" [readonly]=isReadOnlyPayMonthsDayFrequency formControlName="divFreq" placeholder="A,S,Q,M" data-ng-model="vm.assetDivFreq">
                                 </div>
 
                                 <label id="payDayLbl" class="col-sm-2 control-label" for="divPayDay">Day:</label>
