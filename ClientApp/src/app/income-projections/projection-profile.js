@@ -7,4 +7,4 @@ var ProjectionProfile = /** @class */ (function () {
     return ProjectionProfile;
 }());
 exports.ProjectionProfile = ProjectionProfile;
-//# sourceMappingURL=profile.js.map
+//# sourceMappingURL=projection-profile.js.map

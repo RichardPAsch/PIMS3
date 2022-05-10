@@ -8,6 +8,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+*logs/PIMS3_log_*.txt
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -238,3 +239,11 @@ _Pvt_Extensions
 # /ClientApp/src/app/error-logging/logException.js.map
 /ClientApp/5.0.0
 /Logs/PIMS3_log_20200708.txt
+ClientApp/src/app/data-import/data-import.service.spec.ts
+ClientApp/src/app/data-import/data-import.service.spec.ts
+ClientApp/src/app/data-import/data-import.service.spec.ts
+ClientApp/src/app/income-receivables/income-receivables.component.spec.ts
+/ClientApp/src/app/distributions/Distribution.js
+/ClientApp/src/app/distributions/Distribution.js.map
+/Logs/PIMS3_log_20210428.txt
+/Logs/PIMS3_log_20210429.txt
